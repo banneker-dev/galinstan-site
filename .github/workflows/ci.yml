@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The committed public/ and what build.py produces must agree. The practice let
+      # these diverge once and served a page for a week that did not exist in git.
+      - name: public/ is current
+        run: python3 build.py --check
+
+      - name: Guards
+        run: python3 tools/guards.py
+
+      - name: Tests
+        run: python3 -m unittest discover -s tests -v

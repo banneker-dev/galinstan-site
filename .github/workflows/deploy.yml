@@ -1,0 +1,76 @@
+name: Deploy
+
+# Preview on every branch push, so a change is verifiable on a real URL before a pull
+# request exists. Production only on a site-* tag, and only after the production guards
+# pass — which today means only after every string on the page has been approved.
+on:
+  push:
+    branches: [main, "feat/**", "fix/**", "chore/**"]
+    tags: ["site-*"]
+  workflow_dispatch: {}
+
+concurrency:
+  group: pages-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Job level, not step level: a step's own `env` is not in scope for that step's `if`.
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/site-') }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: public/ is current
+        run: python3 build.py --check
+
+      - name: Tests
+        run: python3 -m unittest discover -s tests
+
+      # Red means no deploy: these run before the deploy step, never after it.
+      - name: Guards
+        run: python3 tools/guards.py
+
+      - name: Production guards
+        if: env.IS_RELEASE == 'true'
+        run: python3 tools/guards.py --production
+
+      - name: Deploy
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            pages deploy public
+            --project-name=galinstan
+            --branch=${{ startsWith(github.ref, 'refs/tags/') && 'main' || github.ref_name }}
+
+      - name: Not deployed — no Cloudflare credentials
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: |
+          echo "::notice::Built and guarded, but not deployed: CLOUDFLARE_API_TOKEN is not set."
+          echo "The Cloudflare Pages project has not been created yet. See RELEASE.md."
+
+      # Adversarial verification. A status code cannot tell a stale hit from a live one,
+      # so this fetches the body with a cache-buster and greps for the approved sentence.
+      - name: Verify what is actually being served
+        if: env.IS_RELEASE == 'true' && env.CLOUDFLARE_API_TOKEN != ''
+        run: |
+          sleep 15
+          body=$(curl -fsSL "https://galinstan.ai/?cb=$GITHUB_SHA")
+          echo "$body" | grep -q "runs inside your perimeter, not ours" || {
+            echo "::error::The live page does not contain the approved headline."
+            echo "$body" | head -40
+            exit 1
+          }
+          echo "Live page verified by content, not by status code."

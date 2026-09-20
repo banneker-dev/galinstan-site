@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Privacy — Galinstan</title>
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://galinstan.ai/privacy.html">
+    <style>
+:root {
+  --ink: #101418;
+  --ink-soft: #3d474f;
+  --rule: #d5dade;
+  --paper: #fbfbfa;
+  --flag: #8a3a12;
+  --measure: 34rem;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  padding: 3rem 1.5rem 4rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1.0625rem/1.65 ui-serif, Georgia, "Times New Roman", serif;
+}
+main { max-width: var(--measure); margin: 0 auto; }
+.wordmark {
+  font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 2.5rem;
+}
+h1 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.35;
+  margin: 0 0 2rem;
+  text-wrap: balance;
+}
+p { margin: 0 0 1.25rem; color: var(--ink-soft); }
+footer {
+  margin-top: 3.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+footer p { margin: 0 0 0.375rem; color: inherit; }
+a { color: inherit; text-underline-offset: 2px; }
+.todo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+  color: var(--flag);
+  background: #fdf2ec;
+  border: 1px dashed var(--flag);
+  border-radius: 2px;
+  padding: 0.0625rem 0.375rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #eef1f3; --ink-soft: #b3bcc3; --rule: #2b3238;
+    --paper: #0f1216; --flag: #e8a87c;
+  }
+  .todo { background: #24170f; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="wordmark">Galinstan</p>
+      <h1>Privacy</h1>
+      <p><strong>Data controller.</strong> <span class="todo">[[TODO: privacy-controller — The named data controller for the privacy notice. Required by WEB_SPEC.md section 6 and it is a legal string, so it is not ours to draft.]]</span></p>
+      <p><strong>Analytics.</strong> <span class="todo">[[TODO: privacy-analytics — What the privacy notice says about analytics. Depends on WEB_SPEC.md open item 4 — cookieless and banner-free, or GA4 with consent management. The lawful basis differs between them, so the sentence cannot be drafted first.]]</span></p>
+      <p><strong>Contact.</strong> <span class="todo">[[TODO: contact — WEB_SPEC.md open item 5. A personal address, a role address, or a form. The form option is the only one that carries source attribution, which WEB_SPEC.md section 6a requires from the first submission.]]</span></p>
+      <footer>
+        <p>Galinstan is a product of Banneker Strategy &amp; Compliance LLC.</p>
+        <p><span class="todo">[[TODO: legal-footer — Entity, jurisdiction and registration details, as one line. SITE_COPY_STAGE1.md lists this as still needed before publishing.]]</span></p>
+      </footer>
+    </main>
+  </body>
+</html>
