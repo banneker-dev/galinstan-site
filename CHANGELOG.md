@@ -2,16 +2,26 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
-## [site-2026.09.2] — the stage 1 holding page
+## [site-2026.09.3] — the stage 1 holding page
 
 The first release of `galinstan.ai`. Five files, no dependencies, every string approved.
 
-`site-2026.09.1` was cut first and **failed its own signature check on a validly signed
-tag** — the check grepped `git verify-tag --raw` for `GOODSIG`, which is a GPG status
-token that an SSH signature never emits. It failed closed, so nothing was published, and
-the tag is left in place rather than deleted: a release that did not happen is part of the
-record. The check now asks two questions instead of one — is there a signature at all, and
-is it from a trusted key — and each is exercised in both directions.
+Two tags were cut before this one and both failed the same step, for different reasons.
+Both failed closed; nothing was published either time, and both tags stay in place, because
+a release that did not happen is part of the record.
+
+- **`site-2026.09.1`** — the check grepped `git verify-tag --raw` for `GOODSIG`, a GPG
+  status token an SSH signature never emits. It could not have passed on any tag this
+  project will ever cut.
+- **`site-2026.09.2`** — the check was correct and the tag was not there to read.
+  `actions/checkout` passes `--no-tags` even at `fetch-depth: 0`, so the annotated tag
+  object never reached the runner and a fetch problem was reported as a signing one.
+
+The step now distinguishes three states — object missing, lightweight tag, annotated tag —
+so a checkout problem can never again be read as an unsigned tag, and it fetches the tag
+explicitly rather than trusting an action default that has already changed once. The whole
+block was run against a clone made with `--no-tags`, which is the condition the runner is
+actually in.
 
 ## [Unreleased]
 

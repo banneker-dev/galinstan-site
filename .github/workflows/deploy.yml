@@ -28,6 +28,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # actions/checkout passes --no-tags even at depth 0, so without this the
+          # annotated tag object never reaches the runner and the signature check below
+          # reads a tag that is not there. It cost site-2026.09.2.
+          fetch-tags: true
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -61,6 +65,26 @@ jobs:
           #
           # First: is there a signature at all? `git verify-tag` exits 0 on an unsigned
           # tag in some versions, so its exit code cannot answer this.
+          # Belt and braces with fetch-tags above: fetch the one tag explicitly, so this
+          # does not depend on an action's default that has already changed once.
+          git fetch --force origin \
+            "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}" 2>/dev/null || true
+
+          # Three states, and only one of them is a release: the object is missing, it is
+          # a lightweight tag pointing straight at a commit, or it is an annotated tag.
+          # Only an annotated tag can carry a signature, and a missing one must not read
+          # as unsigned — that is a different failure with a different fix.
+          kind=$(git cat-file -t "${GITHUB_REF_NAME}" 2>/dev/null || echo missing)
+          if [ "$kind" = "missing" ]; then
+            echo "::error::${GITHUB_REF_NAME} did not reach the runner. This is a checkout"
+            echo "problem, not a signing one: the tag object was not fetched."
+            exit 1
+          fi
+          if [ "$kind" != "tag" ]; then
+            echo "::error::${GITHUB_REF_NAME} is a lightweight tag ($kind), which cannot"
+            echo "carry a signature. Cut it with git tag -s."
+            exit 1
+          fi
           if ! git cat-file tag "${GITHUB_REF_NAME}" | grep -qE "BEGIN (SSH|PGP) SIGNATURE"; then
             echo "::error::${GITHUB_REF_NAME} carries no signature at all. Sign it: git tag -s"
             exit 1
