@@ -58,6 +58,20 @@ EXPECTED = {
     "/privacy.html": ("privacy-controller", "The data controller for this site is"),
 }
 
+# Rewrites the edge performs on the response, which no build-time guard can see because
+# they happen after the build. Each entry is a marker that must NOT appear, and the reason.
+#
+# This list exists because Cloudflare's Email Address Obfuscation silently replaced the
+# approved contact address with "[email protected]" on the first production release.
+# The page still looked right in a browser, because a script decoded it — but an approved
+# string was not what was served, and the pre-filled subject line that carries the site's
+# only source attribution had become dependent on JavaScript running.
+FORBIDDEN_MARKERS = [
+    ("__cf_email__", "Cloudflare Email Address Obfuscation is rewriting the contact address"),
+    ("/cdn-cgi/l/email-protection", "the same, in the href"),
+    ("[email\u00a0protected]", "the same, in the visible text"),
+]
+
 
 def _path_of(url: str) -> str:
     from urllib.parse import urlparse
@@ -76,6 +90,19 @@ def verify(url: str) -> list[str]:
         # said what to expect from is not a passing page, it is an unchecked one.
         failures.append(f"{url}: no expected content is recorded for {path!r}")
         return failures
+
+    for marker, why in FORBIDDEN_MARKERS:
+        if marker in body:
+            failures.append(f"{url}: {why} (found {marker!r})")
+
+    # The contact address and its subject are the whole of the site's source attribution
+    # at stage 1, so they are checked on every page that carries them rather than left to
+    # the per-page expectation below.
+    address = page_copy.text("contact")
+    if address in body and "mailto:" + address not in body:
+        failures.append(f"{url}: the contact address is present but not as a mail link")
+    if "mailto:" + address in body and "subject=" not in body:
+        failures.append(f"{url}: the contact link has lost its pre-filled subject")
 
     line_id, fragment = expected
     if fragment not in body:
