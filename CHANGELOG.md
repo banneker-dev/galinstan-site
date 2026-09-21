@@ -2,6 +2,17 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.2] — the stage 1 holding page
+
+The first release of `galinstan.ai`. Five files, no dependencies, every string approved.
+
+`site-2026.09.1` was cut first and **failed its own signature check on a validly signed
+tag** — the check grepped `git verify-tag --raw` for `GOODSIG`, which is a GPG status
+token that an SSH signature never emits. It failed closed, so nothing was published, and
+the tag is left in place rather than deleted: a release that did not happen is part of the
+record. The check now asks two questions instead of one — is there a signature at all, and
+is it from a trusted key — and each is exercised in both directions.
+
 ## [Unreleased]
 
 ### Added
