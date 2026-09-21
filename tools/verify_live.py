@@ -33,6 +33,22 @@ from tools import guards  # noqa: E402
 
 TIMEOUT = 20
 
+# A browser's User-Agent, on purpose.
+#
+# Cloudflare injects its analytics beacon only for browser-like clients, so a verifier
+# announcing itself as a tool is served a *different page* from the one visitors get — one
+# with no beacon in it. Checking that response proves nothing about what a visitor
+# receives, which is the whole job here. It is the same error as checking the built file
+# instead of the response, one layer further down: right up until the edge does something,
+# and then silently wrong.
+#
+# The cost is that this traffic is indistinguishable from a visitor in analytics. That is
+# a handful of hits per release and the trade is worth it.
+BROWSER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+)
+
 
 def fetch(url: str) -> str:
     # A cache-buster, because the point of this check is to see the deploy that just
@@ -40,7 +56,11 @@ def fetch(url: str) -> str:
     separator = "&" if "?" in url else "?"
     request = urllib.request.Request(
         f"{url}{separator}cb={uuid.uuid4().hex}",
-        headers={"User-Agent": "galinstan-release-verifier", "Cache-Control": "no-cache"},
+        headers={
+            "User-Agent": BROWSER_UA,
+            "Accept": "text/html,application/xhtml+xml",
+            "Cache-Control": "no-cache",
+        },
     )
     with urllib.request.urlopen(request, timeout=TIMEOUT) as response:  # noqa: S310
         return response.read().decode("utf-8", errors="replace")
@@ -57,6 +77,20 @@ EXPECTED = {
     "/index.html": ("headline", "runs inside your perimeter, not ours"),
     "/privacy.html": ("privacy-controller", "The data controller for this site is"),
 }
+
+# Rewrites the edge performs on the response, which no build-time guard can see because
+# they happen after the build. Each entry is a marker that must NOT appear, and the reason.
+#
+# This list exists because Cloudflare's Email Address Obfuscation silently replaced the
+# approved contact address with "[email protected]" on the first production release.
+# The page still looked right in a browser, because a script decoded it — but an approved
+# string was not what was served, and the pre-filled subject line that carries the site's
+# only source attribution had become dependent on JavaScript running.
+FORBIDDEN_MARKERS = [
+    ("__cf_email__", "Cloudflare Email Address Obfuscation is rewriting the contact address"),
+    ("/cdn-cgi/l/email-protection", "the same, in the href"),
+    ("[email\u00a0protected]", "the same, in the visible text"),
+]
 
 
 def _path_of(url: str) -> str:
@@ -76,6 +110,19 @@ def verify(url: str) -> list[str]:
         # said what to expect from is not a passing page, it is an unchecked one.
         failures.append(f"{url}: no expected content is recorded for {path!r}")
         return failures
+
+    for marker, why in FORBIDDEN_MARKERS:
+        if marker in body:
+            failures.append(f"{url}: {why} (found {marker!r})")
+
+    # The contact address and its subject are the whole of the site's source attribution
+    # at stage 1, so they are checked on every page that carries them rather than left to
+    # the per-page expectation below.
+    address = page_copy.text("contact")
+    if address in body and "mailto:" + address not in body:
+        failures.append(f"{url}: the contact address is present but not as a mail link")
+    if "mailto:" + address in body and "subject=" not in body:
+        failures.append(f"{url}: the contact link has lost its pre-filled subject")
 
     line_id, fragment = expected
     if fragment not in body:
