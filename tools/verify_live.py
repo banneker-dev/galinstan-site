@@ -33,6 +33,22 @@ from tools import guards  # noqa: E402
 
 TIMEOUT = 20
 
+# A browser's User-Agent, on purpose.
+#
+# Cloudflare injects its analytics beacon only for browser-like clients, so a verifier
+# announcing itself as a tool is served a *different page* from the one visitors get — one
+# with no beacon in it. Checking that response proves nothing about what a visitor
+# receives, which is the whole job here. It is the same error as checking the built file
+# instead of the response, one layer further down: right up until the edge does something,
+# and then silently wrong.
+#
+# The cost is that this traffic is indistinguishable from a visitor in analytics. That is
+# a handful of hits per release and the trade is worth it.
+BROWSER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+)
+
 
 def fetch(url: str) -> str:
     # A cache-buster, because the point of this check is to see the deploy that just
@@ -40,7 +56,11 @@ def fetch(url: str) -> str:
     separator = "&" if "?" in url else "?"
     request = urllib.request.Request(
         f"{url}{separator}cb={uuid.uuid4().hex}",
-        headers={"User-Agent": "galinstan-release-verifier", "Cache-Control": "no-cache"},
+        headers={
+            "User-Agent": BROWSER_UA,
+            "Accept": "text/html,application/xhtml+xml",
+            "Cache-Control": "no-cache",
+        },
     )
     with urllib.request.urlopen(request, timeout=TIMEOUT) as response:  # noqa: S310
         return response.read().decode("utf-8", errors="replace")
