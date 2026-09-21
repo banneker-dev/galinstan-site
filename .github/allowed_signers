@@ -1,0 +1,12 @@
+# Trusted signing keys, for `git verify-tag` over SSH signatures.
+#
+# Format: <email> <key-type> <public key>   — one per line, the public half only.
+# A private key never appears here or anywhere else in this repository.
+#
+# NO SIGNING KEY YET. The release workflow fails on this line rather than skipping the
+# check, because a tag nobody can verify is a tag anyone could have pushed. Replace it
+# with the real line once the key exists:
+#
+#   antwain@banneker.net ssh-ed25519 AAAAC3Nza...
+#
+# The public half is in ~/.ssh/galinstan_signing.pub on the machine that generated it.

@@ -26,6 +26,8 @@ jobs:
       IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/site-') }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -40,6 +42,24 @@ jobs:
       - name: Guards
         run: python3 tools/guards.py
 
+      # Ask 22. `git verify-tag` cannot check an SSH signature without being told which
+      # keys are trusted, and it exits 0 on an *unsigned* tag in some versions — so the
+      # signature is required explicitly rather than inferred from the exit code.
+      - name: The release tag must be signed
+        if: env.IS_RELEASE == 'true'
+        run: |
+          git config gpg.ssh.allowedSignersFile .github/allowed_signers
+          if grep -q "NO SIGNING KEY YET" .github/allowed_signers; then
+            echo "::error::.github/allowed_signers is still the placeholder."
+            echo "Create the signing key (SETUP_GITHUB_CLOUDFLARE.md step 1.5) and commit"
+            echo "the public key here. Until then no tag can be verified, so none is trusted."
+            exit 1
+          fi
+          git verify-tag --raw "${GITHUB_REF_NAME}" 2>&1 | grep -q GOODSIG || {
+            echo "::error::${GITHUB_REF_NAME} carries no valid signature from a trusted key."
+            exit 1
+          }
+
       - name: Production guards
         if: env.IS_RELEASE == 'true'
         run: python3 tools/guards.py --production
@@ -50,10 +70,16 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Ask 21. A release tag deploys to `production`, which is the Cloudflare Pages
+          # production branch; every branch push, including main, deploys to a branch of
+          # its own name and is therefore a preview. Before this, a tag and a push to main
+          # both landed on `main`, so if main had been the production branch an ordinary
+          # push would have reached the live domain without passing the production guards.
+          # Nothing else in this repository assumes `main` is production.
           command: >-
             pages deploy public
             --project-name=galinstan
-            --branch=${{ startsWith(github.ref, 'refs/tags/') && 'main' || github.ref_name }}
+            --branch=${{ startsWith(github.ref, 'refs/tags/') && 'production' || github.ref_name }}
 
       - name: Not deployed — no Cloudflare credentials
         if: env.CLOUDFLARE_API_TOKEN == ''
@@ -61,16 +87,12 @@ jobs:
           echo "::notice::Built and guarded, but not deployed: CLOUDFLARE_API_TOKEN is not set."
           echo "The Cloudflare Pages project has not been created yet. See RELEASE.md."
 
-      # Adversarial verification. A status code cannot tell a stale hit from a live one,
-      # so this fetches the body with a cache-buster and greps for the approved sentence.
+      # Adversarial verification, over the live response rather than the artifact: the
+      # approved headline must be in the body, and no third-party host may be fetched
+      # except the one permitted beacon, which Cloudflare injects after the build and
+      # which no build-time guard can see. See docs/ANALYTICS.md.
       - name: Verify what is actually being served
         if: env.IS_RELEASE == 'true' && env.CLOUDFLARE_API_TOKEN != ''
         run: |
-          sleep 15
-          body=$(curl -fsSL "https://galinstan.ai/?cb=$GITHUB_SHA")
-          echo "$body" | grep -q "runs inside your perimeter, not ours" || {
-            echo "::error::The live page does not contain the approved headline."
-            echo "$body" | head -40
-            exit 1
-          }
-          echo "Live page verified by content, not by status code."
+          sleep 20
+          python3 tools/verify_live.py https://galinstan.ai/ https://galinstan.ai/privacy.html

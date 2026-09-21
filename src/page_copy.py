@@ -16,6 +16,10 @@ Three statuses, and the build treats them differently:
 `publishable()` is the whole point: it is False until every string on the page is
 APPROVED, and the production deploy refuses to run while it is False. A preview URL
 still builds, so the page can be looked at and argued about before it can be published.
+
+**All twelve strings are approved as of 2026-09-21.** That is not a reason to relax the
+mechanism: the next page added starts unapproved, and stage 2 copy has to come from
+discovery rather than from what we currently assume.
 """
 
 from dataclasses import dataclass
@@ -48,114 +52,137 @@ LINES = [
         status=APPROVED,
         text="Galinstan",
         approved_on="2026-09-20",
-        note="The product name. Approved by virtue of being the product name.",
+        note="The product name.",
     ),
     Line(
         id="headline",
         status=APPROVED,
         approved_on="2026-09-20",
         text=(
-            "Air-gapped optimization and audit software for European banks — "
+            "Air-gapped optimization and audit software for European banks \u2014 "
             "the analysis runs inside your perimeter, not ours."
         ),
-        note="Approved 2026-09-20. Recorded in 00_Start_Here/CURRENT_STATE.md section 6a.",
+        note="Approved 2026-09-20.",
     ),
     Line(
         id="body-1",
-        status=PENDING,
+        status=APPROVED,
+        approved_on="2026-09-21",
         text=(
             "Galinstan is being built for treasury and resilience teams at EU and EEA "
             "institutions in scope of DORA. It is designed to do two things inside your own "
             "hardware boundary: find the most efficient way to hold a regulatory liquidity "
             "position, and produce audit evidence that can be relied on."
         ),
-        note="Drafted by Cowork. Tense is deliberate: 'is being built', 'designed to'.",
+        note="Tense is deliberate: 'is being built', 'designed to'.",
     ),
     Line(
         id="body-2",
-        status=PENDING,
+        status=APPROVED,
+        approved_on="2026-09-21",
         text=(
             "By design, no data leaves the institution, there is no cloud service to depend "
-            "on, and there is no entry to add to your critical ICT provider register."
+            "on, and the software makes no outbound connection of any kind."
         ),
-        note="The register line is the highest-value sentence on the page for a DORA lead.",
+        note=(
+            "Revised 2026-09-21. The earlier draft claimed there is no entry to add to the "
+            "critical ICT provider register. Supervisory guidance says a licence sold with "
+            "ongoing support can itself be an ICT service, so a bank would likely still "
+            "record Banneker. This states only what the design guarantees."
+        ),
     ),
     Line(
         id="body-3",
-        status=PENDING,
+        status=APPROVED,
+        approved_on="2026-09-21",
         text=(
-            "We are currently talking with group treasurers, heads of ALM and DORA programme "
-            "leads about how this work gets done today, and what it costs. If that is your "
-            "remit, we would like to hear from you."
+            "We want to hear from group treasurers, heads of ALM and DORA programme leads "
+            "about how this work gets done today, and what it costs. If that is your remit, "
+            "write to us."
         ),
-        note="The discovery invitation. This is the page's only conversion path at stage 1.",
+        note=(
+            "Revised 2026-09-21. 'We are currently talking with...' was not yet true \u2014 "
+            "discovery has not started."
+        ),
     ),
     Line(
         id="entity",
-        status=PENDING,
-        text="Galinstan is a product of Banneker Strategy & Compliance LLC.",
-        note=(
-            "WEB_SPEC.md open item 3 — whether the entity shown is Banneker or Galinstan "
-            "as a product of Banneker. This draft takes the second reading."
-        ),
+        status=APPROVED,
+        approved_on="2026-09-21",
+        text="Galinstan is a product of Banneker.",
+        note="Banneker is a sole proprietorship. No 'LLC', and no 'Strategy & Compliance'.",
     ),
     Line(
         id="contact",
-        status=PLACEHOLDER,
-        text="",
+        status=APPROVED,
+        approved_on="2026-09-21",
+        text="antwain@banneker.net",
         note=(
-            "WEB_SPEC.md open item 5. A personal address, a role address, or a form. "
-            "The form option is the only one that carries source attribution, which "
-            "WEB_SPEC.md section 6a requires from the first submission."
+            "Rendered as a mail link with the subject pre-filled 'Galinstan \u2014 via "
+            "galinstan.ai', which is free source attribution: every enquiry from the site "
+            "arrives labelled, with no form and no paid analytics. The subject is part of "
+            "the approved string and lives in CONTACT_SUBJECT below."
         ),
     ),
     Line(
         id="legal-footer",
-        status=PLACEHOLDER,
-        text="",
+        status=APPROVED,
+        approved_on="2026-09-21",
+        text="\u00a9 2026 Banneker \u00b7 banneker.net",
         note=(
-            "Entity, jurisdiction and registration details, as one line. "
-            "SITE_COPY_STAGE1.md lists this as still needed before publishing."
+            "A US sole proprietorship has no registration number to show, so the footer "
+            "stays minimal. Rendered as plain text rather than a link \u2014 see the note "
+            "on rendering below."
         ),
     ),
     Line(
         id="privacy-controller",
-        status=PLACEHOLDER,
-        text="",
-        note=(
-            "The named data controller for the privacy notice. Required by "
-            "WEB_SPEC.md section 6 and it is a legal string, so it is not ours to draft."
+        status=APPROVED,
+        approved_on="2026-09-21",
+        text=(
+            "The data controller for this site is Sherman A. Cross, trading as Banneker. "
+            "Contact: antwain@banneker.net."
         ),
+        note="A reviewed legal string. The law asks for the controller's identity here.",
     ),
     Line(
         id="privacy-analytics",
-        status=PLACEHOLDER,
-        text="",
+        status=APPROVED,
+        approved_on="2026-09-21",
+        text=(
+            "This site uses Cloudflare Web Analytics to count visits. It sets no cookies "
+            "and does not track you across other sites. Cloudflare, which hosts the site, "
+            "processes your IP address to deliver the page and protect it from abuse. Our "
+            "lawful basis is our legitimate interest in knowing how the site is used."
+        ),
         note=(
-            "What the privacy notice says about analytics. Depends on WEB_SPEC.md open "
-            "item 4 — cookieless and banner-free, or GA4 with consent management. "
-            "The lawful basis differs between them, so the sentence cannot be drafted first."
+            "Cloudflare Web Analytics is free, cookieless and needs no consent banner. Its "
+            "limits are six months of history and no custom events."
         ),
     ),
     Line(
         id="meta-title",
-        status=PENDING,
-        text="Galinstan — air-gapped liquidity optimization and audit software for EU banks",
-        note=(
-            "WEB_SPEC.md section 6: segment keywords, not index terms. Carries "
-            "'air-gapped', 'liquidity optimization', 'EU banks'. 'FinTech' does not appear."
-        ),
+        status=APPROVED,
+        approved_on="2026-09-21",
+        text="Galinstan \u2014 air-gapped liquidity optimization and audit software for EU banks",
+        note="Segment keywords, not index terms. 'FinTech' does not appear.",
     ),
     Line(
         id="meta-description",
-        status=PENDING,
+        status=APPROVED,
+        approved_on="2026-09-21",
         text=(
-            "Intraday liquidity, ALM and DORA third-party risk work that runs on-premise, "
-            "inside the institution's own hardware boundary, with no outbound connection."
+            "Software being built for intraday liquidity, ALM and DORA third-party risk "
+            "work, designed to run on-premise inside the institution's own hardware "
+            "boundary with no outbound connection."
         ),
-        note="Segment keywords: intraday liquidity, ALM, DORA, ICT third-party risk, on-premise.",
+        note="Revised 2026-09-21: 'that runs' became 'being built... designed to run'.",
     ),
 ]
+
+# Part of the approved `contact` string, kept separate because it is an attribute rather
+# than page text: the pre-filled subject that makes every enquiry self-attributing.
+CONTACT_SUBJECT = "Galinstan \u2014 via galinstan.ai"
 
 BY_ID = {line.id: line for line in LINES}
 

@@ -25,6 +25,7 @@ import html
 import pathlib
 import shutil
 import sys
+import urllib.parse
 
 ROOT = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "src"))
@@ -34,13 +35,19 @@ import page_copy  # noqa: E402
 PUBLIC = ROOT / "public"
 SITE_URL = "https://galinstan.ai"
 
-# Analytics is deliberately absent rather than disabled. WEB_SPEC.md open item 4 is
-# unanswered — cookieless and banner-free, or GA4 with consent management — and the two
-# have different lawful bases, so the privacy notice cannot be written before the choice
-# is made. tools/guards.py refuses a production release while this is None, because
-# WEB_SPEC.md section 6a is explicit that measurement missing at the first visitor is
-# unrecoverable: the practice lost eleven days of event data to exactly this.
-ANALYTICS = None
+# Cloudflare Web Analytics, chosen 2026-09-21: free, cookieless, no consent banner, six
+# months of history, no custom events.
+#
+# **It is not a script tag in this file, and that is the point to understand.** Cloudflare
+# injects its beacon at the edge, into the response, after this build has produced the
+# HTML. So `public/index.html` contains no reference to it, and the build-time guard that
+# forbids external references cannot see it — a guard that passes here says nothing about
+# what a visitor is actually served.
+#
+# The resolution is in tools/guards.py: one named beacon is permitted on marketing paths,
+# and the deploy verifies the *live* response rather than the artifact. See
+# docs/ANALYTICS.md for why the rule is scoped to the path rather than waived.
+ANALYTICS = "cloudflare-web-analytics (edge-injected; verified against the live response)"
 
 CSS = """\
 :root {
@@ -118,6 +125,23 @@ def _markup(raw: str) -> str:
     return escaped
 
 
+def _contact_link() -> str:
+    """The contact address as a mail link, with the approved subject pre-filled.
+
+    A `mailto:` opens the visitor's own mail client. It fetches nothing and reaches no
+    third party, so it does not touch the no-external-references rule. The pre-filled
+    subject is the whole of the site's source attribution at stage 1: every enquiry
+    arrives labelled, with no form, no CRM and nothing to pay for.
+
+    The footer's "banneker.net" stays plain text rather than becoming a link. The approved
+    string does not mark it as one, and a session inventing a link out of an approved
+    string is the thing the register exists to stop.
+    """
+    address = page_copy.text("contact")
+    subject = urllib.parse.quote(page_copy.CONTACT_SUBJECT)
+    return f'<a href="mailto:{html.escape(address)}?subject={subject}">{html.escape(address)}</a>'
+
+
 def render_index() -> str:
     t = page_copy.text
     body = "\n".join(
@@ -142,7 +166,7 @@ def render_index() -> str:
 {body}
       <footer>
         <p>{_markup(t("entity"))}</p>
-        <p>{_markup(t("contact"))}</p>
+        <p>{_contact_link()}</p>
         <p><a href="/privacy.html">Privacy</a></p>
         <p>{_markup(t("legal-footer"))}</p>
       </footer>
@@ -171,7 +195,7 @@ def render_privacy() -> str:
       <h1>Privacy</h1>
       <p><strong>Data controller.</strong> {_markup(t("privacy-controller"))}</p>
       <p><strong>Analytics.</strong> {_markup(t("privacy-analytics"))}</p>
-      <p><strong>Contact.</strong> {_markup(t("contact"))}</p>
+      <p><strong>Contact.</strong> {_contact_link()}</p>
       <footer>
         <p>{_markup(t("entity"))}</p>
         <p>{_markup(t("legal-footer"))}</p>

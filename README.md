@@ -21,9 +21,9 @@ library, which is what CI installs and what the site's whole toolchain consists 
 
 ## The two things to understand before changing anything
 
-**Copy lives in `src/page_copy.py`, with a status.** Nothing else in this repository may
-contain page prose. A string is `approved`, `pending` or `placeholder`, and only
-`approved` may reach production. This is not bureaucracy: approved strings are the
+**Copy lives in `src/page_copy.py`, with a status and the date it was approved.** Nothing
+else in this repository may contain page prose. A string is `approved`, `pending` or
+`placeholder`, and only `approved` may reach production. This is not bureaucracy: approved strings are the
 scarce input in this venture, and a session that invents one to fill a gap is the failure
 mode the practice has already paid for.
 
@@ -33,9 +33,12 @@ does not put it on the internet.
 
 ## Status
 
-The page is **not publishable**. Ten of twelve strings are unapproved and analytics is
-unconfigured. `python3 build.py` prints the list; `python3 tools/guards.py --production`
-fails on it, and the production deploy refuses to run.
+**Publishable.** All twelve strings were approved on 2026-09-21 and the analytics choice is
+made, so `python3 tools/guards.py --production` passes and a `site-*` tag would deploy.
 
-A preview build is fine and is the point — the page can be looked at, argued about and
-corrected on a real URL long before it can be published.
+What is left is not copy and not code: the GitHub organisation, the Cloudflare Pages
+project, the signing key and the DNS move. `RELEASE.md` lists them, and
+`50_Claude_Outputs/SETUP_GITHUB_CLOUDFLARE.md` walks through each one field by field.
+
+The gate itself stays. The next page added starts unapproved, and stage 2 copy has to come
+from what discovery finds rather than from what we currently assume.

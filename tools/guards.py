@@ -67,16 +67,16 @@ def _pages() -> list[tuple[str, str]]:
     return [(n, (PUBLIC / n).read_text(encoding="utf-8")) for n in _HTML if (PUBLIC / n).exists()]
 
 
-# The commercial owner's registered name contains the word "Compliance". It is a legal
-# string, not a claim, and it is the one place the word is allowed to appear. Exempting the
-# exact registered name rather than weakening the pattern keeps "compliance" banned
-# everywhere a session might otherwise reach for it. This guard found it on first run,
-# which is the argument for writing guards before copy rather than after.
-_LEGAL_NAMES = ["Banneker Strategy & Compliance LLC", "Banneker Strategy &amp; Compliance LLC"]
+# This list is empty, and it used to hold "Banneker Strategy & Compliance LLC" — the name
+# the claims guard caught on its first run, exempted then as a legal string. On 2026-09-21
+# that entity turned out not to exist: Banneker is a sole proprietorship. The approved
+# copy says "Banneker", the word "Compliance" is gone from the page, and the exemption
+# goes with it rather than sitting here waiting to quietly permit something.
+_LEGAL_NAMES: list[str] = []
 
 
 def _strip_todo(text: str) -> str:
-    """Strips what is not copy: placeholder markers and the registered entity name."""
+    """Strips what is not copy: placeholder markers and any exempt legal string."""
     text = re.sub(r"\[\[TODO:.*?\]\]", "", text, flags=re.S)
     for name in _LEGAL_NAMES:
         text = text.replace(name, "")
@@ -126,6 +126,38 @@ def required_metadata(pages=None) -> list[str]:
     for name in ("robots.txt", "sitemap.xml"):
         if not (PUBLIC / name).exists():
             failures.append(f"{name}: not built")
+    return failures
+
+
+# Exactly one host may be fetched by a marketing page, and only because Cloudflare injects
+# it at the edge after the build. See docs/ANALYTICS.md. Anything else, including a second
+# Cloudflare product, is a build failure.
+PERMITTED_BEACON_HOSTS = {"static.cloudflareinsights.com"}
+
+# Paths that host the demo instance carry the product's rule, not the marketing rule:
+# nothing at all, no exception. Nothing is served under it yet; the rule is written before
+# the path exists so it is not decided in a hurry later.
+AIR_GAPPED_PATH_PREFIXES = ("/demo",)
+
+
+def live_response_has_only_permitted_fetches(url: str, body: str) -> list[str]:
+    """Checked against what a visitor is served, not against what the build produced.
+
+    The build-time guard reads `public/`. Cloudflare's beacon is injected into the
+    response afterwards, so the artifact is silent about it and a green build proves
+    nothing about the live page. This runs after a deploy, over the fetched body.
+    """
+    failures = []
+    for host in sorted(set(re.findall(r"https?://([A-Za-z0-9.\-]+)", body))):
+        if host == OWN_HOST or host.endswith("." + OWN_HOST):
+            continue
+        if host in ("www.sitemaps.org", "www.w3.org"):
+            continue
+        if host in PERMITTED_BEACON_HOSTS:
+            if any(url.rstrip("/").endswith(p) or p in url for p in AIR_GAPPED_PATH_PREFIXES):
+                failures.append(f"{url}: the beacon is present on an air-gapped path ({host})")
+            continue
+        failures.append(f"{url}: unexpected third-party host in the live response: {host}")
     return failures
 
 

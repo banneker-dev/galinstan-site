@@ -52,9 +52,28 @@ class BuildTests(unittest.TestCase):
             (ROOT / "public" / "index.html").read_text(encoding="utf-8"),
         )
 
-    def test_a_placeholder_renders_as_a_marker_and_never_as_a_blank(self):
-        self.assertTrue(page_copy.text("contact").startswith("[[TODO:"))
-        self.assertIn("[[TODO: contact", (ROOT / "public" / "index.html").read_text("utf-8"))
+    def test_a_placeholder_would_render_as_a_marker_and_never_as_a_blank(self):
+        """No placeholders remain, so this checks the mechanism rather than the page."""
+        probe = page_copy.Line(id="probe", status=page_copy.PLACEHOLDER, text="", note="a fact nobody supplied")
+        page_copy.BY_ID["probe"] = probe
+        try:
+            self.assertTrue(page_copy.text("probe").startswith("[[TODO:"))
+        finally:
+            del page_copy.BY_ID["probe"]
+
+    def test_the_page_carries_no_placeholder_markers(self):
+        self.assertNotIn("[[TODO:", (ROOT / "public" / "index.html").read_text("utf-8"))
+
+    def test_the_contact_address_is_a_mail_link_with_the_approved_subject(self):
+        """The pre-filled subject is the whole of the site's source attribution."""
+        body = (ROOT / "public" / "index.html").read_text("utf-8")
+        self.assertIn("mailto:antwain@banneker.net?subject=", body)
+        self.assertIn("via%20galinstan.ai", body)
+
+    def test_the_footer_domain_is_not_invented_into_a_link(self):
+        body = (ROOT / "public" / "index.html").read_text("utf-8")
+        self.assertIn("banneker.net", body)
+        self.assertNotIn('href="https://banneker.net', body)
 
 
 class GuardsPassOnTheRealBuild(unittest.TestCase):
@@ -111,9 +130,13 @@ class GuardsFailWhenTheyShould(unittest.TestCase):
                     f"{label!r} passed the claims guard",
                 )
 
-    def test_the_registered_entity_name_is_not_a_forbidden_claim(self):
+    def test_the_entity_name_no_longer_needs_an_exemption(self):
+        """Banneker is a sole proprietorship. The word "Compliance" left the page with it,
+        so the exemption that once let it through is gone and the word is banned outright.
+        """
+        self.assertEqual(guards._LEGAL_NAMES, [])
         page = [("index.html", "<p>Banneker Strategy & Compliance LLC</p>")]
-        self.assertEqual(guards.no_forbidden_claims(page), [])
+        self.assertTrue(guards.no_forbidden_claims(page))
 
     def test_missing_metadata_is_caught(self):
         page = [("index.html", "<html><title>x</title></html>")]
@@ -121,20 +144,64 @@ class GuardsFailWhenTheyShould(unittest.TestCase):
 
 
 class PublicationGate(unittest.TestCase):
-    def test_unapproved_copy_blocks_a_production_release(self):
-        failures = guards.publication_gate()
-        self.assertTrue(
-            failures,
-            "the publication gate passed while copy is still unapproved — "
-            "if the copy really was approved, this test is the thing to update, "
-            "deliberately and in its own commit",
-        )
+    """Updated 2026-09-21, deliberately: all twelve strings were approved.
 
-    def test_the_gate_names_every_blocker_rather_than_the_first(self):
-        self.assertGreaterEqual(len(guards.publication_gate()), len(page_copy.blockers()))
+    The previous version asserted the gate *fails*, and said in its own message that
+    approval was the only thing that should change it. That is what happened. The
+    mechanism is still tested in both directions — an unapproved string must still
+    block, which is what matters when the next page is added.
+    """
 
-    def test_analytics_absence_is_itself_a_blocker(self):
-        self.assertTrue(any("analytics" in f for f in guards.publication_gate()))
+    def test_the_gate_passes_now_that_every_string_is_approved(self):
+        self.assertEqual(guards.publication_gate(), [])
+
+    def test_every_string_carries_the_date_it_was_approved(self):
+        for line in page_copy.LINES:
+            self.assertEqual(line.status, page_copy.APPROVED, line.id)
+            self.assertRegex(line.approved_on, r"^\d{4}-\d{2}-\d{2}$", line.id)
+
+    def test_an_unapproved_string_still_blocks_a_release(self):
+        original = page_copy.BY_ID["body-1"]
+        replacement = page_copy.Line(id="body-1", status=page_copy.PENDING, text=original.text)
+        position = page_copy.LINES.index(original)
+        page_copy.LINES[position] = replacement
+        page_copy.BY_ID["body-1"] = replacement
+        try:
+            self.assertTrue(any("body-1" in f for f in guards.publication_gate()))
+        finally:
+            page_copy.LINES[position] = original
+            page_copy.BY_ID["body-1"] = original
+
+    def test_analytics_is_configured(self):
+        self.assertIsNotNone(build.ANALYTICS)
+
+
+class LiveResponseVerification(unittest.TestCase):
+    """Guards over what a visitor is served. The beacon is injected after the build."""
+
+    URL = "https://galinstan.ai/"
+
+    def test_the_permitted_beacon_passes_on_a_marketing_path(self):
+        body = '<script src="https://static.cloudflareinsights.com/beacon.min.js"></script>'
+        self.assertEqual(guards.live_response_has_only_permitted_fetches(self.URL, body), [])
+
+    def test_any_other_third_party_host_fails(self):
+        body = '<script src="https://cdn.example.com/a.js"></script>'
+        failures = guards.live_response_has_only_permitted_fetches(self.URL, body)
+        self.assertTrue(any("cdn.example.com" in f for f in failures))
+
+    def test_a_font_service_fails_even_though_it_is_ordinary(self):
+        body = '<link href="https://fonts.googleapis.com/css2?family=X">'
+        self.assertTrue(guards.live_response_has_only_permitted_fetches(self.URL, body))
+
+    def test_the_beacon_is_not_permitted_on_an_air_gapped_path(self):
+        body = '<script src="https://static.cloudflareinsights.com/beacon.min.js"></script>'
+        failures = guards.live_response_has_only_permitted_fetches("https://galinstan.ai/demo", body)
+        self.assertTrue(any("air-gapped path" in f for f in failures))
+
+    def test_our_own_host_passes(self):
+        body = '<link rel="canonical" href="https://galinstan.ai/">'
+        self.assertEqual(guards.live_response_has_only_permitted_fetches(self.URL, body), [])
 
 
 if __name__ == "__main__":
