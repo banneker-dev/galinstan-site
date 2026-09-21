@@ -206,3 +206,35 @@ class LiveResponseVerification(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LiveVerifierExpectations(unittest.TestCase):
+    """The live verifier's per-page expectations, checked against the register.
+
+    The first version asserted the front page's headline on every URL, so /privacy.html
+    failed a check it could never have passed — and because the deploy workflow passes
+    both URLs, a release would have failed on it. Caught on a preview deploy rather than
+    on the tag, which is the argument for running one.
+    """
+
+    def setUp(self):
+        from tools import verify_live
+
+        self.verify_live = verify_live
+
+    def test_every_expectation_quotes_a_string_that_is_still_approved(self):
+        for path, (line_id, fragment) in self.verify_live.EXPECTED.items():
+            with self.subTest(path=path):
+                line = page_copy.line(line_id)
+                self.assertEqual(line.status, page_copy.APPROVED)
+                self.assertIn(fragment, line.text)
+
+    def test_every_published_html_page_has_an_expectation(self):
+        """A page nobody said what to expect from is unchecked, not passing."""
+        published = {f"/{n}" for n in build.ALLOWLIST if n.endswith(".html")}
+        published.discard("/404.html")  # not fetched by a release; it has no canonical content
+        covered = set(self.verify_live.EXPECTED)
+        self.assertTrue(published <= covered, f"no expectation for {published - covered}")
+
+    def test_an_unlisted_path_is_reported_rather_than_passing(self):
+        self.assertIsNone(self.verify_live.EXPECTED.get("/something-nobody-listed"))

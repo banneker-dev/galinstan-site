@@ -46,17 +46,45 @@ def fetch(url: str) -> str:
         return response.read().decode("utf-8", errors="replace")
 
 
+# What must appear in each page's body, keyed by path. The page escapes as it renders, so
+# these are distinctive fragments rather than whole sentences with their punctuation.
+#
+# Per page rather than one fragment for the whole site, because the first version asserted
+# the front page's headline on every URL — so /privacy.html failed a check it could never
+# have passed. It was caught on a preview deploy, which is the argument for running one.
+EXPECTED = {
+    "/": ("headline", "runs inside your perimeter, not ours"),
+    "/index.html": ("headline", "runs inside your perimeter, not ours"),
+    "/privacy.html": ("privacy-controller", "The data controller for this site is"),
+}
+
+
+def _path_of(url: str) -> str:
+    from urllib.parse import urlparse
+
+    return urlparse(url).path or "/"
+
+
 def verify(url: str) -> list[str]:
     body = fetch(url)
     failures = guards.live_response_has_only_permitted_fetches(url, body)
 
-    headline = page_copy.line("headline").text
-    # The page escapes as it renders, so compare on a distinctive fragment rather than on
-    # the whole sentence and its punctuation.
-    fragment = "runs inside your perimeter, not ours"
+    path = _path_of(url)
+    expected = EXPECTED.get(path)
+    if expected is None:
+        # Silence here would mean a page could be verified by accident. A path nobody has
+        # said what to expect from is not a passing page, it is an unchecked one.
+        failures.append(f"{url}: no expected content is recorded for {path!r}")
+        return failures
+
+    line_id, fragment = expected
     if fragment not in body:
-        failures.append(f"{url}: the approved headline is not in the body")
-    assert fragment in headline, "the fragment this check greps for left the approved string"
+        failures.append(f"{url}: the approved {line_id} text is not in the body")
+    # The fragment is a quotation from an approved string. If the string is reworded and
+    # this is not, the check would quietly start testing nothing.
+    assert fragment in page_copy.line(line_id).text, (
+        f"the fragment this check greps for is no longer in the approved {line_id!r} string"
+    )
     return failures
 
 
@@ -76,7 +104,8 @@ def main() -> int:
             for f in failures:
                 print(f"        {f}")
         else:
-            print(f"ok    {url} — headline present, no unexpected third-party host")
+            label = EXPECTED.get(_path_of(url), ("content", ""))[0]
+            print(f"ok    {url} — approved {label} present, no unexpected third-party host")
     return 1 if failed else 0
 
 
