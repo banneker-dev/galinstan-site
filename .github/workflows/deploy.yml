@@ -83,18 +83,32 @@ jobs:
             --project-name=galinstan
             --branch=${{ startsWith(github.ref, 'refs/tags/') && 'production' || github.ref_name }}
 
+      # A release that publishes nothing and reports success is the worst outcome
+      # available here, so a tag fails on missing credentials rather than noticing them.
+      # A branch push may still no-op: a preview with no project to deploy to is a
+      # gap in setup, not a broken release.
+      - name: A release requires credentials
+        if: env.IS_RELEASE == 'true' && (env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '')
+        run: |
+          echo "::error::Refusing to cut a release with no Cloudflare credentials."
+          echo "CLOUDFLARE_API_TOKEN set: ${{ env.CLOUDFLARE_API_TOKEN != '' }}"
+          echo "CLOUDFLARE_ACCOUNT_ID set: ${{ env.CLOUDFLARE_ACCOUNT_ID != '' }}"
+          echo "Both are repository secrets on galinstan-site. Names matter: the workflow"
+          echo "reads these two exactly. See RELEASE.md."
+          exit 1
+
       - name: Not deployed — no Cloudflare credentials
-        if: env.CLOUDFLARE_API_TOKEN == ''
+        if: env.IS_RELEASE != 'true' && env.CLOUDFLARE_API_TOKEN == ''
         run: |
           echo "::notice::Built and guarded, but not deployed: CLOUDFLARE_API_TOKEN is not set."
-          echo "The Cloudflare Pages project has not been created yet. See RELEASE.md."
+          echo "A branch push with no project to deploy to is a setup gap, not a failure."
 
       # Adversarial verification, over the live response rather than the artifact: the
       # approved headline must be in the body, and no third-party host may be fetched
       # except the one permitted beacon, which Cloudflare injects after the build and
       # which no build-time guard can see. See docs/ANALYTICS.md.
       - name: Verify what is actually being served
-        if: env.IS_RELEASE == 'true' && env.CLOUDFLARE_API_TOKEN != ''
+        if: env.IS_RELEASE == 'true'
         run: |
           sleep 20
           python3 tools/verify_live.py https://galinstan.ai/ https://galinstan.ai/privacy.html

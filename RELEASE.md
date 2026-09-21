@@ -23,9 +23,15 @@ Tags are date based: `site-2026.09.1`, then `.2`, `.3` within the month.
 | 1 | ~~Approve the stage 1 copy~~ | **Done 2026-09-21. All twelve strings approved.** |
 | 2 | ~~Analytics choice~~ | **Done. Cloudflare Web Analytics.** See `docs/ANALYTICS.md` |
 | 3 | ~~Publish now or hold~~ | **Done. The page publishes independent of the interviews.** |
-| 4 | The GitHub org, the repo, and the Cloudflare project — A5 and A7 | Antwain |
-| 5 | The SSH signing key, and its public half committed to `.github/allowed_signers` | Antwain creates it; Cody commits it |
-| 6 | `galinstan.ai` nameservers moved to Cloudflare, and the custom domain attached | Antwain |
+| 4 | ~~The GitHub org, the repo, and the Cloudflare project — A5 and A7~~ | **Done 2026-09-21** |
+| 5 | ~~The SSH signing key~~ | **Done 2026-09-21** |
+| 6 | ~~`galinstan.ai` nameservers moved, custom domain attached~~ | **Done 2026-09-21** |
+| 7 | **Two repository secrets, named exactly `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`** | Antwain |
+
+**Secret names are not cosmetic.** The workflow reads those two names and no others. A secret carrying the
+token under a different name is the same as no secret at all — and until this was hardened, the release
+would have skipped the deploy, skipped the live verification, and reported success. A tag now fails on
+missing credentials; only a branch preview is allowed to no-op.
 
 Steps 4 to 6 are written out field by field in `50_Claude_Outputs/SETUP_GITHUB_CLOUDFLARE.md`.
 
