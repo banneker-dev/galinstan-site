@@ -57,10 +57,26 @@ jobs:
             echo "verified, so nothing is trusted."
             exit 1
           fi
-          git verify-tag --raw "${GITHUB_REF_NAME}" 2>&1 | grep -q GOODSIG || {
-            echo "::error::${GITHUB_REF_NAME} carries no valid signature from a trusted key."
+          # Two checks, because neither is sufficient alone.
+          #
+          # First: is there a signature at all? `git verify-tag` exits 0 on an unsigned
+          # tag in some versions, so its exit code cannot answer this.
+          if ! git cat-file tag "${GITHUB_REF_NAME}" | grep -qE "BEGIN (SSH|PGP) SIGNATURE"; then
+            echo "::error::${GITHUB_REF_NAME} carries no signature at all. Sign it: git tag -s"
             exit 1
-          }
+          fi
+          # Second: is it good, and from a key we trust? Here the exit code is meaningful.
+          #
+          # This used to grep the --raw output for GOODSIG, which could never match an SSH
+          # signature: GOODSIG is a GPG status token, and git reports an SSH signature as
+          # `Good "git" signature for <principal>`. It failed site-2026.09.1 on a tag whose
+          # signature was perfectly valid. It failed closed — nothing was published — but a
+          # check that cannot pass is not a check either.
+          if ! git verify-tag "${GITHUB_REF_NAME}"; then
+            echo "::error::${GITHUB_REF_NAME} has a signature, but not one from a trusted key."
+            echo "The trusted keys are in .github/allowed_signers."
+            exit 1
+          fi
 
       - name: Production guards
         if: env.IS_RELEASE == 'true'
