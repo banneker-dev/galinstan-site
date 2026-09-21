@@ -49,10 +49,12 @@ jobs:
         if: env.IS_RELEASE == 'true'
         run: |
           git config gpg.ssh.allowedSignersFile .github/allowed_signers
-          if grep -q "NO SIGNING KEY YET" .github/allowed_signers; then
-            echo "::error::.github/allowed_signers is still the placeholder."
-            echo "Create the signing key (SETUP_GITHUB_CLOUDFLARE.md step 1.5) and commit"
-            echo "the public key here. Until then no tag can be verified, so none is trusted."
+          # A key line, not the absence of a phrase: a check a comment can satisfy is
+          # not a check. Blank lines and comments do not count as a trusted key.
+          if ! grep -qE "^[^#[:space:]]+[[:space:]]+(ssh|sk-ssh)-" .github/allowed_signers; then
+            echo "::error::.github/allowed_signers holds no signing key."
+            echo "Create the key and commit its public half. Until then nothing can be"
+            echo "verified, so nothing is trusted."
             exit 1
           fi
           git verify-tag --raw "${GITHUB_REF_NAME}" 2>&1 | grep -q GOODSIG || {

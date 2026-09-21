@@ -3,10 +3,13 @@
 # Format: <email> <key-type> <public key>   — one per line, the public half only.
 # A private key never appears here or anywhere else in this repository.
 #
-# NO SIGNING KEY YET. The release workflow fails on this line rather than skipping the
-# check, because a tag nobody can verify is a tag anyone could have pushed. Replace it
-# with the real line once the key exists:
+# One line per machine. The private half never leaves the machine that generated it, so a
+# second machine gets its own key and its own line — which is why the key's title in
+# GitHub names the machine, and why revoking one does not disturb the other.
 #
-#   antwain@banneker.net ssh-ed25519 AAAAC3Nza...
-#
-# The public half is in ~/.ssh/galinstan_signing.pub on the machine that generated it.
+# The release workflow refuses to run while this file holds no key. That check reads the
+# file for a key line rather than grepping for a placeholder phrase: a check a comment can
+# satisfy is not a check.
+
+# Cabal — added 2026-09-21
+antwain@banneker.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkorWAaC4MI7Nl6I3yOgq60rTdjc7Olu0SmZjxeT4vm
