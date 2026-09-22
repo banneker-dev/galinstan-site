@@ -2,6 +2,40 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.4] — one address per page, and a crawler policy
+
+Everything a crawler is told, in one release, so the property presents one new state
+rather than three.
+
+### Fixed
+- **The sitemap declares `/privacy`, not `/privacy.html`.** Cloudflare Pages serves the
+  file at `/privacy` and permanently redirects the `.html` form to it, so the one URL the
+  site explicitly declared was the one URL that could not be indexed, and the page that
+  was indexed had never been declared.
+- **The privacy page's canonical is self-referencing.** It named `/privacy.html` while
+  being served at `/privacy`; a canonical that redirects elsewhere is one a crawler
+  discards in favour of its own choice.
+- **The footer links to `/privacy`**, so no visitor takes a redirect hop.
+- **`tools/verify_live.py` no longer follows redirects.** `urlopen` followed the 308 in
+  silence, landed on the served page, found the approved string and reported success —
+  correct about the bytes and wrong about the address, which is the one thing the sitemap
+  needed it to check. A 3xx on a declared address is now a failed release.
+
+### Added
+- **The crawler policy is a committed file.** `robots.txt` carries
+  `Content-Signal: search=yes, ai-input=yes, ai-train=no` inside the `User-agent: *`
+  group, expressing decision 13 — present, not trained on. Content signals are advisory,
+  so Cloudflare's AI Crawl Control blocks the training category as well; the managed
+  `robots.txt` stays off so the policy has one home.
+- **Two guards.** *declared addresses agree* fails when a canonical, a sitemap entry or an
+  internal link names an address the build does not declare. *crawler policy* fails when
+  the signal is missing from `robots.txt`, or sits outside the group it applies to.
+- **The live verifier checks the policy in the response**, not just in the repository: the
+  signal must be present, and the served file must match the committed one. A file that is
+  right in the repository says nothing about what a crawler was handed — the edge prepends
+  to this file if either of two Cloudflare features is on.
+- Nine tests, each new guard exercised in both directions.
+
 ## [site-2026.09.3] — the stage 1 holding page
 
 The first release of `galinstan.ai`. Five files, no dependencies, every string approved.

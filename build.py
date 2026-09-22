@@ -166,7 +166,7 @@ def render_index() -> str:
       <footer>
         <p>{_markup(t("entity"))}</p>
         <p>{_contact_link()}</p>
-        <p><a href="/privacy.html">Privacy</a></p>
+        <p><a href="/privacy">Privacy</a></p>
         <p>{_markup(t("legal-footer"))}</p>
       </footer>
     </main>
@@ -184,7 +184,7 @@ def render_privacy() -> str:
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Privacy — Galinstan</title>
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="{SITE_URL}/privacy.html">
+    <link rel="canonical" href="{SITE_URL}/privacy">
     <style>
 {CSS}    </style>
   </head>
@@ -228,10 +228,25 @@ def render_404() -> str:
 """
 
 
+# The crawler policy, approved by Antwain on 2026-09-21 as option A in
+# `50_Claude_Outputs/MARKETING_STRATEGY.md` §7a: present, not trained on. Search and live
+# AI answers yes, training no.
+#
+# The signal is scoped to the group it sits in, so it goes inside `User-agent: *` rather
+# than above it. Content signals are advisory and some crawlers ignore them, which is why
+# Cloudflare's AI Crawl Control blocks the training category as well — but the policy of
+# record is this committed file. Cloudflare's own managed robots.txt stays off precisely
+# so there are not two places to read it from (SETUP_GITHUB_CLOUDFLARE.md Part 3).
+CONTENT_SIGNAL = "Content-Signal: search=yes, ai-input=yes, ai-train=no"
+
+
 def render_robots() -> str:
     # Owned from the first release rather than left to the host's default. The practice
     # shipped its own robots.txt at release 54 and regretted the gap.
-    return f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n"
+    return (
+        f"User-agent: *\n{CONTENT_SIGNAL}\nAllow: /\n"
+        f"\nSitemap: {SITE_URL}/sitemap.xml\n"
+    )
 
 
 def _content_date(render) -> str | None:
@@ -265,9 +280,14 @@ def _content_date(render) -> str | None:
 
 # What each declared URL is built from. The sitemap dates an address by the copy served
 # at it, so the two have to be named together.
+# The addresses this site declares. Not the filenames it builds: Cloudflare Pages serves
+# `privacy.html` at `/privacy` and permanently redirects the `.html` form to it, so the
+# one URL the sitemap used to declare was the one URL that could not be indexed, and the
+# page that was indexed had never been declared. Canonicals and internal links are checked
+# against this map by `tools/guards.py`, so the three cannot drift apart again.
 SITEMAP = {
     "/": lambda: render_index(),
-    "/privacy.html": lambda: render_privacy(),
+    "/privacy": lambda: render_privacy(),
 }
 
 

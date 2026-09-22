@@ -22,6 +22,7 @@ sys.path.insert(0, str(ROOT / "src"))
 import build  # noqa: E402
 import page_copy  # noqa: E402
 from tools import guards  # noqa: E402
+from tools import verify_live  # noqa: E402
 
 
 class BuildTests(unittest.TestCase):
@@ -167,6 +168,79 @@ class GuardsFailWhenTheyShould(unittest.TestCase):
         self.assertTrue(guards.required_metadata(page))
 
 
+class DeclaredAddresses(unittest.TestCase):
+    """One address per page, in the sitemap, the canonical and every internal link.
+
+    The host serves `privacy.html` at `/privacy` and redirects the `.html` form to it, so
+    the first release declared a URL that could not be indexed and indexed a URL it had
+    never declared. None of that was visible from the build.
+    """
+
+    def test_the_real_build_agrees_with_itself(self):
+        self.assertEqual(guards.declared_addresses_agree(), [])
+
+    def test_a_canonical_pointing_somewhere_else_is_caught(self):
+        page = build.render_privacy().replace(
+            f'rel="canonical" href="{build.SITE_URL}/privacy"',
+            f'rel="canonical" href="{build.SITE_URL}/privacy.html"',
+        )
+        failures = guards.declared_addresses_agree(pages=[("privacy.html", page)])
+        self.assertTrue(any("canonical" in f for f in failures), failures)
+
+    def test_a_link_to_the_redirecting_form_is_caught(self):
+        page = build.render_index().replace('href="/privacy"', 'href="/privacy.html"')
+        failures = guards.declared_addresses_agree(pages=[("index.html", page)])
+        self.assertTrue(any("redirects" in f for f in failures), failures)
+
+    def test_an_undeclared_url_in_the_sitemap_is_caught(self):
+        sitemap = build.render_sitemap().replace(f"{build.SITE_URL}/privacy", f"{build.SITE_URL}/privacy.html")
+        failures = guards.declared_addresses_agree(sitemap=sitemap)
+        self.assertTrue(any("is not declared" in f for f in failures), failures)
+
+
+class CrawlerPolicy(unittest.TestCase):
+    """Decision 13, approved 2026-09-21: present, not trained on."""
+
+    def test_the_built_robots_carries_the_signal_inside_the_group(self):
+        self.assertEqual(guards.crawler_policy(), [])
+        self.assertIn(build.CONTENT_SIGNAL, build.render_robots())
+
+    def test_a_missing_signal_is_caught(self):
+        served = build.render_robots().replace(build.CONTENT_SIGNAL + "\n", "")
+        self.assertTrue(guards.crawler_policy(served=served))
+
+    def test_a_signal_outside_the_group_is_caught(self):
+        """A content signal applies to the group it sits in, so placement is the policy."""
+        served = build.render_robots().replace(build.CONTENT_SIGNAL + "\n", "")
+        served = f"{build.CONTENT_SIGNAL}\n\n{served}"
+        failures = guards.crawler_policy(served=served)
+        self.assertTrue(any("outside" in f for f in failures), failures)
+
+
+class TheVerifierRefusesRedirects(unittest.TestCase):
+    """Following a redirect is how a verifier confirms a URL that does not exist."""
+
+    def test_a_redirect_on_a_declared_address_fails(self):
+        original = verify_live.fetch
+
+        def redirected(url, accept=None):
+            raise verify_live.Redirected(url, 308, "https://galinstan.ai/privacy")
+
+        verify_live.fetch = redirected
+        try:
+            failures = verify_live.verify("https://galinstan.ai/privacy.html")
+        finally:
+            verify_live.fetch = original
+        self.assertEqual(len(failures), 1)
+        self.assertIn("308", failures[0])
+
+    def test_the_handler_does_not_follow(self):
+        handler = verify_live._RefuseRedirects()
+        self.assertIsNone(
+            handler.redirect_request(None, None, 308, "", {}, "https://galinstan.ai/privacy")
+        )
+
+
 class PublicationGate(unittest.TestCase):
     """Updated 2026-09-21, deliberately: all twelve strings were approved.
 
@@ -253,12 +327,19 @@ class LiveVerifierExpectations(unittest.TestCase):
                 self.assertEqual(line.status, page_copy.APPROVED)
                 self.assertIn(fragment, line.text)
 
-    def test_every_published_html_page_has_an_expectation(self):
-        """A page nobody said what to expect from is unchecked, not passing."""
-        published = {f"/{n}" for n in build.ALLOWLIST if n.endswith(".html")}
-        published.discard("/404.html")  # not fetched by a release; it has no canonical content
+    def test_every_declared_address_has_an_expectation(self):
+        """A page nobody said what to expect from is unchecked, not passing.
+
+        Keyed by the address the site declares rather than by the filename the build
+        writes. They are not the same thing: the host serves `privacy.html` at `/privacy`,
+        and the verifier now refuses redirects, so a filename here would name a URL that
+        cannot be verified.
+        """
         covered = set(self.verify_live.EXPECTED)
-        self.assertTrue(published <= covered, f"no expectation for {published - covered}")
+        self.assertTrue(
+            set(build.SITEMAP) <= covered,
+            f"no expectation for {set(build.SITEMAP) - covered}",
+        )
 
     def test_an_unlisted_path_is_reported_rather_than_passing(self):
         self.assertIsNone(self.verify_live.EXPECTED.get("/something-nobody-listed"))
