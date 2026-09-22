@@ -353,3 +353,34 @@ class LiveVerifierExpectations(unittest.TestCase):
 
     def test_an_unlisted_path_is_reported_rather_than_passing(self):
         self.assertIsNone(self.verify_live.EXPECTED.get("/something-nobody-listed"))
+
+
+class MailTargets(unittest.TestCase):
+    """Round 9, ask 47: every mail link is an approved target with its approved subject."""
+
+    def test_the_real_build_serves_every_approved_mail_link(self):
+        self.assertEqual(guards.mail_targets_carry_their_subjects(), [])
+
+    def test_a_link_that_lost_its_subject_is_caught(self):
+        pages = [("index.html", '<a href="mailto:partners@banneker.net">partners@banneker.net</a>')]
+        failures = guards.mail_targets_carry_their_subjects(pages)
+        self.assertTrue(any("is not an approved target" in f for f in failures))
+        self.assertTrue(any("no page serves" in f for f in failures))
+
+    def test_an_unapproved_address_is_caught(self):
+        href = build.mail_href("contact").replace("partners@", "antwain@")
+        pages = [("index.html", f'<a href="{href}">x</a>')]
+        self.assertTrue(any("antwain@" in f for f in guards.mail_targets_carry_their_subjects(pages)))
+
+    def test_the_live_verifier_names_a_missing_demo_link(self):
+        """Over a served body: the contact link present and the demo link rewritten away."""
+        body = (ROOT / "public" / "deployment.html").read_text("utf-8")
+        rewritten = body.replace(build.mail_href("cta-demo-target"), "/cdn-cgi/l/email-protection")
+        original = verify_live.fetch
+        verify_live.fetch = lambda url, accept=None: rewritten
+        try:
+            failures = verify_live.verify("https://galinstan.ai/deployment")
+        finally:
+            verify_live.fetch = original
+        self.assertTrue(any("cta-demo-target mail link is not served" in f for f in failures))
+        self.assertTrue(any("/cdn-cgi/l/email-protection" in f for f in failures))

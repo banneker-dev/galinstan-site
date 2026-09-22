@@ -262,12 +262,37 @@ def crawler_policy(served=None) -> list[str]:
     return []
 
 
+def mail_targets_carry_their_subjects(pages=None) -> list[str]:
+    """Every mail link is an approved target with its approved subject (Round 9, ask 47).
+
+    Two directions. Each mail-bearing string in the register must be served somewhere as
+    exactly its `mailto:` with subject — a template edit that drops a subject is caught on
+    the commit. And every `mailto:` on every page must be one of those — a link to an
+    address nobody approved is caught too. `tools/verify_live.py` asserts the same over the
+    served response, which is where an edge rewrite would show.
+    """
+    failures = []
+    pages = pages if pages is not None else _pages()
+    approved = {build.mail_href(item.id) for item in page_copy.LINES if item.mail_subject}
+    served = set()
+    for name, text in pages:
+        for href in re.findall(r'href="(mailto:[^"]*)"', text):
+            href = href.replace("&amp;", "&")
+            served.add(href)
+            if href not in approved:
+                failures.append(f"{name}: mail link {href!r} is not an approved target and subject")
+    for href in sorted(approved - served):
+        failures.append(f"no page serves the approved mail link {href!r}")
+    return failures
+
+
 ALWAYS = {
     "no external references": no_external_references,
     "no forbidden claims": no_forbidden_claims,
     "required metadata": required_metadata,
     "declared addresses agree": declared_addresses_agree,
     "crawler policy": crawler_policy,
+    "mail targets carry their subjects": mail_targets_carry_their_subjects,
 }
 
 PRODUCTION_ONLY = {"publication gate": publication_gate}
