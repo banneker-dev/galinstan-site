@@ -2,6 +2,16 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.6] — two sentences out of `/deployment`
+
+### Changed
+- **`dep-body-2`** drops the sentence on sizing against named machines, measuring on the
+  machine and publishing the specification. None of it exists before Gate B.
+- **`dep-body-3`** drops the sentences on how supervisory guidance treats a licence with
+  support and on the register entry. "None of your data reaches us" now begins its
+  sentence, and that capital is the only change beyond the cut.
+- Both are Antwain's revisions of 2026-09-22.
+
 ## [site-2026.09.5] — stage 2, the demo route, and partners@
 
 Three pages, a nav and a footer line (ask 54), and the demo route and address change
