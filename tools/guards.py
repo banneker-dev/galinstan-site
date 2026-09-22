@@ -19,6 +19,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
+import build  # noqa: E402
 import page_copy  # noqa: E402
 
 PUBLIC = ROOT / "public"
@@ -116,7 +117,7 @@ def required_metadata(pages=None) -> list[str]:
     failures = []
     required = {
         "index.html": ["<html lang=", "<title>", 'name="description"', 'rel="canonical"', "viewport"],
-        "privacy.html": ["<html lang=", "<title>", "viewport"],
+        "privacy.html": ["<html lang=", "<title>", 'rel="canonical"', "viewport"],
         "404.html": ["<html lang=", "<title>", 'name="robots" content="noindex"'],
     }
     for name, text in pages if pages is not None else _pages():
@@ -176,10 +177,75 @@ def publication_gate() -> list[str]:
     return failures
 
 
+def declared_addresses_agree(pages=None, sitemap=None) -> list[str]:
+    """One address per page, in the sitemap, the canonical and every internal link.
+
+    Three defects on the first release were one defect: the build wrote `privacy.html`
+    and the host served `/privacy`, so the sitemap declared a URL that redirects, the
+    canonical pointed somewhere other than where the page was served, and the footer sent
+    every visitor through a hop. None of it was visible from the build, because the
+    redirect belongs to the host and does not exist until the bytes are published.
+
+    So the build now names the addresses it declares — `build.SITEMAP` — and this fails if
+    a canonical, a sitemap entry or an internal link disagrees with that list. The host's
+    behaviour is still the host's; what is checked here is that we only ever declare one
+    address per page.
+    """
+    failures = []
+    declared = {path: f"{build.SITE_URL}{path}" for path in build.SITEMAP}
+    canonical_of = {"/": "index.html", "/privacy": "privacy.html"}
+
+    if sitemap is None:
+        sitemap = (PUBLIC / "sitemap.xml").read_text(encoding="utf-8")
+    rendered = dict(pages) if pages is not None else None
+    for path, url in declared.items():
+        if f"<loc>{url}</loc>" not in sitemap:
+            failures.append(f"sitemap.xml: {url} is not declared")
+        name = canonical_of.get(path)
+        if name is None:
+            continue
+        if rendered is not None:
+            if name not in rendered:
+                continue  # a caller checking one page only
+            page = rendered[name]
+        else:
+            page = (PUBLIC / name).read_text(encoding="utf-8")
+        if f'rel="canonical" href="{url}"' not in page:
+            failures.append(f"{name}: its canonical is not {url}")
+
+    for name, text in (pages if pages is not None else _pages()):
+        for path in build.SITEMAP:
+            stale = f'href="{path}.html"' if path != "/" else 'href="/index.html"'
+            if stale in text:
+                failures.append(f"{name}: links to {stale[6:-1]}, which the host redirects")
+    return failures
+
+
+def crawler_policy(served=None) -> list[str]:
+    """The approved crawler policy is a committed file, so it is checked like one.
+
+    `robots.txt` carries the content signal from decision 13 — present, not trained on.
+    Cloudflare's managed robots.txt is off so this file is the only place the policy
+    lives, and `tools/verify_live.py` asserts the same line in the served response,
+    because a file that is right in the repository says nothing about what a crawler was
+    handed.
+    """
+    if served is None:
+        served = (PUBLIC / "robots.txt").read_text(encoding="utf-8")
+    if build.CONTENT_SIGNAL not in served:
+        return [f"robots.txt: the crawler policy line is missing ({build.CONTENT_SIGNAL})"]
+    group = served.split("User-agent: *", 1)[-1].split("\n\n", 1)[0]
+    if build.CONTENT_SIGNAL not in group:
+        return ["robots.txt: the content signal is outside the User-agent group it applies to"]
+    return []
+
+
 ALWAYS = {
     "no external references": no_external_references,
     "no forbidden claims": no_forbidden_claims,
     "required metadata": required_metadata,
+    "declared addresses agree": declared_addresses_agree,
+    "crawler policy": crawler_policy,
 }
 
 PRODUCTION_ONLY = {"publication gate": publication_gate}

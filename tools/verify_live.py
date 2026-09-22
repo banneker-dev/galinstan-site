@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import pathlib
 import sys
+import urllib.error
 import urllib.request
 import uuid
 
@@ -28,6 +29,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
+import build  # noqa: E402
 import page_copy  # noqa: E402
 from tools import guards  # noqa: E402
 
@@ -50,7 +52,32 @@ BROWSER_UA = (
 )
 
 
-def fetch(url: str) -> str:
+class Redirected(Exception):
+    """A declared address answered with a redirect instead of a page."""
+
+    def __init__(self, url: str, status: int, location: str) -> None:
+        self.url, self.status, self.location = url, status, location
+        super().__init__(f"{url} answered {status} to {location}")
+
+
+class _RefuseRedirects(urllib.request.HTTPRedirectHandler):
+    """Following a redirect is how a verifier confirms a URL that does not exist.
+
+    `urlopen` follows a 308 in silence. So the first version of this file fetched
+    `/privacy.html`, landed on `/privacy`, found the approved controller string and
+    reported success — correct about the bytes and wrong about the address, which is
+    exactly the check the sitemap needed it to make. Returning None here makes urllib
+    raise on the 3xx instead of chasing it.
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: D102
+        return None
+
+
+_OPENER = urllib.request.build_opener(_RefuseRedirects)
+
+
+def fetch(url: str, accept: str = "text/html,application/xhtml+xml") -> str:
     # A cache-buster, because the point of this check is to see the deploy that just
     # happened rather than whatever an edge is still holding.
     separator = "&" if "?" in url else "?"
@@ -58,12 +85,17 @@ def fetch(url: str) -> str:
         f"{url}{separator}cb={uuid.uuid4().hex}",
         headers={
             "User-Agent": BROWSER_UA,
-            "Accept": "text/html,application/xhtml+xml",
+            "Accept": accept,
             "Cache-Control": "no-cache",
         },
     )
-    with urllib.request.urlopen(request, timeout=TIMEOUT) as response:  # noqa: S310
-        return response.read().decode("utf-8", errors="replace")
+    try:
+        with _OPENER.open(request, timeout=TIMEOUT) as response:  # noqa: S310
+            return response.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        if 300 <= exc.code < 400:
+            raise Redirected(url, exc.code, exc.headers.get("Location", "")) from None
+        raise
 
 
 # What must appear in each page's body, keyed by path. The page escapes as it renders, so
@@ -74,8 +106,7 @@ def fetch(url: str) -> str:
 # have passed. It was caught on a preview deploy, which is the argument for running one.
 EXPECTED = {
     "/": ("headline", "runs inside your perimeter, not ours"),
-    "/index.html": ("headline", "runs inside your perimeter, not ours"),
-    "/privacy.html": ("privacy-controller", "The data controller for this site is"),
+    "/privacy": ("privacy-controller", "The data controller for this site is"),
 }
 
 # Rewrites the edge performs on the response, which no build-time guard can see because
@@ -100,7 +131,13 @@ def _path_of(url: str) -> str:
 
 
 def verify(url: str) -> list[str]:
-    body = fetch(url)
+    try:
+        body = fetch(url)
+    except Redirected as exc:
+        return [
+            f"{url}: answered {exc.status} to {exc.location}. A declared address is served, "
+            "not redirected — see CURRENT_STATE_REPO.md section 5c."
+        ]
     failures = guards.live_response_has_only_permitted_fetches(url, body)
 
     path = _path_of(url)
@@ -135,6 +172,32 @@ def verify(url: str) -> list[str]:
     return failures
 
 
+def verify_crawler_policy(origin: str) -> list[str]:
+    """The approved crawler policy, checked in the response rather than in the repository.
+
+    Two failures, because they mean different things. A missing content signal is a
+    policy that never shipped. A served file that differs from the committed one is the
+    edge writing its own — Cloudflare's Bot Preference Sync and managed robots.txt both
+    prepend to this file, and both are off for exactly that reason.
+    """
+    url = f"{origin}/robots.txt"
+    try:
+        served = fetch(url, accept="text/plain")
+    except Redirected as exc:
+        return [f"{url}: answered {exc.status} to {exc.location}"]
+    failures = []
+    if build.CONTENT_SIGNAL not in served:
+        failures.append(f"{url}: the crawler policy line is missing ({build.CONTENT_SIGNAL})")
+    committed = (ROOT / "public" / "robots.txt").read_text(encoding="utf-8")
+    if served.strip() != committed.strip():
+        failures.append(
+            f"{url}: what is served differs from the committed public/robots.txt. "
+            "An edge feature writing this file is one cause; a release that did not "
+            "deploy is another. Diff the two before concluding which."
+        )
+    return failures
+
+
 def main() -> int:
     urls = sys.argv[1:] or ["https://galinstan.ai/"]
     failed = 0
@@ -153,6 +216,25 @@ def main() -> int:
         else:
             label = EXPECTED.get(_path_of(url), ("content", ""))[0]
             print(f"ok    {url} — approved {label} present, no unexpected third-party host")
+
+    if urls:
+        from urllib.parse import urlparse
+
+        parts = urlparse(urls[0])
+        origin = f"{parts.scheme}://{parts.netloc}"
+        try:
+            policy = verify_crawler_policy(origin)
+        except Exception as exc:  # a fetch that does not complete is a failed release
+            print(f"FAIL  {origin}/robots.txt\n        {type(exc).__name__}: {exc}")
+            failed += 1
+        else:
+            if policy:
+                failed += 1
+                print(f"FAIL  {origin}/robots.txt")
+                for f in policy:
+                    print(f"        {f}")
+            else:
+                print(f"ok    {origin}/robots.txt — crawler policy present, byte-identical to the commit")
     return 1 if failed else 0
 
 
