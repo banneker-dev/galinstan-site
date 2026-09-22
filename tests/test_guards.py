@@ -92,8 +92,9 @@ class BuildTests(unittest.TestCase):
     def test_the_contact_address_is_a_mail_link_with_the_approved_subject(self):
         """The pre-filled subject is the whole of the site's source attribution."""
         body = (ROOT / "public" / "index.html").read_text("utf-8")
-        self.assertIn("mailto:antwain@banneker.net?subject=", body)
+        self.assertIn("mailto:partners@banneker.net?subject=", body)
         self.assertIn("via%20galinstan.ai", body)
+        self.assertNotIn("antwain@banneker.net", body, "the retired address is still served")
 
     def test_the_footer_domain_is_not_invented_into_a_link(self):
         body = (ROOT / "public" / "index.html").read_text("utf-8")

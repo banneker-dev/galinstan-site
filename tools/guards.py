@@ -61,7 +61,9 @@ _FORBIDDEN = [
     (r"\b(?:EUR|GBP|USD)\s?\d", "same"),
 ]
 
-_HTML = ("index.html", "privacy.html", "404.html")
+# Every page the build publishes, taken from the allowlist so a page added there cannot be
+# missed here.
+_HTML = tuple(name for name in build.ALLOWLIST if name.endswith(".html"))
 
 
 def _pages() -> list[tuple[str, str]]:
@@ -115,8 +117,10 @@ def no_forbidden_claims(pages=None) -> list[str]:
 def required_metadata(pages=None) -> list[str]:
     """The metadata that cannot be added retroactively to a visit that already happened."""
     failures = []
+    content_page = ["<html lang=", "<title>", 'name="description"', 'rel="canonical"', "viewport"]
     required = {
-        "index.html": ["<html lang=", "<title>", 'name="description"', 'rel="canonical"', "viewport"],
+        "index.html": content_page,
+        **{f"{path[1:]}.html": content_page for path in build.PAGES},
         "privacy.html": ["<html lang=", "<title>", 'rel="canonical"', "viewport"],
         "404.html": ["<html lang=", "<title>", 'name="robots" content="noindex"'],
     }
@@ -193,7 +197,7 @@ def declared_addresses_agree(pages=None, sitemap=None) -> list[str]:
     """
     failures = []
     declared = {path: f"{build.SITE_URL}{path}" for path in build.SITEMAP}
-    canonical_of = {"/": "index.html", "/privacy": "privacy.html"}
+    canonical_of = {path: ("index.html" if path == "/" else f"{path[1:]}.html") for path in build.SITEMAP}
 
     if sitemap is None:
         sitemap = (PUBLIC / "sitemap.xml").read_text(encoding="utf-8")

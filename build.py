@@ -22,6 +22,7 @@ import argparse
 import filecmp
 import html
 import pathlib
+import re
 import shutil
 import sys
 import urllib.parse
@@ -93,6 +94,18 @@ footer {
   color: var(--ink-soft);
 }
 footer p { margin: 0 0 0.375rem; color: inherit; }
+.wordmark a { text-decoration: none; }
+nav {
+  font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 0.875rem;
+  margin: -1.5rem 0 2.5rem;
+  display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem;
+}
+nav a { color: var(--ink-soft); }
+nav a[aria-current="page"] { color: var(--ink); text-decoration: none; font-weight: 600; }
+.sub { color: var(--ink); font-size: 1.125rem; }
+.cta { margin-top: 2rem; }
+strong { color: var(--ink); font-weight: 600; }
 a { color: inherit; text-underline-offset: 2px; }
 .todo {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -117,11 +130,15 @@ a { color: inherit; text-underline-offset: 2px; }
 
 
 def _markup(raw: str) -> str:
-    """Escapes a copy string, then re-marks the placeholder tokens so they are visible."""
+    """Escapes a copy string, then re-marks the placeholder tokens so they are visible.
+
+    A `**lead-in**` in an approved string renders bold. That is the only markup the
+    register carries, and it is carried because the approved text carries it.
+    """
     escaped = html.escape(raw, quote=False)
     if escaped.startswith("[[TODO:"):
         return f'<span class="todo">{escaped}</span>'
-    return escaped
+    return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
 
 
 def _contact_link() -> str:
@@ -136,9 +153,89 @@ def _contact_link() -> str:
     string does not mark it as one, and a session inventing a link out of an approved
     string is the thing the register exists to stop.
     """
-    address = page_copy.text("contact")
-    subject = urllib.parse.quote(page_copy.CONTACT_SUBJECT)
-    return f'<a href="mailto:{html.escape(address)}?subject={subject}">{html.escape(address)}</a>'
+    return _mail_link("contact")
+
+
+def mail_href(line_id: str) -> str:
+    """The `mailto:` for a mail-bearing string, with its approved subject. One place, so
+    the build, the build-time guard and the live verifier cannot disagree about it."""
+    item = page_copy.line(line_id)
+    subject = urllib.parse.quote(item.mail_subject)
+    return f"mailto:{item.text}?subject={subject}"
+
+
+def _mail_link(target_id: str, label_id: str | None = None) -> str:
+    label = page_copy.text(label_id or target_id)
+    return f'<a href="{html.escape(mail_href(target_id))}">{_markup(label)}</a>'
+
+
+# The stage 2 pages, in nav order. The address is the file's name without `.html`, which
+# is how the host serves it; `SITEMAP` below is what declares it.
+PAGES = {
+    "/intraday-liquidity": ("il", "nav-1"),
+    "/audit-evidence": ("ae", "nav-2"),
+    "/deployment": ("dep", "nav-3"),
+}
+
+
+def _nav(current: str | None) -> str:
+    links = []
+    for path, (_, nav_id) in PAGES.items():
+        mark = ' aria-current="page"' if path == current else ""
+        links.append(f'<a href="{path}"{mark}>{_markup(page_copy.text(nav_id))}</a>')
+    return "      <nav>\n        " + "\n        ".join(links) + "\n      </nav>"
+
+
+def _footer() -> str:
+    t = page_copy.text
+    return f"""      <footer>
+        <p>{_markup(t("foot-claim"))}</p>
+        <p>{_markup(t("entity"))}</p>
+        <p>{_contact_link()}</p>
+        <p><a href="/privacy">Privacy</a></p>
+        <p>{_markup(t("legal-footer"))}</p>
+      </footer>"""
+
+
+def _head(title: str, canonical: str, description: str | None = None, robots: str = "index, follow") -> str:
+    desc = f'\n    <meta name="description" content="{html.escape(description, quote=True)}">' if description else ""
+    canon = f'\n    <link rel="canonical" href="{SITE_URL}{canonical}">' if canonical else ""
+    return f"""<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{html.escape(title)}</title>{desc}{canon}
+    <meta name="robots" content="{robots}">
+    <style>
+{CSS}    </style>
+  </head>"""
+
+
+def _wordmark(link: bool = True) -> str:
+    mark = _markup(page_copy.text("wordmark"))
+    return f'      <p class="wordmark"><a href="/">{mark}</a></p>' if link else f'      <p class="wordmark">{mark}</p>'
+
+
+def render_stage_2(path: str) -> str:
+    prefix, _ = PAGES[path]
+    t = page_copy.text
+    bodies = [i.id for i in page_copy.LINES if re.fullmatch(rf"{prefix}-body-\d+", i.id)]
+    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in bodies)
+    return f"""{_head(t(f"{prefix}-meta-title"), path, t(f"{prefix}-meta-description"))}
+  <body>
+    <main>
+{_wordmark()}
+{_nav(path)}
+      <h1>{_markup(t(f"{prefix}-h1"))}</h1>
+      <p class="sub">{_markup(t(f"{prefix}-sub"))}</p>
+{body}
+      <p class="cta">{_mail_link("cta-demo-target", f"{prefix}-cta")}</p>
+{_footer()}
+    </main>
+  </body>
+</html>
+"""
 
 
 def render_index() -> str:
@@ -146,29 +243,15 @@ def render_index() -> str:
     body = "\n".join(
         f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2", "body-3")
     )
-    return f"""<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{html.escape(t("meta-title"))}</title>
-    <meta name="description" content="{html.escape(t("meta-description"), quote=True)}">
-    <link rel="canonical" href="{SITE_URL}/">
-    <meta name="robots" content="index, follow">
-    <style>
-{CSS}    </style>
-  </head>
+    return f"""{_head(t("meta-title"), "/", t("meta-description"))}
   <body>
     <main>
-      <p class="wordmark">{_markup(t("wordmark"))}</p>
+{_wordmark(link=False)}
+{_nav(None)}
       <h1>{_markup(t("headline"))}</h1>
 {body}
-      <footer>
-        <p>{_markup(t("entity"))}</p>
-        <p>{_contact_link()}</p>
-        <p><a href="/privacy">Privacy</a></p>
-        <p>{_markup(t("legal-footer"))}</p>
-      </footer>
+      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
+{_footer()}
     </main>
   </body>
 </html>
@@ -177,20 +260,11 @@ def render_index() -> str:
 
 def render_privacy() -> str:
     t = page_copy.text
-    return f"""<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Privacy — Galinstan</title>
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="{SITE_URL}/privacy">
-    <style>
-{CSS}    </style>
-  </head>
+    return f"""{_head("Privacy — Galinstan", "/privacy")}
   <body>
     <main>
-      <p class="wordmark">{_markup(t("wordmark"))}</p>
+{_wordmark()}
+{_nav(None)}
       <h1>Privacy</h1>
       <p><strong>Data controller.</strong> {_markup(t("privacy-controller"))}</p>
       <p><strong>Analytics.</strong> {_markup(t("privacy-analytics"))}</p>
@@ -287,6 +361,7 @@ def _content_date(render) -> str | None:
 # against this map by `tools/guards.py`, so the three cannot drift apart again.
 SITEMAP = {
     "/": lambda: render_index(),
+    **{path: (lambda p=path: render_stage_2(p)) for path in PAGES},
     "/privacy": lambda: render_privacy(),
 }
 
@@ -313,6 +388,7 @@ def render_sitemap() -> str:
 # The allowlist. A file reaches galinstan.ai if and only if it is named here.
 ALLOWLIST = {
     "index.html": render_index,
+    **{f"{path[1:]}.html": (lambda p=path: render_stage_2(p)) for path in PAGES},
     "privacy.html": render_privacy,
     "404.html": render_404,
     "robots.txt": render_robots,
