@@ -151,4 +151,4 @@ jobs:
         if: env.IS_RELEASE == 'true'
         run: |
           sleep 20
-          python3 tools/verify_live.py https://galinstan.ai/ https://galinstan.ai/privacy
+          python3 tools/verify_live.py https://galinstan.ai

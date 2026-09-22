@@ -2,6 +2,35 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.5] — stage 2, the demo route, and partners@
+
+Three pages, a nav and a footer line (ask 54), and the demo route and address change
+(ask 47), on Antwain's approvals of 2026-09-22. Stage 2 was to be coined at G3; his
+approval supersedes that.
+
+### Added
+- **`/intraday-liquidity`, `/audit-evidence`, `/deployment`**, in that nav order, each with
+  its "Request a demo" link and the `foot-claim` line. The 34 strings are parsed from
+  `SITE_COPY_STAGE2.md` §2 rather than retyped.
+- **"Request a demo"** on the front page, a mail link to `partners@banneker.net` with the
+  subject "Galinstan — demo request". No form; the privacy notice does not change.
+- **Guard: mail targets carry their subjects** (Round 9, ask 47). Every approved mail
+  target must be served with its subject, and every served `mailto:` must be approved.
+  The live verifier makes the same assertion over the response.
+- The live verifier takes an origin and checks **every declared address**; the deploy
+  passes the origin, so a page added to the sitemap is verified without editing the
+  workflow.
+
+### Changed
+- **`partners@banneker.net` replaces `antwain@banneker.net`** in `contact` and
+  `privacy-controller` — an alias onto the same monitored mailbox, which delivered a test
+  message on 2026-09-22 (A10). The contact subject, the site's source attribution, is
+  unchanged.
+- `body-1` and `meta-description` take the "Galinstan is built to…" tense.
+- **The claims guard lets the approved demo route through, and nothing else** — in its own
+  commit. "Request a demo" invites a request; any other use of the word still fails.
+- Pages, canonicals and required metadata are derived from the allowlist and the sitemap.
+
 ## [site-2026.09.4] — one address per page, and a crawler policy
 
 Everything a crawler is told, in one release, so the property presents one new state

@@ -3,8 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Privacy — Galinstan</title>
-    <link rel="canonical" href="https://galinstan.ai/privacy">
+    <title>How Galinstan is deployed: no egress, your hardware, escrow and exit</title>
+    <meta name="description" content="What an institution installs, what it must buy, what leaves the perimeter, how an offline instance is upgraded, and what happens at exit.">
+    <link rel="canonical" href="https://galinstan.ai/deployment">
     <meta name="robots" content="index, follow">
     <style>
 :root {
@@ -91,14 +92,21 @@ a { color: inherit; text-underline-offset: 2px; }
       <nav>
         <a href="/intraday-liquidity">Intraday liquidity</a>
         <a href="/audit-evidence">Audit evidence</a>
-        <a href="/deployment">Deployment</a>
+        <a href="/deployment" aria-current="page">Deployment</a>
       </nav>
-      <h1>Privacy</h1>
-      <p><strong>Data controller.</strong> The data controller for this site is Sherman A. Cross, trading as Banneker. Contact: partners@banneker.net.</p>
-      <p><strong>Analytics.</strong> This site uses Cloudflare Web Analytics to count visits. It sets no cookies and does not track you across other sites. Cloudflare, which hosts the site, processes your IP address to deliver the page and protect it from abuse. Our lawful basis is our legitimate interest in knowing how the site is used.</p>
-      <p><strong>Contact.</strong> <a href="mailto:partners@banneker.net?subject=Galinstan%20%E2%80%94%20via%20galinstan.ai">partners@banneker.net</a></p>
+      <h1>The questions a diligence reviewer asks first, answered on the page rather than in the third meeting.</h1>
+      <p class="sub">Galinstan is built as software you install and run inside your own perimeter. There is no tenancy and no console on our side.</p>
+      <p><strong>What leaves.</strong> Nothing, by design. The software makes no outbound connection of any kind — not for licensing, not for telemetry, not for model weights, not for updates. It is built to run on a machine with no route to the internet, and it has nothing to reach if it is given one.</p>
+      <p><strong>What you buy.</strong> Galinstan is built to run on hardware you already know how to procure. We size each deployment against named, purchasable machines, measure the figures on the machine rather than model them, and publish the specification rather than quote it on request.</p>
+      <p><strong>What we are to your register.</strong> We license Galinstan annually with support, patches and calibration. Supervisory guidance treats a software licence that carries ongoing support as an ICT service, so we expect to appear in your register of information as a provider. What changes is not the entry. It is that none of your data reaches us, and no part of the analysis depends on us being reachable.</p>
+      <p><strong>Upgrades.</strong> Every version is cut as a signed release: an offline bundle with a checksum for every file and a software bill of materials. It installs with no package index and no network, and the instance never reaches out for it.</p>
+      <p><strong>Escrow and exit.</strong> Every release is built to be deposited — source, bundle and checksums as one versioned artefact. We agree escrow and exit terms in the contract rather than pointing at a policy page.</p>
+      <p class="cta"><a href="mailto:partners@banneker.net?subject=Galinstan%20%E2%80%94%20demo%20request">Request a demo</a></p>
       <footer>
+        <p>We do not certify that any institution meets a regulatory obligation. Galinstan is built to run inside your perimeter and produce evidence.</p>
         <p>Galinstan is a product of Banneker.</p>
+        <p><a href="mailto:partners@banneker.net?subject=Galinstan%20%E2%80%94%20via%20galinstan.ai">partners@banneker.net</a></p>
+        <p><a href="/privacy">Privacy</a></p>
         <p>© 2026 Banneker · banneker.net</p>
       </footer>
     </main>

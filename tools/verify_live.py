@@ -106,6 +106,9 @@ def fetch(url: str, accept: str = "text/html,application/xhtml+xml") -> str:
 # have passed. It was caught on a preview deploy, which is the argument for running one.
 EXPECTED = {
     "/": ("headline", "runs inside your perimeter, not ours"),
+    "/intraday-liquidity": ("il-h1", "are two different problems"),
+    "/audit-evidence": ("ae-h1", "Few will let the auditor do the work again"),
+    "/deployment": ("dep-body-1", "not for licensing, not for telemetry"),
     "/privacy": ("privacy-controller", "The data controller for this site is"),
 }
 
@@ -142,6 +145,8 @@ def verify(url: str) -> list[str]:
 
     path = _path_of(url)
     expected = EXPECTED.get(path)
+    if expected is not None and path not in build.SITEMAP:
+        failures.append(f"{url}: {path!r} is not a declared address")
     if expected is None:
         # Silence here would mean a page could be verified by accident. A path nobody has
         # said what to expect from is not a passing page, it is an unchecked one.
@@ -152,14 +157,16 @@ def verify(url: str) -> list[str]:
         if marker in body:
             failures.append(f"{url}: {why} (found {marker!r})")
 
-    # The contact address and its subject are the whole of the site's source attribution
-    # at stage 1, so they are checked on every page that carries them rather than left to
-    # the per-page expectation below.
-    address = page_copy.text("contact")
-    if address in body and "mailto:" + address not in body:
-        failures.append(f"{url}: the contact address is present but not as a mail link")
-    if "mailto:" + address in body and "subject=" not in body:
-        failures.append(f"{url}: the contact link has lost its pre-filled subject")
+    # Every mail link served must be an approved target with its approved subject — the
+    # build-time guard's assertion, made again over the response, because the edge is what
+    # rewrote the address last time (Round 9, ask 47). Iterating the register rather than
+    # naming one string, so a second target cannot go unchecked.
+    failures += [f"{url}: {f}" for f in guards.mail_targets_carry_their_subjects([(path, body)])
+                 if not f.startswith("no page serves")]
+    expected_links = {"contact"} | ({"cta-demo-target"} if path != "/privacy" else set())
+    for line_id in sorted(expected_links):
+        if build.mail_href(line_id) not in body.replace("&amp;", "&"):
+            failures.append(f"{url}: the approved {line_id} mail link is not served as built")
 
     line_id, fragment = expected
     if fragment not in body:
@@ -199,7 +206,15 @@ def verify_crawler_policy(origin: str) -> list[str]:
 
 
 def main() -> int:
-    urls = sys.argv[1:] or ["https://galinstan.ai/"]
+    # An origin alone verifies every declared address; the deploy passes the origin, so a
+    # page added to the sitemap is verified without anyone editing the workflow.
+    args = sys.argv[1:] or ["https://galinstan.ai"]
+    urls = []
+    for arg in args:
+        if arg.rstrip("/").count("/") == 2:  # an origin
+            urls += [arg.rstrip("/") + path for path in build.SITEMAP]
+        else:
+            urls.append(arg)
     failed = 0
     for url in urls:
         try:

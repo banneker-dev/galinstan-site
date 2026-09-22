@@ -43,9 +43,11 @@ _EXTERNAL_PATTERNS = [
 #                quantum claim and the air-gap claim are mutually exclusive in practice.
 #                Whichever way that is eventually decided, it is not decided on a holding
 #                page by accident.
-#   "demo"     — WEB_SPEC.md forbids "any claim that a demo exists". There is no safe use
-#                of the word on a page that has no demo, so the whole word is banned until
-#                there is one.
+#   "demo"     — WEB_SPEC.md forbids "any claim that a demo exists". The word stays banned,
+#                with one exemption decided by Antwain on 2026-09-22 (SITE_COPY_STAGE2.md
+#                section 1): the approved "Request a demo" link and its mail subject. An
+#                invitation to ask is not a claim that a demo exists — the reply is where
+#                that is decided. Any other use of the word still fails.
 #
 # A word leaves this list by decision, not by inconvenience.
 _FORBIDDEN = [
@@ -61,7 +63,9 @@ _FORBIDDEN = [
     (r"\b(?:EUR|GBP|USD)\s?\d", "same"),
 ]
 
-_HTML = ("index.html", "privacy.html", "404.html")
+# Every page the build publishes, taken from the allowlist so a page added there cannot be
+# missed here.
+_HTML = tuple(name for name in build.ALLOWLIST if name.endswith(".html"))
 
 
 def _pages() -> list[tuple[str, str]]:
@@ -76,11 +80,27 @@ def _pages() -> list[tuple[str, str]]:
 _LEGAL_NAMES: list[str] = []
 
 
+# The approved demo route, by register id: the link text on each page and the target whose
+# subject names it. Exempted as exact strings, so a reworded CTA is caught rather than let
+# through by the exemption.
+_DEMO_ROUTE_IDS = ("cta-demo", "dep-cta", "il-cta", "ae-cta")
+
+
+def _demo_route_strings() -> list[str]:
+    strings = [page_copy.line(i).text for i in _DEMO_ROUTE_IDS if i in page_copy.BY_ID]
+    if "cta-demo-target" in page_copy.BY_ID:
+        strings.append(build.mail_href("cta-demo-target"))
+    return strings
+
+
 def _strip_todo(text: str) -> str:
-    """Strips what is not copy: placeholder markers and any exempt legal string."""
+    """Strips what is not copy: placeholder markers, exempt legal strings, and the approved
+    demo route, which is the one sanctioned use of the word."""
     text = re.sub(r"\[\[TODO:.*?\]\]", "", text, flags=re.S)
     for name in _LEGAL_NAMES:
         text = text.replace(name, "")
+    for exempt in _demo_route_strings():
+        text = text.replace(f">{exempt}<", "><").replace(f'"{exempt}"', '""')
     return text
 
 
@@ -115,8 +135,10 @@ def no_forbidden_claims(pages=None) -> list[str]:
 def required_metadata(pages=None) -> list[str]:
     """The metadata that cannot be added retroactively to a visit that already happened."""
     failures = []
+    content_page = ["<html lang=", "<title>", 'name="description"', 'rel="canonical"', "viewport"]
     required = {
-        "index.html": ["<html lang=", "<title>", 'name="description"', 'rel="canonical"', "viewport"],
+        "index.html": content_page,
+        **{f"{path[1:]}.html": content_page for path in build.PAGES},
         "privacy.html": ["<html lang=", "<title>", 'rel="canonical"', "viewport"],
         "404.html": ["<html lang=", "<title>", 'name="robots" content="noindex"'],
     }
@@ -193,7 +215,7 @@ def declared_addresses_agree(pages=None, sitemap=None) -> list[str]:
     """
     failures = []
     declared = {path: f"{build.SITE_URL}{path}" for path in build.SITEMAP}
-    canonical_of = {"/": "index.html", "/privacy": "privacy.html"}
+    canonical_of = {path: ("index.html" if path == "/" else f"{path[1:]}.html") for path in build.SITEMAP}
 
     if sitemap is None:
         sitemap = (PUBLIC / "sitemap.xml").read_text(encoding="utf-8")
@@ -240,12 +262,37 @@ def crawler_policy(served=None) -> list[str]:
     return []
 
 
+def mail_targets_carry_their_subjects(pages=None) -> list[str]:
+    """Every mail link is an approved target with its approved subject (Round 9, ask 47).
+
+    Two directions. Each mail-bearing string in the register must be served somewhere as
+    exactly its `mailto:` with subject — a template edit that drops a subject is caught on
+    the commit. And every `mailto:` on every page must be one of those — a link to an
+    address nobody approved is caught too. `tools/verify_live.py` asserts the same over the
+    served response, which is where an edge rewrite would show.
+    """
+    failures = []
+    pages = pages if pages is not None else _pages()
+    approved = {build.mail_href(item.id) for item in page_copy.LINES if item.mail_subject}
+    served = set()
+    for name, text in pages:
+        for href in re.findall(r'href="(mailto:[^"]*)"', text):
+            href = href.replace("&amp;", "&")
+            served.add(href)
+            if href not in approved:
+                failures.append(f"{name}: mail link {href!r} is not an approved target and subject")
+    for href in sorted(approved - served):
+        failures.append(f"no page serves the approved mail link {href!r}")
+    return failures
+
+
 ALWAYS = {
     "no external references": no_external_references,
     "no forbidden claims": no_forbidden_claims,
     "required metadata": required_metadata,
     "declared addresses agree": declared_addresses_agree,
     "crawler policy": crawler_policy,
+    "mail targets carry their subjects": mail_targets_carry_their_subjects,
 }
 
 PRODUCTION_ONLY = {"publication gate": publication_gate}
