@@ -43,9 +43,11 @@ _EXTERNAL_PATTERNS = [
 #                quantum claim and the air-gap claim are mutually exclusive in practice.
 #                Whichever way that is eventually decided, it is not decided on a holding
 #                page by accident.
-#   "demo"     — WEB_SPEC.md forbids "any claim that a demo exists". There is no safe use
-#                of the word on a page that has no demo, so the whole word is banned until
-#                there is one.
+#   "demo"     — WEB_SPEC.md forbids "any claim that a demo exists". The word stays banned,
+#                with one exemption decided by Antwain on 2026-09-22 (SITE_COPY_STAGE2.md
+#                section 1): the approved "Request a demo" link and its mail subject. An
+#                invitation to ask is not a claim that a demo exists — the reply is where
+#                that is decided. Any other use of the word still fails.
 #
 # A word leaves this list by decision, not by inconvenience.
 _FORBIDDEN = [
@@ -78,11 +80,27 @@ def _pages() -> list[tuple[str, str]]:
 _LEGAL_NAMES: list[str] = []
 
 
+# The approved demo route, by register id: the link text on each page and the target whose
+# subject names it. Exempted as exact strings, so a reworded CTA is caught rather than let
+# through by the exemption.
+_DEMO_ROUTE_IDS = ("cta-demo", "dep-cta", "il-cta", "ae-cta")
+
+
+def _demo_route_strings() -> list[str]:
+    strings = [page_copy.line(i).text for i in _DEMO_ROUTE_IDS if i in page_copy.BY_ID]
+    if "cta-demo-target" in page_copy.BY_ID:
+        strings.append(build.mail_href("cta-demo-target"))
+    return strings
+
+
 def _strip_todo(text: str) -> str:
-    """Strips what is not copy: placeholder markers and any exempt legal string."""
+    """Strips what is not copy: placeholder markers, exempt legal strings, and the approved
+    demo route, which is the one sanctioned use of the word."""
     text = re.sub(r"\[\[TODO:.*?\]\]", "", text, flags=re.S)
     for name in _LEGAL_NAMES:
         text = text.replace(name, "")
+    for exempt in _demo_route_strings():
+        text = text.replace(f">{exempt}<", "><").replace(f'"{exempt}"', '""')
     return text
 
 

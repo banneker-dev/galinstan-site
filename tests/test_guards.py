@@ -156,6 +156,15 @@ class GuardsFailWhenTheyShould(unittest.TestCase):
                     f"{label!r} passed the claims guard",
                 )
 
+    def test_the_approved_demo_route_is_the_only_use_of_the_word_that_passes(self):
+        """Antwain, 2026-09-22: "Request a demo" invites a request; it claims nothing."""
+        href = build.mail_href("cta-demo-target")
+        passing = [("index.html", f'<p class="cta"><a href="{href}">Request a demo</a></p>')]
+        self.assertEqual(guards.no_forbidden_claims(passing), [])
+        for claim in ("See the live demo.", "Our demo shows the saving.", '<a href="mailto:x">Watch a demo</a>'):
+            with self.subTest(claim=claim):
+                self.assertTrue(guards.no_forbidden_claims([("index.html", f"<p>{claim}</p>")]))
+
     def test_the_entity_name_no_longer_needs_an_exemption(self):
         """Banneker is a sole proprietorship. The word "Compliance" left the page with it,
         so the exemption that once let it through is gone and the word is banned outright.
