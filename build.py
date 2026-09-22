@@ -19,7 +19,6 @@ and `tools/guards.py` fails the build over it.
 """
 
 import argparse
-import datetime as dt
 import filecmp
 import html
 import pathlib
@@ -235,12 +234,55 @@ def render_robots() -> str:
     return f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n"
 
 
+def _content_date(render) -> str | None:
+    """The newest approval date among the strings a page actually renders.
+
+    Collected by rendering the page with the copy accessor recording what it is asked
+    for, rather than by keeping a second list of line ids beside the renderers. Two
+    lists drift, and this one would drift silently: a sitemap is read by crawlers and
+    by nobody else.
+
+    None when the page renders no dated string, and then the entry carries no `lastmod`
+    at all. The field is optional, and a crawler that is told nothing is better served
+    than one that is told a date we made up.
+    """
+    seen: list[str] = []
+    accessor = page_copy.text
+
+    def recording(line_id: str) -> str:
+        seen.append(line_id)
+        return accessor(line_id)
+
+    page_copy.text = recording
+    try:
+        render()
+    finally:
+        page_copy.text = accessor
+
+    dates = [d for d in (page_copy.line(i).approved_on for i in seen) if d]
+    return max(dates) if dates else None
+
+
+# What each declared URL is built from. The sitemap dates an address by the copy served
+# at it, so the two have to be named together.
+SITEMAP = {
+    "/": lambda: render_index(),
+    "/privacy.html": lambda: render_privacy(),
+}
+
+
 def render_sitemap() -> str:
-    today = dt.date.today().isoformat()
-    urls = "".join(
-        f"  <url><loc>{SITE_URL}{path}</loc><lastmod>{today}</lastmod></url>\n"
-        for path in ("/", "/privacy.html")
-    )
+    # `lastmod` used to be `date.today()`, which made every release claim every page had
+    # changed — and made the committed build go stale at midnight UTC without a single
+    # edit, so CI failed a pull request that had touched nothing on the page. It is the
+    # only field in this file still weighed by a crawler, and the way to lose that weight
+    # is to make it always true. The copy register already records the date each string
+    # was approved, which is a real content date sitting one function away.
+    urls = ""
+    for path in SITEMAP:
+        lastmod = _content_date(SITEMAP[path])
+        stamp = f"<lastmod>{lastmod}</lastmod>" if lastmod else ""
+        urls += f"  <url><loc>{SITE_URL}{path}</loc>{stamp}</url>\n"
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'

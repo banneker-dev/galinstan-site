@@ -9,7 +9,9 @@ fail. *"Counting the absence of something is not a test until you have confirmed
 ran."*
 """
 
+import dataclasses
 import pathlib
+import re
 import sys
 import unittest
 
@@ -38,6 +40,28 @@ class BuildTests(unittest.TestCase):
                     render(),
                     f"public/{name} is stale. Run python3 build.py and commit the result.",
                 )
+
+    def test_the_sitemap_dates_a_page_by_its_copy_and_not_by_the_clock(self):
+        """`lastmod` was `date.today()`, so the committed build went stale at midnight
+        UTC and CI failed a pull request that had changed nothing on the page."""
+        approved = {item.approved_on for item in page_copy.LINES if item.approved_on}
+        stamped = re.findall(r"<lastmod>([^<]+)</lastmod>", build.render_sitemap())
+        self.assertTrue(stamped, "the sitemap carried no lastmod at all")
+        for stamp in stamped:
+            self.assertIn(stamp, approved, "a lastmod no string in the register accounts for")
+
+    def test_the_sitemap_follows_the_register_when_a_string_is_re_approved(self):
+        """The other direction: the date has to move when the copy's approval moves,
+        or the test above would pass just as well on a constant."""
+        before = re.findall(r"<lastmod>([^<]+)</lastmod>", build.render_sitemap())
+        headline = page_copy.BY_ID["headline"]
+        page_copy.BY_ID["headline"] = dataclasses.replace(headline, approved_on="2027-01-01")
+        try:
+            after = re.findall(r"<lastmod>([^<]+)</lastmod>", build.render_sitemap())
+        finally:
+            page_copy.BY_ID["headline"] = headline
+        self.assertNotEqual(before, after)
+        self.assertEqual(after[0], "2027-01-01", "the front page ignored its own copy")
 
     def test_public_holds_nothing_the_allowlist_does_not_name(self):
         """Deploy an allowlist, not the checkout."""
