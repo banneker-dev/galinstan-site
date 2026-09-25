@@ -157,6 +157,13 @@ def verify(url: str) -> list[str]:
         if marker in body:
             failures.append(f"{url}: {why} (found {marker!r})")
 
+    # RULES.md D2 over the response, not just over the build. The build-time guard
+    # (site-2026.09.10) checks the register and the assembled pages; this checks what the
+    # visitor is actually served, because the edge is what rewrote approved copy last time
+    # and a guard that cannot see the edge cannot speak for it.
+    failures += [f"{url}: {f}" for f in guards.no_dashes_as_punctuation([(path, body)])
+                 if "in the served page" in f]
+
     # Every mail link served must be an approved target with its approved subject — the
     # build-time guard's assertion, made again over the response, because the edge is what
     # rewrote the address last time (Round 9, ask 47). Iterating the register rather than
