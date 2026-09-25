@@ -2,6 +2,15 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.9] — two page titles
+
+### Changed
+- **`/privacy` is titled "Privacy"** and **`/404` is titled "Not found"** (Antwain, 2026-09-25).
+  Neither repeats the product name: the wordmark is already on the page, and a tab that says
+  the product twice says it once too often. Both were "Galinstan: …" for one release.
+- Still hardcoded in `build.py` rather than held in `src/page_copy.py`. Moving them into the
+  register is open, because anything a visitor sees belongs there.
+
 ## [site-2026.09.8] — dashes out, reperformance off the pages, claims guard deleted
 
 ### Changed
