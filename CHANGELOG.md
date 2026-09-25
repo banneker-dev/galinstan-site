@@ -2,6 +2,20 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [Unreleased]
+
+### Removed
+- **Guard: no forbidden claims**, and everything behind it. The word list ("compliant" in
+  any form, "certified", "guarantee", "audit-ready", the licensor names, "demo", "quantum"
+  and the two price patterns), the legal-name exemption, the demo-route exemption and the
+  placeholder stripper that served only this guard. Four tests go with it, so the suite is
+  43 rather than 47.
+- Deleted on Antwain's instruction of 2026-09-25, restated 2026-09-25 (ask 66). Its own
+  commit, which is what `RULES.md` r32 asks of a guard change: on purpose, not to make a
+  build pass. Nothing served changes, so this carries no site release on its own.
+- **The publication gate stays.** Every string a visitor sees still has to be APPROVED in
+  `src/page_copy.py`, and a production deploy still refuses to run while one is not.
+
 ## [site-2026.09.7] — the disclaimer off the footer
 
 Antwain's copy decisions of 2026-09-25, the first two parts of ask 66 in
