@@ -2,6 +2,27 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.14] — the product brief, at /galinstan-brief.pdf
+
+### Added
+- **The product brief**, a four-page PDF at `/galinstan-brief.pdf`, approved by Antwain
+  2026-09-25 in full. It says what Galinstan does and why, with its published sources, and
+  deliberately stops short of the method: "whitepaper" is reserved for the document shared
+  under NDA, and the brief does not offer it. Every word is a `brief-` string in
+  `src/page_copy.py`.
+- Linked from `/`, `/audit-evidence` and `/deployment` as "How Galinstan works: product
+  brief (PDF)", and declared in `sitemap.xml`.
+- Its contact link carries its own subject, "Galinstan enquiry via the product brief",
+  because Cloudflare Web Analytics cannot count a PDF download.
+- `tools/make_brief.py` prints the brief's source with a local Chrome and records both
+  hashes in `assets/galinstan-brief.lock.json`. The build keeps no dependencies; the PDF is
+  committed.
+- **Guard: the brief matches its source.** Fails if the strings, the template or the PDF
+  change without the others, if the PDF carries an author field (`RULES.md` D5), or if it
+  links anywhere but the approved contact. Eight tests. Suite is 61.
+- **The live verifier checks the served PDF's bytes** against the lock, and that it is
+  served as `application/pdf`.
+
 ## [site-2026.09.13] — every string a visitor reads comes from the register
 
 No served byte changes. The pages are identical; what changes is where their strings

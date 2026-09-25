@@ -17,9 +17,10 @@ Three statuses, and the build treats them differently:
 APPROVED, and the production deploy refuses to run while it is False. A preview URL
 still builds, so the page can be looked at and argued about before it can be published.
 
-**Every string is approved as of 2026-09-22** — the stage 1 page, the demo route (ask 47)
+**Every string is approved as of 2026-09-25** — the stage 1 page, the demo route (ask 47)
 and the stage 2 release set (ask 54), each on Antwain's approval as recorded in
-`50_Claude_Outputs/SITE_COPY_STAGE1.md` and `SITE_COPY_STAGE2.md`. That is not a reason to
+`50_Claude_Outputs/SITE_COPY_STAGE1.md` and `SITE_COPY_STAGE2.md`, and the product brief,
+approved by him in conversation with Cody on 2026-09-25 and recorded below. That is not a reason to
 relax the mechanism: the next string added starts unapproved.
 """
 
@@ -277,11 +278,14 @@ LINES += STAGE_2
 # brief-ref- a source, brief-p- a paragraph.
 # --------------------------------------------------------------------------------------
 
-_BRIEF_NOTE = "Drafted by Cody, 2026-09-25, on Antwain's instruction. Awaiting his approval."
+_BRIEF_NOTE = (
+    "Drafted by Cody, 2026-09-25, on Antwain's instruction. Approved 2026-09-25 (Antwain), "
+    "every string as drafted, including the demonstration figure in brief-p-stress."
+)
 
 
 def _brief(line_id: str, text: str, **kw) -> Line:
-    return Line(id=line_id, status=PENDING, text=text, note=_BRIEF_NOTE, **kw)
+    return Line(id=line_id, status=APPROVED, approved_on="2026-09-25", text=text, note=_BRIEF_NOTE, **kw)
 
 
 BRIEF = [
