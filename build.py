@@ -265,10 +265,10 @@ def render_privacy() -> str:
     <main>
 {_wordmark()}
 {_nav(None)}
-      <h1>Privacy</h1>
-      <p><strong>Data controller.</strong> {_markup(t("privacy-controller"))}</p>
-      <p><strong>Analytics.</strong> {_markup(t("privacy-analytics"))}</p>
-      <p><strong>Contact.</strong> {_contact_link()}</p>
+      <h1>{_markup(t("privacy-meta-title"))}</h1>
+      <p>{_markup(t("privacy-controller"))}</p>
+      <p>{_markup(t("privacy-analytics"))}</p>
+      <p>{_markup(t("privacy-contact-label"))} {_contact_link()}</p>
       <footer>
         <p>{_markup(t("entity"))}</p>
         <p>{_markup(t("legal-footer"))}</p>
@@ -294,8 +294,8 @@ def render_404() -> str:
   <body>
     <main>
       <p class="wordmark">{_markup(t("wordmark"))}</p>
-      <h1>That page does not exist.</h1>
-      <p><a href="/">Return to the front page.</a></p>
+      <h1>{_markup(t("notfound-h1"))}</h1>
+      <p><a href="/">{_markup(t("notfound-link"))}</a></p>
     </main>
   </body>
 </html>
