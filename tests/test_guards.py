@@ -106,6 +106,9 @@ class GuardsPassOnTheRealBuild(unittest.TestCase):
     def test_no_external_references(self):
         self.assertEqual(guards.no_external_references(), [])
 
+    def test_no_dashes_as_punctuation(self):
+        self.assertEqual(guards.no_dashes_as_punctuation(), [])
+
     def test_required_metadata(self):
         self.assertEqual(guards.required_metadata(), [])
 
@@ -132,6 +135,47 @@ class GuardsFailWhenTheyShould(unittest.TestCase):
     def test_our_own_absolute_url_is_not_caught(self):
         page = [("index.html", '<link rel="canonical" href="https://galinstan.ai/">')]
         self.assertEqual(guards.no_external_references(page), [])
+
+    def test_each_dash_as_punctuation_is_caught(self):
+        """RULES.md D2. Every sample is a string this site actually served."""
+        samples = {
+            "em dash in the old headline": "European banks \u2014 the analysis runs inside your perimeter",
+            "em dash in the old privacy title": "Privacy \u2014 Galinstan",
+            "en dash": "Tier A \u2013 Tier B",
+            "spaced hyphen": "inside your perimeter - not ours",
+            "hyphen opening a clause": "no outbound connection -not for licensing",
+            "hyphen closing a clause": "no outbound connection- not for licensing",
+        }
+        for label, text in samples.items():
+            with self.subTest(dash=label):
+                self.assertTrue(
+                    guards._LOOSE_HYPHEN.search(text)
+                    or any(ch in text for ch, _ in guards._DASH_AS_PUNCTUATION),
+                    f"{label!r} passed the dash guard",
+                )
+
+    def test_hyphenated_compounds_are_spelling_and_pass(self):
+        """The other half of D2: hyphenated compounds are fine."""
+        for text in (
+            "Air-gapped, on-premise, high-quality liquid assets.",
+            "Air-gapped optimization and audit software for European banks.",
+            "air-gapped",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(guards._LOOSE_HYPHEN.search(text))
+                self.assertFalse(any(ch in text for ch, _ in guards._DASH_AS_PUNCTUATION))
+
+    def test_a_dash_in_a_page_outside_the_copy_register_is_caught(self):
+        """The half that matters. The /privacy and /404 titles were never register strings,
+        which is how they kept their dashes through every copy review.
+        """
+        page = [("privacy.html", "<title>Privacy \u2014 Galinstan</title>")]
+        self.assertTrue(guards.no_dashes_as_punctuation(page))
+
+    def test_css_arithmetic_is_not_a_dash(self):
+        """Why the served-page pass is limited to real dashes: the build inlines CSS."""
+        page = [("index.html", "<style>main { width: calc(100% - 2rem); margin: -1.5rem 0; }</style>")]
+        self.assertEqual(guards.no_dashes_as_punctuation(page), [])
 
     def test_missing_metadata_is_caught(self):
         page = [("index.html", "<html><title>x</title></html>")]

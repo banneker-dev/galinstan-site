@@ -2,6 +2,22 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.10] — a guard for D2
+
+### Added
+- **Guard: no dashes as punctuation**, approved by Antwain 2026-09-25. Enforces `RULES.md` D2,
+  which has been a binding row since 2026-09-24 and was broken on the live site for two days
+  because nothing checked it.
+- Two passes. The copy register, every string's text and mail subject, for em dash, en dash and
+  a hyphen with a space on either side. Then the served pages, for em and en dashes only,
+  because a spaced hyphen is legitimate in the CSS this build inlines.
+- The second pass is the one that matters: the `/privacy` and `/404` titles were not register
+  strings, which is how they kept their dashes through every copy review.
+- Hyphenated compounds are untouched. air-gapped, on-premise and high-quality are spelling,
+  which is the other half of D2.
+- Five tests, both directions, and the runner was broken on a real built page to confirm it
+  exits non-zero rather than warning. Suite is 48.
+
 ## [site-2026.09.9] — two page titles
 
 ### Changed

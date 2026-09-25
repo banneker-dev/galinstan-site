@@ -60,6 +60,44 @@ def no_external_references(pages=None) -> list[str]:
     return failures
 
 
+# RULES.md D2, Antwain 2026-09-24: "No dashes as punctuation in the middle of a sentence in
+# any marketing, website, whitepaper or report copy; hyphenated compounds are fine."
+#
+# Two passes, because the rule was broken in two different ways and one pass catches only one.
+# Ten violations lived in the copy register. Two lived in page titles that were not in the
+# register at all, which is how they survived every copy review. A register-only guard would
+# have missed those two; a page-only guard would report a served byte without naming the
+# string that produced it.
+#
+# The served-page pass looks for the two real dashes only. A hyphen with spaces around it is
+# legitimate inside the CSS this build inlines, as in calc(100% - 2rem), so applying the
+# loose-hyphen rule to a whole page would fail on stylesheet arithmetic.
+_DASH_AS_PUNCTUATION = [("\u2014", "em dash"), ("\u2013", "en dash")]
+
+# A hyphen with a space on at least one side is doing a dash's job rather than spelling one.
+# air-gapped, on-premise and high-quality are untouched, which is the half of D2 that says
+# hyphenated compounds are fine.
+_LOOSE_HYPHEN = re.compile(r"(?:\s-\s|\s-(?=\w)|(?<=\w)-\s)")
+
+
+def no_dashes_as_punctuation(pages=None) -> list[str]:
+    """RULES.md D2. A dash used as punctuation reads as machine written, and this buyer notices."""
+    failures = []
+    for item in page_copy.LINES:
+        for field in ("text", "mail_subject"):
+            value = getattr(item, field, "") or ""
+            for ch, label in _DASH_AS_PUNCTUATION:
+                if ch in value:
+                    failures.append(f"copy {item.id!r}.{field}: {label}")
+            if _LOOSE_HYPHEN.search(value):
+                failures.append(f"copy {item.id!r}.{field}: hyphen used as punctuation")
+    for name, text in pages if pages is not None else _pages():
+        for ch, label in _DASH_AS_PUNCTUATION:
+            if ch in text:
+                failures.append(f"{name}: {label} in the served page")
+    return failures
+
+
 def required_metadata(pages=None) -> list[str]:
     """The metadata that cannot be added retroactively to a visit that already happened."""
     failures = []
@@ -216,6 +254,7 @@ def mail_targets_carry_their_subjects(pages=None) -> list[str]:
 
 ALWAYS = {
     "no external references": no_external_references,
+    "no dashes as punctuation": no_dashes_as_punctuation,
     "required metadata": required_metadata,
     "declared addresses agree": declared_addresses_agree,
     "crawler policy": crawler_policy,
