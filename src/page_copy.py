@@ -62,12 +62,11 @@ LINES = [
     Line(
         id="headline",
         status=APPROVED,
-        approved_on="2026-09-20",
+        approved_on="2026-09-23",
         text=(
-            "Air-gapped optimization and audit software for European banks \u2014 "
-            "the analysis runs inside your perimeter, not ours."
+            "Air-gapped optimization and audit software for European banks. The analysis runs inside your perimeter, not ours."
         ),
-        note="Approved 2026-09-20.",
+        note="Revision approved 2026-09-23 (Antwain): no dashes in client-facing copy.",
     ),
     Line(
         id="body-1",
@@ -135,17 +134,17 @@ LINES = [
         status=APPROVED,
         approved_on="2026-09-22",
         text="partners@banneker.net",
-        mail_subject="Galinstan \u2014 demo request",
+        mail_subject="Galinstan demo request",
         note="Where every 'Request a demo' link points, with its pre-filled subject.",
     ),
     Line(
         id="contact",
         status=APPROVED,
         approved_on="2026-09-22",
-        mail_subject="Galinstan \u2014 via galinstan.ai",
+        mail_subject="Galinstan enquiry via galinstan.ai",
         text="partners@banneker.net",
         note=(
-            "Rendered as a mail link with the subject pre-filled 'Galinstan \u2014 via "
+            "Rendered as a mail link with the subject pre-filled 'Galinstan enquiry via "
             "galinstan.ai', which is free source attribution: every enquiry from the site "
             "arrives labelled, with no form and no paid analytics. The subject is part of "
             "the approved string and lives in CONTACT_SUBJECT below."
@@ -194,9 +193,9 @@ LINES = [
     Line(
         id="meta-title",
         status=APPROVED,
-        approved_on="2026-09-21",
-        text="Galinstan \u2014 air-gapped liquidity optimization and audit software for EU banks",
-        note="Segment keywords, not index terms. 'FinTech' does not appear.",
+        approved_on="2026-09-23",
+        text="Galinstan: air-gapped liquidity optimization and audit software for EU banks",
+        note="Revision approved 2026-09-23 (Antwain): no dashes in client-facing copy.",
     ),
     Line(
         id="meta-description",
@@ -223,30 +222,27 @@ STAGE_2 = [
     Line(id="dep-meta-description", status=APPROVED, approved_on="2026-09-22", text="What an institution installs, what it must buy, what leaves the perimeter, how an offline instance is upgraded, and what happens at exit."),
     Line(id="dep-h1", status=APPROVED, approved_on="2026-09-22", text="The questions a diligence reviewer asks first, answered on the page rather than in the third meeting."),
     Line(id="dep-sub", status=APPROVED, approved_on="2026-09-22", text="Galinstan is built as software you install and run inside your own perimeter. There is no tenancy and no console on our side."),
-    Line(id="dep-body-1", status=APPROVED, approved_on="2026-09-22", text="**What leaves.** Nothing, by design. The software makes no outbound connection of any kind \u2014 not for licensing, not for telemetry, not for model weights, not for updates. It is built to run on a machine with no route to the internet, and it has nothing to reach if it is given one."),
+    Line(id="dep-body-1", status=APPROVED, approved_on="2026-09-23", text="**What leaves.** Nothing, by design. The software makes no outbound connection of any kind. Not for licensing, not for telemetry, not for model weights, not for updates. It is built to run on a machine with no route to the internet, and it has nothing to reach if it is given one."),
     Line(
         id="dep-body-2", status=APPROVED, approved_on="2026-09-22", text="**What you buy.** Galinstan is built to run on hardware you already know how to procure.", note="Revision approved 2026-09-22 (Antwain): a sentence removed from the approved text."),
     Line(
         id="dep-body-3", status=APPROVED, approved_on="2026-09-22", text="**What we are to your register.** We license Galinstan annually with support, patches and calibration. None of your data reaches us, and no part of the analysis depends on us being reachable.", note="Revision approved 2026-09-22 (Antwain): a sentence removed from the approved text."),
     Line(id="dep-body-4", status=APPROVED, approved_on="2026-09-22", text="**Upgrades.** Every version is cut as a signed release: an offline bundle with a checksum for every file and a software bill of materials. It installs with no package index and no network, and the instance never reaches out for it."),
-    Line(id="dep-body-5", status=APPROVED, approved_on="2026-09-22", text="**Escrow and exit.** Every release is built to be deposited \u2014 source, bundle and checksums as one versioned artefact. We agree escrow and exit terms in the contract rather than pointing at a policy page."),
+    Line(id="dep-body-5", status=APPROVED, approved_on="2026-09-23", text="**Escrow and exit.** Every release is built to be deposited: source, bundle and checksums as one versioned artefact. We agree escrow and exit terms in the contract rather than pointing at a policy page."),
     Line(id="dep-cta", status=APPROVED, approved_on="2026-09-22", text="Request a demo"),
-    Line(id="il-meta-title", status=APPROVED, approved_on="2026-09-22", text="Intraday liquidity optimization that runs on your own hardware \u2014 Galinstan"),
+    Line(id="il-meta-title", status=APPROVED, approved_on="2026-09-23", text="Galinstan: intraday liquidity optimization that runs on your own hardware"),
     Line(id="il-meta-description", status=APPROVED, approved_on="2026-09-22", text="Software built to decide what an EU bank should hold against its intraday and LCR requirements, and to run the decision inside the institution's own hardware boundary."),
     Line(id="il-h1", status=APPROVED, approved_on="2026-09-22", text="Knowing where the money is, and knowing what to hold, are two different problems."),
-    Line(id="il-sub", status=APPROVED, approved_on="2026-09-22", text="Intraday monitoring tells a treasurer what happened. Galinstan is built to answer what to do about it \u2014 which assets to hold, which to release, and what the surplus is costing."),
+    Line(id="il-sub", status=APPROVED, approved_on="2026-09-23", text="Intraday monitoring tells a treasurer what happened. Galinstan is built to answer what to do about it: which assets to hold, which to release, and what the surplus is costing."),
     Line(id="il-body-1", status=APPROVED, approved_on="2026-09-22", text="The intraday tooling on the market is built to make positions visible: balances across accounts, payment flows, throttling decisions, the data a supervisor asks for. That work is necessary and it is well served. What we have not found is software that chooses the position."),
-    Line(id="il-body-2", status=APPROVED, approved_on="2026-09-22", text="The choice is hard on purpose. Assets are held in lots, haircuts and caps interact, encumbrance removes collateral from the buffer, and the objective \u2014 give up as little yield as possible while staying above the requirement all day \u2014 is a combinatorial problem, not a report. Galinstan is built to formulate it as one and solve it."),
+    Line(id="il-body-2", status=APPROVED, approved_on="2026-09-23", text="The choice is hard on purpose. Assets are held in lots, haircuts and caps interact, and encumbrance removes collateral from the buffer. The objective is to give up as little yield as possible while staying above the requirement all day. That is a combinatorial problem rather than a report, and Galinstan is built to solve it as one."),
     Line(id="il-body-3", status=APPROVED, approved_on="2026-09-22", text="The surplus is worth measuring before it is defended. The FY2025 Pillar 3 disclosures of three European banks show average liquidity coverage ratios between 156% and 256%. Some of that headroom is deliberate. The part that is not is high-quality liquid assets the requirement did not call for."),
     Line(id="il-body-4", status=APPROVED, approved_on="2026-09-22", text="Galinstan is built to connect to nothing. It reads the position you give it, computes inside your hardware boundary, and writes its answer back to you. There is no service on our end of a line, because there is no line."),
-    Line(id="il-body-5", status=APPROVED, approved_on="2026-09-22", text="Galinstan is built so that the same position, run twice on the same platform, gives the same answer \u2014 and so that every run records the version, the parameter set, the calibration issue and the seed behind it. A reviewer can repeat the run rather than take it on trust."),
-    Line(id="il-body-6", status=APPROVED, approved_on="2026-09-22", text="We have not found a competitor who offers this, and we would rather be checked than believed."),
     Line(id="il-cta", status=APPROVED, approved_on="2026-09-22", text="Request a demo"),
-    Line(id="ae-meta-title", status=APPROVED, approved_on="2026-09-22", text="Audit evidence that can be re-run, not just replayed \u2014 Galinstan"),
+    Line(id="ae-meta-title", status=APPROVED, approved_on="2026-09-23", text="Galinstan: audit evidence produced inside your own perimeter"),
     Line(id="ae-meta-description", status=APPROVED, approved_on="2026-09-22", text="Software built to produce control-testing and gap-analysis evidence inside the institution's own hardware boundary, with the inputs and method recorded alongside the result."),
-    Line(id="ae-h1", status=APPROVED, approved_on="2026-09-22", text="Most vendors will show an auditor a record of what happened. Few will let the auditor do the work again."),
-    Line(id="ae-sub", status=APPROVED, approved_on="2026-09-22", text="Galinstan is built so that the evidence behind a finding carries what it would take to arrive at that finding independently."),
-    Line(id="ae-body-1", status=APPROVED, approved_on="2026-09-22", text="The standard offer in this market is a trail: who ran what, when, against which document, with the answer linked back to its source. That is worth having, and it is what an audit trail is for. It also asks the reviewer to take the record on trust, because the record is all there is."),
+    Line(id="ae-h1", status=APPROVED, approved_on="2026-09-23", text="Audit evidence that never leaves the institution that produced it."),
+    Line(id="ae-sub", status=APPROVED, approved_on="2026-09-23", text="Galinstan is built to produce control testing and gap analysis evidence inside your own hardware boundary, with each finding citing where it came from."),
     Line(id="ae-body-2", status=APPROVED, approved_on="2026-09-22", text="A different standard is possible when the software runs inside the institution. The inputs never leave. The version that produced the result sits on the institution's own disk. Nothing is rewritten between the calculation and the report by a service neither party controls."),
     Line(id="ae-body-3", status=APPROVED, approved_on="2026-09-22", text="Module 2 is built around that: control testing and gap analysis against DORA and the EBA outsourcing guidelines, with the evidence for each finding citing where it came from, and with the model and method that produced it recorded beside it rather than described afterwards."),
     Line(id="ae-cta", status=APPROVED, approved_on="2026-09-22", text="Request a demo"),
@@ -261,7 +257,7 @@ LINES += STAGE_2
 
 # Part of the approved `contact` string, kept separate because it is an attribute rather
 # than page text: the pre-filled subject that makes every enquiry self-attributing.
-CONTACT_SUBJECT = "Galinstan \u2014 via galinstan.ai"
+CONTACT_SUBJECT = "Galinstan enquiry via galinstan.ai"
 assert CONTACT_SUBJECT == next(item for item in LINES if item.id == "contact").mail_subject
 
 BY_ID = {line.id: line for line in LINES}

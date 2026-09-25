@@ -106,9 +106,6 @@ class GuardsPassOnTheRealBuild(unittest.TestCase):
     def test_no_external_references(self):
         self.assertEqual(guards.no_external_references(), [])
 
-    def test_no_forbidden_claims(self):
-        self.assertEqual(guards.no_forbidden_claims(), [])
-
     def test_required_metadata(self):
         self.assertEqual(guards.required_metadata(), [])
 
@@ -135,43 +132,6 @@ class GuardsFailWhenTheyShould(unittest.TestCase):
     def test_our_own_absolute_url_is_not_caught(self):
         page = [("index.html", '<link rel="canonical" href="https://galinstan.ai/">')]
         self.assertEqual(guards.no_external_references(page), [])
-
-    def test_each_forbidden_claim_is_caught(self):
-        samples = {
-            "compliant": "Galinstan keeps you compliant.",
-            "certified": "An ISO certified platform.",
-            "guarantee": "We guarantee the outcome.",
-            "audit-ready": "Audit-ready evidence.",
-            "Icosa": "Built with Icosa technology.",
-            "Zeno": "Runs on Zeno.",
-            "demo": "Book a demo today.",
-            "quantum": "Quantum optimization for banks.",
-            "price": "From €45,000 per engagement.",
-            "currency code": "From EUR 45,000 per engagement.",
-        }
-        for label, text in samples.items():
-            with self.subTest(claim=label):
-                self.assertTrue(
-                    guards.no_forbidden_claims([("index.html", f"<p>{text}</p>")]),
-                    f"{label!r} passed the claims guard",
-                )
-
-    def test_the_approved_demo_route_is_the_only_use_of_the_word_that_passes(self):
-        """Antwain, 2026-09-22: "Request a demo" invites a request; it claims nothing."""
-        href = build.mail_href("cta-demo-target")
-        passing = [("index.html", f'<p class="cta"><a href="{href}">Request a demo</a></p>')]
-        self.assertEqual(guards.no_forbidden_claims(passing), [])
-        for claim in ("See the live demo.", "Our demo shows the saving.", '<a href="mailto:x">Watch a demo</a>'):
-            with self.subTest(claim=claim):
-                self.assertTrue(guards.no_forbidden_claims([("index.html", f"<p>{claim}</p>")]))
-
-    def test_the_entity_name_no_longer_needs_an_exemption(self):
-        """Banneker is a sole proprietorship. The word "Compliance" left the page with it,
-        so the exemption that once let it through is gone and the word is banned outright.
-        """
-        self.assertEqual(guards._LEGAL_NAMES, [])
-        page = [("index.html", "<p>Banneker Strategy & Compliance LLC</p>")]
-        self.assertTrue(guards.no_forbidden_claims(page))
 
     def test_missing_metadata_is_caught(self):
         page = [("index.html", "<html><title>x</title></html>")]

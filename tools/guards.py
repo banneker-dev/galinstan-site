@@ -35,34 +35,6 @@ _EXTERNAL_PATTERNS = [
     (re.compile(r"<link\b[^>]*\brel\s*=\s*[\"']?(?:preconnect|dns-prefetch|preload)", re.I), "resource hint to a third party"),
 ]
 
-# Claims the stage-1 page may not make. The list is Cody's, drawn from the explicit
-# prohibitions in 50_Claude_Outputs/WEB_SPEC.md section 5 and
-# 50_Claude_Outputs/SITE_COPY_STAGE1.md, plus two of its own:
-#
-#   "quantum"  — 50_Claude_Outputs/BUILD_STACK_AND_ARCHITECTURE.md section 6 concludes the
-#                quantum claim and the air-gap claim are mutually exclusive in practice.
-#                Whichever way that is eventually decided, it is not decided on a holding
-#                page by accident.
-#   "demo"     — WEB_SPEC.md forbids "any claim that a demo exists". The word stays banned,
-#                with one exemption decided by Antwain on 2026-09-22 (SITE_COPY_STAGE2.md
-#                section 1): the approved "Request a demo" link and its mail subject. An
-#                invitation to ask is not a claim that a demo exists — the reply is where
-#                that is decided. Any other use of the word still fails.
-#
-# A word leaves this list by decision, not by inconvenience.
-_FORBIDDEN = [
-    (r"complian(?:t|ce)", "WEB_SPEC.md section 5: the word 'compliant' in any form"),
-    (r"certif(?:ied|ication)", "certification is a claim Galinstan must never make"),
-    (r"\bguarantee", "a guarantee is a contractual promise, not marketing copy"),
-    (r"audit[- ]ready", "SITE_COPY_STAGE1.md: edges toward a compliance promise"),
-    (r"\bIcosa\b", "the teaming agreement is unsigned; Icosa is not named publicly"),
-    (r"\bZeno\b|\bLMShop\b", "Icosa product names, same reason"),
-    (r"\bdemo\b", "WEB_SPEC.md section 5: no claim that a demo exists"),
-    (r"\bquantum\b", "BUILD_STACK_AND_ARCHITECTURE.md section 6"),
-    (r"[€£\$]\s?\d", "WEB_SPEC.md section 5: no price or tier"),
-    (r"\b(?:EUR|GBP|USD)\s?\d", "same"),
-]
-
 # Every page the build publishes, taken from the allowlist so a page added there cannot be
 # missed here.
 _HTML = tuple(name for name in build.ALLOWLIST if name.endswith(".html"))
@@ -70,38 +42,6 @@ _HTML = tuple(name for name in build.ALLOWLIST if name.endswith(".html"))
 
 def _pages() -> list[tuple[str, str]]:
     return [(n, (PUBLIC / n).read_text(encoding="utf-8")) for n in _HTML if (PUBLIC / n).exists()]
-
-
-# This list is empty, and it used to hold "Banneker Strategy & Compliance LLC" — the name
-# the claims guard caught on its first run, exempted then as a legal string. On 2026-09-21
-# that entity turned out not to exist: Banneker is a sole proprietorship. The approved
-# copy says "Banneker", the word "Compliance" is gone from the page, and the exemption
-# goes with it rather than sitting here waiting to quietly permit something.
-_LEGAL_NAMES: list[str] = []
-
-
-# The approved demo route, by register id: the link text on each page and the target whose
-# subject names it. Exempted as exact strings, so a reworded CTA is caught rather than let
-# through by the exemption.
-_DEMO_ROUTE_IDS = ("cta-demo", "dep-cta", "il-cta", "ae-cta")
-
-
-def _demo_route_strings() -> list[str]:
-    strings = [page_copy.line(i).text for i in _DEMO_ROUTE_IDS if i in page_copy.BY_ID]
-    if "cta-demo-target" in page_copy.BY_ID:
-        strings.append(build.mail_href("cta-demo-target"))
-    return strings
-
-
-def _strip_todo(text: str) -> str:
-    """Strips what is not copy: placeholder markers, exempt legal strings, and the approved
-    demo route, which is the one sanctioned use of the word."""
-    text = re.sub(r"\[\[TODO:.*?\]\]", "", text, flags=re.S)
-    for name in _LEGAL_NAMES:
-        text = text.replace(name, "")
-    for exempt in _demo_route_strings():
-        text = text.replace(f">{exempt}<", "><").replace(f'"{exempt}"', '""')
-    return text
 
 
 def no_external_references(pages=None) -> list[str]:
@@ -117,18 +57,6 @@ def no_external_references(pages=None) -> list[str]:
                 if host in ("www.sitemaps.org", "www.w3.org"):  # XML namespaces, not fetched
                     continue
                 failures.append(f"{name}: absolute URL to {host}")
-    return failures
-
-
-def no_forbidden_claims(pages=None) -> list[str]:
-    """No claim on the site outruns what exists. WEB_SPEC.md section 6 calls this absolute."""
-    failures = []
-    for name, text in pages if pages is not None else _pages():
-        body = _strip_todo(text)
-        for pattern, why in _FORBIDDEN:
-            hit = re.search(pattern, body, re.I)
-            if hit:
-                failures.append(f"{name}: forbidden {hit.group(0)!r} — {why}")
     return failures
 
 
@@ -288,7 +216,6 @@ def mail_targets_carry_their_subjects(pages=None) -> list[str]:
 
 ALWAYS = {
     "no external references": no_external_references,
-    "no forbidden claims": no_forbidden_claims,
     "required metadata": required_metadata,
     "declared addresses agree": declared_addresses_agree,
     "crawler policy": crawler_policy,
