@@ -107,8 +107,8 @@ def fetch(url: str, accept: str = "text/html,application/xhtml+xml") -> str:
 EXPECTED = {
     "/": ("headline", "runs inside your perimeter, not ours"),
     "/intraday-liquidity": ("il-h1", "are two different problems"),
-    "/audit-evidence": ("ae-h1", "Few will let the auditor do the work again"),
-    "/deployment": ("dep-body-1", "not for licensing, not for telemetry"),
+    "/audit-evidence": ("ae-h1", "never leaves the institution that produced it"),
+    "/deployment": ("dep-body-1", "for licensing, not for telemetry"),
     "/privacy": ("privacy-controller", "The data controller for this site is"),
 }
 

@@ -4,6 +4,23 @@ Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
 ## [Unreleased]
 
+### Changed
+- **No dashes in client-facing copy** (Antwain, 2026-09-23, restated 2026-09-25). Ten strings
+  revised so the dash used as punctuation is gone: `headline`, `meta-title`, `dep-body-1`,
+  `dep-body-5`, `il-meta-title`, `il-sub`, `il-body-2`, `ae-meta-title`, `ae-h1`, `ae-sub`.
+  Both mail subjects lose theirs, so an enquiry now arrives as "Galinstan enquiry via
+  galinstan.ai" and a demo request as "Galinstan demo request".
+- **Two page titles** that were never in the register, `/privacy` and `/404`, now follow the
+  same colon pattern as the approved titles. Cody's wording, not an approved string.
+- The live verifier's expected fragments for `/audit-evidence` and `/deployment` follow the
+  revised text.
+- Hyphenated compounds are untouched: air-gapped, high-quality and on-premise are spelling.
+
+### Removed
+- **`il-body-5`, `il-body-6` and `ae-body-1`** (Antwain, 2026-09-23): reperformance is
+  demonstrated, not marketed. It is the moment in a demo where a reviewer repeats a run, and
+  a page that claims it spends that moment. `ae-body-2` and `ae-body-3` stand.
+
 ### Removed
 - **Guard: no forbidden claims**, and everything behind it. The word list ("compliant" in
   any form, "certified", "guarantee", "audit-ready", the licensor names, "demo", "quantum"
