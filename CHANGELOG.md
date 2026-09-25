@@ -15,7 +15,7 @@ Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
   publisher, Banneker. "Galinstan" is also a gallium alloy; this tells search and AI answers
   which one the site is. New approved string `ld-publisher`.
 - **Guard change, in its own commit:** URLs inside JSON-LD are names, not fetches, so
-  schema.org and banneker.net pass there and only there. Four tests. Suite is 66.
+  schema.org and banneker.net pass there and only there. Four tests. Suite is 65.
 
 ## [site-2026.09.14] — the product brief, at /galinstan-brief.pdf
 
