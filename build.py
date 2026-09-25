@@ -260,7 +260,7 @@ def render_index() -> str:
 
 def render_privacy() -> str:
     t = page_copy.text
-    return f"""{_head("Privacy", "/privacy")}
+    return f"""{_head(t("privacy-meta-title"), "/privacy")}
   <body>
     <main>
 {_wordmark()}
@@ -286,7 +286,7 @@ def render_404() -> str:
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Not found</title>
+    <title>{html.escape(t("notfound-meta-title"))}</title>
     <meta name="robots" content="noindex">
     <style>
 {CSS}    </style>

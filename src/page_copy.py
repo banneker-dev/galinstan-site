@@ -62,11 +62,11 @@ LINES = [
     Line(
         id="headline",
         status=APPROVED,
-        approved_on="2026-09-23",
+        approved_on="2026-09-25",
         text=(
             "Air-gapped optimization and audit software for European banks. The analysis runs inside your perimeter, not ours."
         ),
-        note="Revision approved 2026-09-23 (Antwain): no dashes in client-facing copy.",
+        note='Approved 2026-09-25 (Antwain), rejected row r01 closed. Dashes out per RULES.md D2; this wording is now his.',
     ),
     Line(
         id="body-1",
@@ -132,23 +132,18 @@ LINES = [
     Line(
         id="cta-demo-target",
         status=APPROVED,
-        approved_on="2026-09-22",
+        approved_on="2026-09-25",
         text="partners@banneker.net",
         mail_subject="Galinstan demo request",
-        note="Where every 'Request a demo' link points, with its pre-filled subject.",
+        note='Subject approved 2026-09-25 (Antwain), rejected row r12 closed.',
     ),
     Line(
         id="contact",
         status=APPROVED,
-        approved_on="2026-09-22",
+        approved_on="2026-09-25",
         mail_subject="Galinstan enquiry via galinstan.ai",
         text="partners@banneker.net",
-        note=(
-            "Rendered as a mail link with the subject pre-filled 'Galinstan enquiry via "
-            "galinstan.ai', which is free source attribution: every enquiry from the site "
-            "arrives labelled, with no form and no paid analytics. The subject is part of "
-            "the approved string and lives in CONTACT_SUBJECT below."
-        ),
+        note="Rendered as a mail link with the subject pre-filled 'Galinstan enquiry via galinstan.ai', which is free source attribution: every enquiry from the site arrives labelled, with no form and no paid analytics. Subject approved 2026-09-25 (Antwain).",
     ),
     Line(
         id="legal-footer",
@@ -207,6 +202,16 @@ LINES = [
             "outbound connection."
         ),
         note="Revision approved 2026-09-22: the 'built to' tense, as body-1.",
+    ),
+    # Moved into the register on 2026-09-25 (Antwain). Both were hardcoded in build.py, and
+    # being outside the register is how they kept an em dash through every copy review.
+    Line(
+        id="privacy-meta-title", status=APPROVED, approved_on="2026-09-25", text="Privacy",
+        note="Approved 2026-09-25 (Antwain): 'just say Privacy, you dont need to repeat the product'. The wordmark is already on the page.",
+    ),
+    Line(
+        id="notfound-meta-title", status=APPROVED, approved_on="2026-09-25", text="Not found",
+        note="Approved 2026-09-25 (Antwain), same reason as privacy-meta-title. The page is noindex and absent from the sitemap; it exists so the host does not serve its own error page instead.",
     ),
 ]
 
