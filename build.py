@@ -443,16 +443,17 @@ def render_brief_pdf() -> bytes:
     return BRIEF_PDF.read_bytes()
 
 
-# The crawler policy, approved by Antwain on 2026-09-21 as option A in
-# `50_Claude_Outputs/MARKETING_STRATEGY.md` §7a: present, not trained on. Search and live
-# AI answers yes, training no.
+# The crawler policy, RULES.md r11, revised by Antwain on 2026-09-25: "AI crawlers: search,
+# live AI answers and training are all allowed. The site carries no IP; the method is not
+# published." It was option A in `50_Claude_Outputs/MARKETING_STRATEGY.md` §7a (present,
+# not trained on) from 2026-09-21 until then.
 #
 # The signal is scoped to the group it sits in, so it goes inside `User-agent: *` rather
-# than above it. Content signals are advisory and some crawlers ignore them, which is why
-# Cloudflare's AI Crawl Control blocks the training category as well — but the policy of
-# record is this committed file. Cloudflare's own managed robots.txt stays off precisely
-# so there are not two places to read it from (SETUP_GITHUB_CLOUDFLARE.md Part 3).
-CONTENT_SIGNAL = "Content-Signal: search=yes, ai-input=yes, ai-train=no"
+# than above it. Content signals are advisory, and the edge has to agree: Cloudflare's AI
+# bot policy for the Training category is set to Allow with this release. The policy of
+# record is still this committed file. Cloudflare's own managed robots.txt stays off
+# precisely so there are not two places to read it from (SETUP_GITHUB_CLOUDFLARE.md Part 3).
+CONTENT_SIGNAL = "Content-Signal: search=yes, ai-input=yes, ai-train=yes"
 
 
 def render_robots() -> str:
