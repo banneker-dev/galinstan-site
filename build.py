@@ -21,6 +21,7 @@ and `tools/guards.py` fails the build over it.
 import argparse
 import filecmp
 import html
+import json
 import pathlib
 import re
 import shutil
@@ -197,7 +198,30 @@ def _footer() -> str:
       </footer>"""
 
 
-def _head(title: str, canonical: str, description: str | None = None, robots: str = "index, follow") -> str:
+def render_structured_data() -> str:
+    """JSON-LD saying what Galinstan is and who publishes it, for search and AI answers.
+
+    "Galinstan" is also a gallium alloy, and a model asked about the name answers about the
+    metal. This tells a crawler that galinstan.ai is software, published by Banneker.
+    Approved by Antwain on 2026-09-25. Every value a reader could see is a register string;
+    the rest is schema.org vocabulary and our own and the publisher's addresses, which
+    `tools/guards.py` permits inside this block and nowhere else.
+    """
+    t = page_copy.text
+    data = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": t("wordmark"),
+        "url": f"{SITE_URL}/",
+        "description": t("meta-description"),
+        "applicationCategory": "BusinessApplication",
+        "publisher": {"@type": "Organization", "name": t("ld-publisher"), "url": "https://banneker.net"},
+    }
+    body = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    return f'\n    <script type="application/ld+json">{body}</script>'
+
+
+def _head(title: str, canonical: str, description: str | None = None, robots: str = "index, follow", extra: str = "") -> str:
     desc = f'\n    <meta name="description" content="{html.escape(description, quote=True)}">' if description else ""
     canon = f'\n    <link rel="canonical" href="{SITE_URL}{canonical}">' if canonical else ""
     return f"""<!doctype html>
@@ -206,7 +230,7 @@ def _head(title: str, canonical: str, description: str | None = None, robots: st
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{html.escape(title)}</title>{desc}{canon}
-    <meta name="robots" content="{robots}">
+    <meta name="robots" content="{robots}">{extra}
     <style>
 {CSS}    </style>
   </head>"""
@@ -243,7 +267,7 @@ def render_index() -> str:
     body = "\n".join(
         f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2", "body-3")
     )
-    return f"""{_head(t("meta-title"), "/", t("meta-description"))}
+    return f"""{_head(t("meta-title"), "/", t("meta-description"), extra=render_structured_data())}
   <body>
     <main>
 {_wordmark(link=False)}

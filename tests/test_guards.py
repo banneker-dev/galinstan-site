@@ -486,3 +486,14 @@ class StructuredData(unittest.TestCase):
 
     def test_the_same_hosts_outside_json_ld_are_still_caught(self):
         self.assertTrue(guards.no_external_references([("p.html", '<a href="https://banneker.net">x</a>')]))
+
+    def test_the_home_page_carries_it_from_register_strings(self):
+        import json
+
+        page = (ROOT / "public" / "index.html").read_text(encoding="utf-8")
+        block = re.search(r'<script type="application/ld\+json">(.*?)</script>', page, re.S).group(1)
+        data = json.loads(block)
+        self.assertEqual(data["name"], page_copy.text("wordmark"))
+        self.assertEqual(data["description"], page_copy.text("meta-description"))
+        self.assertEqual(data["publisher"]["name"], page_copy.text("ld-publisher"))
+        self.assertEqual(data["url"], f"{build.SITE_URL}/")

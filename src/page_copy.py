@@ -359,6 +359,19 @@ BRIEF = [
 
 LINES += BRIEF
 
+# Structured data on the home page (build.render_structured_data). The product's name is
+# `wordmark` and its description `meta-description`, both already approved; this is the one
+# new string. Approved 2026-09-25 (Antwain), with the structured data itself.
+LINES += [
+    Line(
+        id="ld-publisher",
+        status=APPROVED,
+        approved_on="2026-09-25",
+        text="Banneker",
+        note="The publisher's name in the home page's structured data. Approved 2026-09-25 (Antwain).",
+    ),
+]
+
 # Part of the approved `contact` string, kept separate because it is an attribute rather
 # than page text: the pre-filled subject that makes every enquiry self-attributing.
 CONTACT_SUBJECT = "Galinstan enquiry via galinstan.ai"
