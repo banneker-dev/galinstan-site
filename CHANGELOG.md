@@ -4,8 +4,10 @@ Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
 ## [site-2026.09.11] — the last two strings into the copy register
 
-No served byte changes. Both titles render exactly as they did in `site-2026.09.9`;
-what changes is where they come from.
+Both titles render exactly as they did in `site-2026.09.9`; what changes is where they
+come from. One served byte does move: `/privacy` takes `lastmod` `2026-09-25` instead of
+`2026-09-22`, because the page now renders a register string approved today. That is
+correct rather than incidental, since its title did change today.
 
 ### Changed
 - **`/privacy` and `/404` titles move into `src/page_copy.py`** as `privacy-meta-title`
