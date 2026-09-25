@@ -2,7 +2,7 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
-## [Unreleased]
+## [site-2026.09.8] — dashes out, reperformance off the pages, claims guard deleted
 
 ### Changed
 - **No dashes in client-facing copy** (Antwain, 2026-09-23, restated 2026-09-25). Ten strings
