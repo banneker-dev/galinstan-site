@@ -2,6 +2,27 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.11] — the last two strings into the copy register
+
+Both titles render exactly as they did in `site-2026.09.9`; what changes is where they
+come from. One served byte does move: `/privacy` takes `lastmod` `2026-09-25` instead of
+`2026-09-22`, because the page now renders a register string approved today. That is
+correct rather than incidental, since its title did change today.
+
+### Changed
+- **`/privacy` and `/404` titles move into `src/page_copy.py`** as `privacy-meta-title`
+  and `notfound-meta-title`, approved by Antwain 2026-09-25. They were hardcoded in
+  `build.py`, and being outside the register is how they kept an em dash through every
+  copy review. Nothing a visitor sees is now outside the register except the `/404`
+  body, which is noted below.
+- **Three approvals recorded** (Antwain, 2026-09-25): the `headline`, which closes
+  rejected row `r01`, and both mail subjects, which closes `r12`. All three went live in
+  `site-2026.09.8` carrying wording he had not yet signed off.
+
+### Known gap
+- The `/404` heading and its link text are still hardcoded prose. The dash guard's
+  served-page pass covers them for D2, but they are not register strings.
+
 ## [site-2026.09.10] — a guard for D2
 
 ### Added
