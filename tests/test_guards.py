@@ -35,10 +35,12 @@ class BuildTests(unittest.TestCase):
         """CI fails if a generated file differs from what is committed."""
         for name, render in build.ALLOWLIST.items():
             with self.subTest(name=name):
-                committed = (ROOT / "public" / name).read_text(encoding="utf-8")
+                built = render()
+                path = ROOT / "public" / name
+                committed = path.read_bytes() if isinstance(built, bytes) else path.read_text(encoding="utf-8")
                 self.assertEqual(
                     committed,
-                    render(),
+                    built,
                     f"public/{name} is stale. Run python3 build.py and commit the result.",
                 )
 
@@ -378,7 +380,7 @@ class LiveVerifierExpectations(unittest.TestCase):
         and the verifier now refuses redirects, so a filename here would name a URL that
         cannot be verified.
         """
-        covered = set(self.verify_live.EXPECTED)
+        covered = set(self.verify_live.EXPECTED) | self.verify_live.BINARY
         self.assertTrue(
             set(build.SITEMAP) <= covered,
             f"no expectation for {set(build.SITEMAP) - covered}",
@@ -417,3 +419,52 @@ class MailTargets(unittest.TestCase):
             verify_live.fetch = original
         self.assertTrue(any("cta-demo-target mail link is not served" in f for f in failures))
         self.assertTrue(any("/cdn-cgi/l/email-protection" in f for f in failures))
+
+
+class Whitepaper(unittest.TestCase):
+    """The committed PDF is tied to the register's strings, and carries nothing else."""
+
+    def setUp(self):
+        import json
+
+        self.pdf = build.WHITEPAPER_PDF.read_bytes()
+        self.lock = json.loads(build.WHITEPAPER_LOCK.read_text(encoding="utf-8"))
+        self.source = build.render_whitepaper_source()
+
+    def test_the_committed_pdf_matches_its_source(self):
+        self.assertEqual(guards.whitepaper_matches_its_source(), [])
+
+    def test_a_string_changed_without_reprinting_is_caught(self):
+        failures = guards.whitepaper_matches_its_source(
+            self.pdf, self.lock, self.source.replace("How Galinstan works", "How it works")
+        )
+        self.assertTrue(any("source has changed" in f for f in failures), failures)
+
+    def test_a_swapped_pdf_is_caught(self):
+        failures = guards.whitepaper_matches_its_source(self.pdf + b"\n", self.lock, self.source)
+        self.assertTrue(any("not the one the lock records" in f for f in failures), failures)
+
+    def test_an_author_field_is_caught(self):
+        failures = guards.whitepaper_matches_its_source(self.pdf + b"/Author (Someone)", self.lock, self.source)
+        self.assertTrue(any("author field" in f for f in failures), failures)
+
+    def test_a_link_to_a_third_party_is_caught(self):
+        failures = guards.whitepaper_matches_its_source(
+            self.pdf + b"/URI (https://example.com/x)", self.lock, self.source
+        )
+        self.assertTrue(any("example.com" in f for f in failures), failures)
+
+    def test_the_approved_contact_is_the_only_link(self):
+        self.assertEqual(guards._pdf_uris(self.pdf), {build.mail_href("wp-contact")})
+
+    def test_every_word_of_the_source_is_from_the_register(self):
+        self.assertEqual(
+            guards.page_prose_comes_from_the_register([("whitepaper source", self.source)]), []
+        )
+
+    def test_the_paper_is_linked_from_the_pages_approved_for_it(self):
+        for path in build.WHITEPAPER_LINKED_FROM:
+            name = "index.html" if path == "/" else f"{path[1:]}.html"
+            with self.subTest(page=name):
+                self.assertIn(f'href="{build.WHITEPAPER_PATH}"', (build.PUBLIC / name).read_text(encoding="utf-8"))
+        self.assertNotIn(build.WHITEPAPER_PATH, (build.PUBLIC / "intraday-liquidity.html").read_text(encoding="utf-8"))
