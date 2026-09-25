@@ -49,10 +49,33 @@ def _pages() -> list[tuple[str, str]]:
     return pages + [("brief source", build.render_brief_source())]
 
 
+# Structured data names things by URL without fetching them: JSON-LD's `@context` is the
+# schema.org vocabulary, and a publisher's `url` identifies it. A browser opens no connection
+# for either. So URLs inside `<script type="application/ld+json">` are checked against this
+# set rather than failed, and only there (Antwain approved the home page's structured data
+# on 2026-09-25, to tell search and AI answers that Galinstan the software is not the
+# alloy). A host outside the set still fails, in or out of the block.
+STRUCTURED_DATA_HOSTS = {"schema.org", "banneker.net"}
+_LD_JSON = re.compile(r'<script type="application/ld\+json">(.*?)</script>', re.S)
+
+
+def _split_structured_data(text: str) -> tuple[str, list[str]]:
+    """The page with its JSON-LD blocks removed, and the hosts those blocks name that are not
+    in `STRUCTURED_DATA_HOSTS`."""
+    stray = []
+    for block in _LD_JSON.findall(text):
+        for host in re.findall(r"https?://([A-Za-z0-9.\-]+)", block):
+            if host.lower() not in STRUCTURED_DATA_HOSTS and host.lower() != OWN_HOST:
+                stray.append(host.lower())
+    return _LD_JSON.sub("", text), stray
+
+
 def no_external_references(pages=None) -> list[str]:
     """Nothing on a Galinstan page is fetched from somewhere else."""
     failures = []
     for name, text in pages if pages is not None else _pages():
+        text, stray = _split_structured_data(text)
+        failures += [f"{name}: structured data names {host}" for host in stray]
         for pattern, label in _EXTERNAL_PATTERNS:
             if pattern.search(text):
                 failures.append(f"{name}: {label}")
@@ -205,6 +228,8 @@ def live_response_has_only_permitted_fetches(url: str, body: str) -> list[str]:
     nothing about the live page. This runs after a deploy, over the fetched body.
     """
     failures = []
+    body, stray = _split_structured_data(body)
+    failures += [f"{url}: structured data names {host}" for host in stray]
     for host in sorted(set(re.findall(r"https?://([A-Za-z0-9.\-]+)", body))):
         if host == OWN_HOST or host.endswith("." + OWN_HOST):
             continue

@@ -468,3 +468,32 @@ class ProductBrief(unittest.TestCase):
             with self.subTest(page=name):
                 self.assertIn(f'href="{build.BRIEF_PATH}"', (build.PUBLIC / name).read_text(encoding="utf-8"))
         self.assertNotIn(build.BRIEF_PATH, (build.PUBLIC / "intraday-liquidity.html").read_text(encoding="utf-8"))
+
+
+class StructuredData(unittest.TestCase):
+    """JSON-LD names schema.org and the publisher by URL without fetching either."""
+
+    LD = '<script type="application/ld+json">{"@context":"https://schema.org","publisher":{"url":"https://banneker.net"}}</script>'
+
+    def test_the_vocabulary_and_publisher_pass_inside_json_ld(self):
+        self.assertEqual(guards.no_external_references([("p.html", f"<head>{self.LD}</head>")]), [])
+        self.assertEqual(guards.live_response_has_only_permitted_fetches("https://galinstan.ai/", self.LD), [])
+
+    def test_another_host_inside_json_ld_is_caught(self):
+        page = self.LD.replace("https://banneker.net", "https://example.com")
+        self.assertTrue(guards.no_external_references([("p.html", page)]))
+        self.assertTrue(guards.live_response_has_only_permitted_fetches("https://galinstan.ai/", page))
+
+    def test_the_same_hosts_outside_json_ld_are_still_caught(self):
+        self.assertTrue(guards.no_external_references([("p.html", '<a href="https://banneker.net">x</a>')]))
+
+    def test_the_home_page_carries_it_from_register_strings(self):
+        import json
+
+        page = (ROOT / "public" / "index.html").read_text(encoding="utf-8")
+        block = re.search(r'<script type="application/ld\+json">(.*?)</script>', page, re.S).group(1)
+        data = json.loads(block)
+        self.assertEqual(data["name"], page_copy.text("wordmark"))
+        self.assertEqual(data["description"], page_copy.text("meta-description"))
+        self.assertEqual(data["publisher"]["name"], page_copy.text("ld-publisher"))
+        self.assertEqual(data["url"], f"{build.SITE_URL}/")
