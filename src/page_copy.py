@@ -249,12 +249,12 @@ STAGE_2 = [
     Line(id="ae-body-1", status=APPROVED, approved_on="2026-09-22", text="The standard offer in this market is a trail: who ran what, when, against which document, with the answer linked back to its source. That is worth having, and it is what an audit trail is for. It also asks the reviewer to take the record on trust, because the record is all there is."),
     Line(id="ae-body-2", status=APPROVED, approved_on="2026-09-22", text="A different standard is possible when the software runs inside the institution. The inputs never leave. The version that produced the result sits on the institution's own disk. Nothing is rewritten between the calculation and the report by a service neither party controls."),
     Line(id="ae-body-3", status=APPROVED, approved_on="2026-09-22", text="Module 2 is built around that: control testing and gap analysis against DORA and the EBA outsourcing guidelines, with the evidence for each finding citing where it came from, and with the model and method that produced it recorded beside it rather than described afterwards."),
-    Line(id="ae-body-4", status=APPROVED, approved_on="2026-09-22", text="We do not certify anything, and we do not tell a supervisor that an institution has met an obligation. Galinstan produces the evidence your own people use to reach that view, and to show their work."),
     Line(id="ae-cta", status=APPROVED, approved_on="2026-09-22", text="Request a demo"),
     Line(id="nav-1", status=APPROVED, approved_on="2026-09-22", text="Intraday liquidity"),
     Line(id="nav-2", status=APPROVED, approved_on="2026-09-22", text="Audit evidence"),
     Line(id="nav-3", status=APPROVED, approved_on="2026-09-22", text="Deployment"),
-    Line(id="foot-claim", status=APPROVED, approved_on="2026-09-22", text="We do not certify that any institution meets a regulatory obligation. Galinstan is built to run inside your perimeter and produce evidence."),
+    Line(
+        id="foot-claim", status=APPROVED, approved_on="2026-09-25", text="Galinstan is built to run inside your perimeter and produce evidence.", note="Revision approved 2026-09-25 (Antwain): the disclaimer sentence is cut. A footer carries a tagline, the entity and the legal links, not a disclaimer."),
 ]
 
 LINES += STAGE_2

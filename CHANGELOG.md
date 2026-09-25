@@ -2,6 +2,19 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.7] — the disclaimer off the footer
+
+Antwain's copy decisions of 2026-09-25, the first two parts of ask 66 in
+`00_Start_Here/CURRENT_STATE.md`. The third part of that ask is not in this release.
+
+### Changed
+- **`foot-claim`** loses its first sentence, "We do not certify that any institution meets a
+  regulatory obligation." The string is now "Galinstan is built to run inside your perimeter
+  and produce evidence." A footer carries a tagline, the entity and the legal links.
+
+### Removed
+- **`ae-body-4`.** `/audit-evidence` ends at `ae-body-3` and its "Request a demo" link.
+
 ## [site-2026.09.6] — two sentences out of `/deployment`
 
 ### Changed
