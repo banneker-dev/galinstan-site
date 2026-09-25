@@ -161,13 +161,10 @@ LINES = [
         status=APPROVED,
         approved_on="2026-09-22",
         text=(
-            "The data controller for this site is Sherman A. Cross, trading as Banneker. "
-            "Contact: partners@banneker.net."
+            "**Data controller.** The data controller for this site is Sherman A. Cross, trading as Banneker. Contact: partners@banneker.net."
         ),
         note=(
-            "A reviewed legal string. The law asks for the controller's identity here. "
-            "Revision approved 2026-09-22: partners@ replaces antwain@, an alias onto the "
-            "same monitored mailbox."
+            "A reviewed legal string. The law asks for the controller's identity here. Revision approved 2026-09-22: partners@ replaces antwain@, an alias onto the same monitored mailbox. Label folded into the string on 2026-09-25 so no page prose sits outside the register. The served bytes are unchanged: the renderer used to emit the same <strong> itself."
         ),
     ),
     Line(
@@ -175,14 +172,10 @@ LINES = [
         status=APPROVED,
         approved_on="2026-09-21",
         text=(
-            "This site uses Cloudflare Web Analytics to count visits. It sets no cookies "
-            "and does not track you across other sites. Cloudflare, which hosts the site, "
-            "processes your IP address to deliver the page and protect it from abuse. Our "
-            "lawful basis is our legitimate interest in knowing how the site is used."
+            "**Analytics.** This site uses Cloudflare Web Analytics to count visits. It sets no cookies and does not track you across other sites. Cloudflare, which hosts the site, processes your IP address to deliver the page and protect it from abuse. Our lawful basis is our legitimate interest in knowing how the site is used."
         ),
         note=(
-            "Cloudflare Web Analytics is free, cookieless and needs no consent banner. Its "
-            "limits are six months of history and no custom events."
+            "Cloudflare Web Analytics is free, cookieless and needs no consent banner. Its limits are six months of history and no custom events. Label folded into the string on 2026-09-25 so no page prose sits outside the register. The served bytes are unchanged: the renderer used to emit the same <strong> itself."
         ),
     ),
     Line(
@@ -212,6 +205,21 @@ LINES = [
     Line(
         id="notfound-meta-title", status=APPROVED, approved_on="2026-09-25", text="Not found",
         note="Approved 2026-09-25 (Antwain), same reason as privacy-meta-title. The page is noindex and absent from the sitemap; it exists so the host does not serve its own error page instead.",
+    ),
+    # Moved in on 2026-09-25 so that no prose a visitor can read sits outside this register.
+    # The wording of all three is unchanged and has been live since site-2026.09.1; what is
+    # new is that it is now recorded, approvable and checked.
+    Line(
+        id="privacy-contact-label", status=APPROVED, approved_on="2026-09-25", text="**Contact.**",
+        note="The bold label on the privacy page's contact line. Was hardcoded in build.py; wording unchanged.",
+    ),
+    Line(
+        id="notfound-h1", status=APPROVED, approved_on="2026-09-25", text="That page does not exist.",
+        note="The /404 heading. Was hardcoded in build.py; wording unchanged since the first release.",
+    ),
+    Line(
+        id="notfound-link", status=APPROVED, approved_on="2026-09-25", text="Return to the front page.",
+        note="The /404 link home. Was hardcoded in build.py; wording unchanged since the first release.",
     ),
 ]
 

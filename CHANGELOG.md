@@ -2,6 +2,36 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.13] — every string a visitor reads comes from the register
+
+No served byte changes. The pages are identical; what changes is where their strings
+live, and therefore whether one can reach a visitor without being approved.
+
+### Added
+- **Guard: page prose comes from the register**, approved by Antwain 2026-09-25. Every text
+  node in every built page, plus the description a search result shows, must be contained in
+  an approved string in `src/page_copy.py`.
+- Containment rather than equality, because a `**lead-in**` renders as two text nodes around
+  a `<strong>`, so a node is legitimately a fragment of the string that produced it.
+- `style` and `script` contents are not prose. Attributes other than the description are
+  addresses and markup.
+- Five tests, and the runner was broken on a real built page to confirm a non-zero exit.
+  Suite is 53.
+
+### Changed
+- **Six strings of page prose moved into the register**, all wording unchanged and live since
+  `site-2026.09.1`. The `/privacy` labels "Data controller." and "Analytics." fold into their
+  approved strings, the convention every stage 2 body line already follows. The privacy `h1`
+  reads `privacy-meta-title`. New strings: `privacy-contact-label`, `notfound-h1`,
+  `notfound-link`.
+- The guard found six. Reading the renderers by eye had found two, which is the argument for
+  having it rather than a habit.
+
+### Why this is a release and not housekeeping
+- `publishable()` only looks at register strings, so prose outside the register could be
+  reworded and go live with no approval gate at all. That was the actual hole. The dash was
+  the symptom that revealed it.
+
 ## [site-2026.09.12] — D2 asserted over the response
 
 ### Added

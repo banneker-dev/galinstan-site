@@ -11,9 +11,11 @@ absence of something is not a test until the thing has been confirmed to run.
 
 from __future__ import annotations
 
+import html as _html
 import pathlib
 import re
 import sys
+from html.parser import HTMLParser
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -95,6 +97,68 @@ def no_dashes_as_punctuation(pages=None) -> list[str]:
         for ch, label in _DASH_AS_PUNCTUATION:
             if ch in text:
                 failures.append(f"{name}: {label} in the served page")
+    return failures
+
+
+class _Prose(HTMLParser):
+    """Every string a visitor can read: text nodes, plus the description a search result shows.
+
+    Skips style and script, which are not prose, and attributes other than the description,
+    which are addresses and markup rather than copy.
+    """
+
+    _SKIP = {"style", "script"}
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self._open: list[str] = []
+        self.found: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        self._open.append(tag)
+        pairs = dict(attrs)
+        if tag == "meta" and pairs.get("name") == "description" and pairs.get("content"):
+            self.found.append(pairs["content"])
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        self._open.pop()
+
+    def handle_endtag(self, tag):
+        if self._open and self._open[-1] == tag:
+            self._open.pop()
+
+    def handle_data(self, data):
+        if any(t in self._SKIP for t in self._open):
+            return
+        text = " ".join(data.split())
+        if text:
+            self.found.append(text)
+
+
+def _flat(text: str) -> str:
+    return " ".join(_html.unescape(text).split())
+
+
+def page_prose_comes_from_the_register(pages=None) -> list[str]:
+    """src/page_copy.py says nothing else in this repository may contain page prose. Until this
+    guard existed that was an intention rather than a fact, and six strings were outside it.
+
+    A text node passes when it is contained in some approved string. Containment rather than
+    equality, because `**lead-in**` renders as two nodes around a <strong>, so a node is
+    legitimately a fragment of the string that produced it.
+    """
+    approved = [_flat(item.text.replace("**", "")) for item in page_copy.LINES]
+    approved += [_flat(item.mail_subject) for item in page_copy.LINES if item.mail_subject]
+
+    failures = []
+    for name, text in pages if pages is not None else _pages():
+        parser = _Prose()
+        parser.feed(text)
+        for node in parser.found:
+            flat = _flat(node)
+            if not any(flat in candidate for candidate in approved):
+                failures.append(f"{name}: prose not in the copy register: {node!r}")
     return failures
 
 
@@ -255,6 +319,7 @@ def mail_targets_carry_their_subjects(pages=None) -> list[str]:
 ALWAYS = {
     "no external references": no_external_references,
     "no dashes as punctuation": no_dashes_as_punctuation,
+    "page prose comes from the register": page_prose_comes_from_the_register,
     "required metadata": required_metadata,
     "declared addresses agree": declared_addresses_agree,
     "crawler policy": crawler_policy,
