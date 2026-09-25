@@ -109,6 +109,9 @@ class GuardsPassOnTheRealBuild(unittest.TestCase):
     def test_no_dashes_as_punctuation(self):
         self.assertEqual(guards.no_dashes_as_punctuation(), [])
 
+    def test_page_prose_comes_from_the_register(self):
+        self.assertEqual(guards.page_prose_comes_from_the_register(), [])
+
     def test_required_metadata(self):
         self.assertEqual(guards.required_metadata(), [])
 
@@ -176,6 +179,32 @@ class GuardsFailWhenTheyShould(unittest.TestCase):
         """Why the served-page pass is limited to real dashes: the build inlines CSS."""
         page = [("index.html", "<style>main { width: calc(100% - 2rem); margin: -1.5rem 0; }</style>")]
         self.assertEqual(guards.no_dashes_as_punctuation(page), [])
+
+    def test_prose_invented_in_the_renderer_is_caught(self):
+        """The whole point. Six strings sat in build.py until this guard existed, and two of
+        them carried an em dash through every copy review by not being register strings.
+        """
+        page = [("404.html", "<h1>That page does not exist.</h1>")]
+        self.assertEqual(guards.page_prose_comes_from_the_register(page), [])
+        invented = [("404.html", "<h1>Sorry, we could not find that.</h1>")]
+        self.assertTrue(guards.page_prose_comes_from_the_register(invented))
+
+    def test_a_fragment_of_an_approved_string_passes(self):
+        """A `**lead-in**` renders as two text nodes around a <strong>, so a node is
+        legitimately a fragment rather than a whole string.
+        """
+        page = [("deployment.html", "<p><strong>What leaves.</strong> Nothing, by design.</p>")]
+        self.assertEqual(guards.page_prose_comes_from_the_register(page), [])
+
+    def test_css_and_script_are_not_prose(self):
+        page = [("index.html", "<style>body { font-family: Georgia; }</style>"
+                               "<script>const x = 'not copy';</script>")]
+        self.assertEqual(guards.page_prose_comes_from_the_register(page), [])
+
+    def test_a_search_description_is_prose(self):
+        """It is what a search result shows, so it is read by a visitor like any other string."""
+        page = [("index.html", '<meta name="description" content="Invented by a renderer.">')]
+        self.assertTrue(guards.page_prose_comes_from_the_register(page))
 
     def test_missing_metadata_is_caught(self):
         page = [("index.html", "<html><title>x</title></html>")]
