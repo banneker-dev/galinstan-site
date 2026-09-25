@@ -230,7 +230,7 @@ def render_stage_2(path: str) -> str:
       <h1>{_markup(t(f"{prefix}-h1"))}</h1>
       <p class="sub">{_markup(t(f"{prefix}-sub"))}</p>
 {body}
-      <p class="cta">{_mail_link("cta-demo-target", f"{prefix}-cta")}</p>
+{_brief_link(path)}      <p class="cta">{_mail_link("cta-demo-target", f"{prefix}-cta")}</p>
 {_footer()}
     </main>
   </body>
@@ -250,7 +250,7 @@ def render_index() -> str:
 {_nav(None)}
       <h1>{_markup(t("headline"))}</h1>
 {body}
-      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
+{_brief_link("/")}      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
 {_footer()}
     </main>
   </body>
@@ -300,6 +300,123 @@ def render_404() -> str:
   </body>
 </html>
 """
+
+
+# The product brief, the public paper, served at /galinstan-brief.pdf.
+#
+# **The PDF is committed, not built here**, because this build has no dependencies and a
+# typeset PDF needs a browser engine. So the build renders the paper's *source*, an HTML
+# page made only of strings from the copy register, and `tools/make_brief.py` prints
+# that source to `assets/galinstan-brief.pdf` with a local Chrome and records both hashes in
+# `assets/galinstan-brief.lock.json`. The guard `brief_matches_its_source` fails the build
+# if the register, this template or the PDF changes without the other two: a paper that
+# ships is always the one its approved strings describe.
+#
+# No URL in it but the contact mail link, no author field, no NDA offer (Antwain,
+# 2026-09-25: the technical detail is not offered without a direct conversation first).
+ASSETS = ROOT / "assets"
+BRIEF_PDF = ASSETS / "galinstan-brief.pdf"
+BRIEF_LOCK = ASSETS / "galinstan-brief.lock.json"
+BRIEF_PATH = "/galinstan-brief.pdf"
+BRIEF_LINKED_FROM = ("/", "/audit-evidence", "/deployment")
+
+BRIEF_CSS = """\
+@page {
+  size: A4;
+  margin: 24mm 22mm 24mm 22mm;
+  @bottom-left { content: "Galinstan"; font: 400 8pt Charter, serif; letter-spacing: 0.14em; color: #6b747b; }
+  @bottom-right { content: counter(page); font: 400 8pt Charter, serif; color: #6b747b; }
+}
+@page :first { @bottom-left { content: none; } @bottom-right { content: none; } }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; color: #101418; font: 400 10.5pt/1.55 Charter, Georgia, serif; }
+.wordmark { font-size: 9pt; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 30mm; }
+h1 { font-size: 28pt; font-weight: 400; line-height: 1.15; margin: 0 0 6mm; }
+.sub { font-size: 13.5pt; line-height: 1.45; color: #3d474f; max-width: 130mm; margin: 0 0 12mm; }
+.edition { font-size: 9pt; color: #6b747b; border-top: 0.5pt solid #b8c0c6; padding-top: 3mm; margin: 0 0 14mm; }
+h2 { font-size: 15pt; font-weight: 700; margin: 9mm 0 3mm; break-after: avoid; }
+h3 { font-size: 11pt; font-weight: 700; margin: 6mm 0 1.5mm; break-after: avoid; }
+p { margin: 0 0 3mm; orphans: 3; widows: 3; }
+ul { margin: 0 0 3.5mm; padding-left: 5mm; }
+li { margin: 0 0 1.8mm; }
+ol.sources { font-size: 9pt; line-height: 1.45; padding-left: 6mm; color: #3d474f; }
+strong { font-weight: 700; }
+a { color: inherit; }
+.close { margin-top: 10mm; padding-top: 3mm; border-top: 0.5pt solid #b8c0c6; font-size: 9.5pt; }
+.close p { margin: 0 0 1.5mm; }
+.cover { break-after: page; }
+"""
+
+_BRIEF_BODY = re.compile(r"brief-(h|h3|p|li|ref)-.+")
+
+
+def render_brief_source() -> str:
+    """The paper as HTML, every visible word from the register, in the register's order.
+
+    The cover carries the summary, so it reads as a one-page brief on its own; the rest
+    follows on the pages after it.
+    """
+    t = page_copy.text
+    items = [(m.group(1), i.id) for i in page_copy.LINES if (m := _BRIEF_BODY.fullmatch(i.id))]
+    out: list[str] = []
+    open_list = ""
+    for kind, line_id in items:
+        wanted = {"li": "ul", "ref": "ol"}.get(kind, "")
+        if open_list and open_list != wanted:
+            out.append(f"      </{open_list}>")
+            open_list = ""
+        if kind == "h":
+            if line_id == "brief-h-problem":  # the cover ends with the summary
+                out.append("    </section>\n    <section>")
+            out.append(f"      <h2>{_markup(t(line_id))}</h2>")
+        elif kind == "h3":
+            out.append(f"      <h3>{_markup(t(line_id))}</h3>")
+        elif kind == "p":
+            out.append(f"      <p>{_markup(t(line_id))}</p>")
+        else:
+            if not open_list:
+                cls = ' class="sources"' if wanted == "ol" else ""
+                out.append(f"      <{wanted}{cls}>")
+                open_list = wanted
+            out.append(f"        <li>{_markup(t(line_id))}</li>")
+    if open_list:
+        out.append(f"      </{open_list}>")
+    body = "\n".join(out)
+    return f"""<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{html.escape(t("brief-meta-title"))}</title>
+    <style>
+{BRIEF_CSS}    </style>
+  </head>
+  <body>
+    <section class="cover">
+      <p class="wordmark">{_markup(t("wordmark"))}</p>
+      <h1>{_markup(t("brief-title"))}</h1>
+      <p class="sub">{_markup(t("brief-sub"))}</p>
+      <p class="edition">{_markup(t("brief-edition"))}</p>
+{body}
+      <div class="close">
+        <p>{_markup(t("brief-contact-label"))} {_mail_link("brief-contact")}</p>
+        <p>{_markup(t("entity"))}</p>
+        <p>{_markup(t("legal-footer"))}</p>
+      </div>
+    </section>
+  </body>
+</html>
+"""
+
+
+def _brief_link(path: str) -> str:
+    if path not in BRIEF_LINKED_FROM:
+        return ""
+    return f'      <p><a href="{BRIEF_PATH}">{_markup(page_copy.text("brief-link"))}</a></p>\n'
+
+
+def render_brief_pdf() -> bytes:
+    return BRIEF_PDF.read_bytes()
 
 
 # The crawler policy, approved by Antwain on 2026-09-21 as option A in
@@ -363,6 +480,7 @@ SITEMAP = {
     "/": lambda: render_index(),
     **{path: (lambda p=path: render_stage_2(p)) for path in PAGES},
     "/privacy": lambda: render_privacy(),
+    BRIEF_PATH: lambda: render_brief_source(),
 }
 
 
@@ -393,6 +511,7 @@ ALLOWLIST = {
     "404.html": render_404,
     "robots.txt": render_robots,
     "sitemap.xml": render_sitemap,
+    "galinstan-brief.pdf": render_brief_pdf,
 }
 
 
@@ -401,7 +520,11 @@ def build(target: pathlib.Path) -> None:
         shutil.rmtree(target)
     target.mkdir(parents=True)
     for name, render in ALLOWLIST.items():
-        (target / name).write_text(render(), encoding="utf-8")
+        content = render()
+        if isinstance(content, bytes):
+            (target / name).write_bytes(content)
+        else:
+            (target / name).write_text(content, encoding="utf-8")
 
 
 def main() -> int:

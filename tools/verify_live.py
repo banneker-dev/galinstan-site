@@ -112,6 +112,11 @@ EXPECTED = {
     "/privacy": ("privacy-controller", "The data controller for this site is"),
 }
 
+# Declared addresses that are not pages. The product brief is checked by its bytes: the
+# served file must be the one `assets/galinstan-brief.lock.json` records, which is the one the
+# build-time guard tied to the approved strings.
+BINARY = {"/galinstan-brief.pdf"}
+
 # Rewrites the edge performs on the response, which no build-time guard can see because
 # they happen after the build. Each entry is a marker that must NOT appear, and the reason.
 #
@@ -133,7 +138,35 @@ def _path_of(url: str) -> str:
     return urlparse(url).path or "/"
 
 
+def verify_brief(url: str) -> list[str]:
+    import hashlib
+    import json
+
+    separator = "&" if "?" in url else "?"
+    request = urllib.request.Request(
+        f"{url}{separator}cb={uuid.uuid4().hex}",
+        headers={"User-Agent": BROWSER_UA, "Accept": "application/pdf", "Cache-Control": "no-cache"},
+    )
+    try:
+        with _OPENER.open(request, timeout=TIMEOUT) as response:  # noqa: S310
+            body = response.read()
+            kind = response.headers.get("Content-Type", "")
+    except urllib.error.HTTPError as exc:
+        if 300 <= exc.code < 400:
+            return [f"{url}: answered {exc.code} to {exc.headers.get('Location', '')}"]
+        raise
+    failures = []
+    if not kind.startswith("application/pdf"):
+        failures.append(f"{url}: served as {kind!r}, not application/pdf")
+    lock = json.loads(build.BRIEF_LOCK.read_text(encoding="utf-8"))
+    if hashlib.sha256(body).hexdigest() != lock["pdf_sha256"]:
+        failures.append(f"{url}: the served file is not the one the lock records")
+    return failures
+
+
 def verify(url: str) -> list[str]:
+    if _path_of(url) in BINARY:
+        return verify_brief(url)
     try:
         body = fetch(url)
     except Redirected as exc:
@@ -236,7 +269,7 @@ def main() -> int:
             for f in failures:
                 print(f"        {f}")
         else:
-            label = EXPECTED.get(_path_of(url), ("content", ""))[0]
+            label = EXPECTED.get(_path_of(url), ("file", ""))[0]
             print(f"ok    {url} — approved {label} present, no unexpected third-party host")
 
     if urls:

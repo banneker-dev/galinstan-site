@@ -43,7 +43,10 @@ _HTML = tuple(name for name in build.ALLOWLIST if name.endswith(".html"))
 
 
 def _pages() -> list[tuple[str, str]]:
-    return [(n, (PUBLIC / n).read_text(encoding="utf-8")) for n in _HTML if (PUBLIC / n).exists()]
+    # The product brief's source is checked with the pages: it is prose a visitor reads, in
+    # the PDF, so the dash, register and mail-link guards apply to it as to any page.
+    pages = [(n, (PUBLIC / n).read_text(encoding="utf-8")) for n in _HTML if (PUBLIC / n).exists()]
+    return pages + [("brief source", build.render_brief_source())]
 
 
 def no_external_references(pages=None) -> list[str]:
@@ -63,7 +66,8 @@ def no_external_references(pages=None) -> list[str]:
 
 
 # RULES.md D2, Antwain 2026-09-24: "No dashes as punctuation in the middle of a sentence in
-# any marketing, website, whitepaper or report copy; hyphenated compounds are fine."
+# any marketing, website, whitepaper, product brief or report copy; hyphenated compounds are
+# fine." (product brief added 2026-09-25)
 #
 # Two passes, because the rule was broken in two different ways and one pass catches only one.
 # Ten violations lived in the copy register. Two lived in page titles that were not in the
@@ -245,7 +249,11 @@ def declared_addresses_agree(pages=None, sitemap=None) -> list[str]:
     """
     failures = []
     declared = {path: f"{build.SITE_URL}{path}" for path in build.SITEMAP}
-    canonical_of = {path: ("index.html" if path == "/" else f"{path[1:]}.html") for path in build.SITEMAP}
+    canonical_of = {
+        path: ("index.html" if path == "/" else f"{path[1:]}.html")
+        for path in build.SITEMAP
+        if path != build.BRIEF_PATH  # a PDF has no canonical tag to agree with
+    }
 
     if sitemap is None:
         sitemap = (PUBLIC / "sitemap.xml").read_text(encoding="utf-8")
@@ -316,6 +324,55 @@ def mail_targets_carry_their_subjects(pages=None) -> list[str]:
     return failures
 
 
+def _pdf_uris(pdf: bytes) -> set[str]:
+    return {u.decode("latin-1").replace("\\(", "(").replace("\\)", ")")
+            for u in re.findall(rb"/URI\s*\(((?:[^()\\]|\\.)*)\)", pdf)}
+
+
+def brief_matches_its_source(pdf=None, lock=None, source=None) -> list[str]:
+    """The committed PDF is the one the register's strings describe, and says nothing else.
+
+    `tools/make_brief.py` prints the source and records both hashes. If a `brief-` string
+    or the template changes and the PDF is not printed again, the source hash disagrees;
+    if the PDF is swapped or edited, its own hash does. Either way the build fails rather
+    than serving a paper nobody approved. It also fails on an author field (RULES.md D5:
+    no direct reference to Antwain in the whitepaper or the product brief), and on any
+    link but the approved contact, since a PDF's links are not in the pages the other
+    guards read.
+    """
+    import hashlib
+    import json
+
+    failures = []
+    if lock is None:
+        if not build.BRIEF_LOCK.exists():
+            return [f"{build.BRIEF_LOCK.name}: missing; run tools/make_brief.py"]
+        lock = json.loads(build.BRIEF_LOCK.read_text(encoding="utf-8"))
+    if pdf is None:
+        if not build.BRIEF_PDF.exists():
+            return [f"{build.BRIEF_PDF.name}: missing; run tools/make_brief.py"]
+        pdf = build.BRIEF_PDF.read_bytes()
+    if source is None:
+        source = build.render_brief_source()
+
+    if hashlib.sha256(source.encode("utf-8")).hexdigest() != lock.get("source_sha256"):
+        failures.append(
+            "galinstan-brief.pdf: its source has changed since it was printed; "
+            "run tools/make_brief.py"
+        )
+    if hashlib.sha256(pdf).hexdigest() != lock.get("pdf_sha256"):
+        failures.append("galinstan-brief.pdf: the file is not the one the lock records")
+    if re.search(rb"/Author\s*\(", pdf):
+        failures.append("galinstan-brief.pdf: carries an author field")
+    allowed = {build.mail_href("brief-contact")}
+    for uri in sorted(_pdf_uris(pdf) - allowed):
+        host = re.match(r"https?://([^/]+)", uri)
+        if host and (host.group(1) == OWN_HOST or host.group(1).endswith("." + OWN_HOST)):
+            continue
+        failures.append(f"galinstan-brief.pdf: links to {uri!r}, which is not the approved contact")
+    return failures
+
+
 ALWAYS = {
     "no external references": no_external_references,
     "no dashes as punctuation": no_dashes_as_punctuation,
@@ -324,6 +381,7 @@ ALWAYS = {
     "declared addresses agree": declared_addresses_agree,
     "crawler policy": crawler_policy,
     "mail targets carry their subjects": mail_targets_carry_their_subjects,
+    "brief matches its source": brief_matches_its_source,
 }
 
 PRODUCTION_ONLY = {"publication gate": publication_gate}
