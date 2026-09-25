@@ -2,6 +2,18 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.12] — D2 asserted over the response
+
+### Added
+- **The live verifier checks `RULES.md` D2 on every page it fetches**, approved by Antwain
+  2026-09-25. The build guard from `site-2026.09.10` checks the register and the assembled
+  pages; this checks what a visitor is actually served.
+- The reason is specific rather than theoretical. Cloudflare's Email Address Obfuscation
+  rewrote the approved contact address on the first production release, which is why
+  `FORBIDDEN_MARKERS` exists. A guard that cannot see the edge cannot speak for the edge.
+- Confirmed in both directions against the real production response: clean as served, and
+  failing when a dash is put back into the fetched body.
+
 ## [site-2026.09.11] — the last two strings into the copy register
 
 Both titles render exactly as they did in `site-2026.09.9`; what changes is where they
