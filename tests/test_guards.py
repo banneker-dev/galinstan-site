@@ -421,50 +421,50 @@ class MailTargets(unittest.TestCase):
         self.assertTrue(any("/cdn-cgi/l/email-protection" in f for f in failures))
 
 
-class Whitepaper(unittest.TestCase):
+class ProductBrief(unittest.TestCase):
     """The committed PDF is tied to the register's strings, and carries nothing else."""
 
     def setUp(self):
         import json
 
-        self.pdf = build.WHITEPAPER_PDF.read_bytes()
-        self.lock = json.loads(build.WHITEPAPER_LOCK.read_text(encoding="utf-8"))
-        self.source = build.render_whitepaper_source()
+        self.pdf = build.BRIEF_PDF.read_bytes()
+        self.lock = json.loads(build.BRIEF_LOCK.read_text(encoding="utf-8"))
+        self.source = build.render_brief_source()
 
     def test_the_committed_pdf_matches_its_source(self):
-        self.assertEqual(guards.whitepaper_matches_its_source(), [])
+        self.assertEqual(guards.brief_matches_its_source(), [])
 
     def test_a_string_changed_without_reprinting_is_caught(self):
-        failures = guards.whitepaper_matches_its_source(
+        failures = guards.brief_matches_its_source(
             self.pdf, self.lock, self.source.replace("How Galinstan works", "How it works")
         )
         self.assertTrue(any("source has changed" in f for f in failures), failures)
 
     def test_a_swapped_pdf_is_caught(self):
-        failures = guards.whitepaper_matches_its_source(self.pdf + b"\n", self.lock, self.source)
+        failures = guards.brief_matches_its_source(self.pdf + b"\n", self.lock, self.source)
         self.assertTrue(any("not the one the lock records" in f for f in failures), failures)
 
     def test_an_author_field_is_caught(self):
-        failures = guards.whitepaper_matches_its_source(self.pdf + b"/Author (Someone)", self.lock, self.source)
+        failures = guards.brief_matches_its_source(self.pdf + b"/Author (Someone)", self.lock, self.source)
         self.assertTrue(any("author field" in f for f in failures), failures)
 
     def test_a_link_to_a_third_party_is_caught(self):
-        failures = guards.whitepaper_matches_its_source(
+        failures = guards.brief_matches_its_source(
             self.pdf + b"/URI (https://example.com/x)", self.lock, self.source
         )
         self.assertTrue(any("example.com" in f for f in failures), failures)
 
     def test_the_approved_contact_is_the_only_link(self):
-        self.assertEqual(guards._pdf_uris(self.pdf), {build.mail_href("wp-contact")})
+        self.assertEqual(guards._pdf_uris(self.pdf), {build.mail_href("brief-contact")})
 
     def test_every_word_of_the_source_is_from_the_register(self):
         self.assertEqual(
-            guards.page_prose_comes_from_the_register([("whitepaper source", self.source)]), []
+            guards.page_prose_comes_from_the_register([("brief source", self.source)]), []
         )
 
     def test_the_paper_is_linked_from_the_pages_approved_for_it(self):
-        for path in build.WHITEPAPER_LINKED_FROM:
+        for path in build.BRIEF_LINKED_FROM:
             name = "index.html" if path == "/" else f"{path[1:]}.html"
             with self.subTest(page=name):
-                self.assertIn(f'href="{build.WHITEPAPER_PATH}"', (build.PUBLIC / name).read_text(encoding="utf-8"))
-        self.assertNotIn(build.WHITEPAPER_PATH, (build.PUBLIC / "intraday-liquidity.html").read_text(encoding="utf-8"))
+                self.assertIn(f'href="{build.BRIEF_PATH}"', (build.PUBLIC / name).read_text(encoding="utf-8"))
+        self.assertNotIn(build.BRIEF_PATH, (build.PUBLIC / "intraday-liquidity.html").read_text(encoding="utf-8"))

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Prints the whitepaper's source to `assets/whitepaper.pdf` and records both hashes.
+"""Prints the product brief's source to `assets/galinstan-brief.pdf` and records both hashes.
 
-Run on a Mac with Google Chrome installed, after any change to a `wp-` string in the
-copy register or to the whitepaper template in `build.py`:
+Run on a Mac with Google Chrome installed, after any change to a `brief-` string in the
+copy register or to the product brief template in `build.py`:
 
-    python3 tools/make_whitepaper.py
+    python3 tools/make_brief.py
     python3 build.py
 
 It is a local tool, not a build step: the site build has no dependencies, and a browser
 engine is one. CI never runs it. CI runs the guard that checks its output, which is
-`whitepaper_matches_its_source` in `tools/guards.py`.
+`brief_matches_its_source` in `tools/guards.py`.
 
 The source is printed from a file in a temporary directory, with no network: every
 word and style is inline and the font is the machine's own (Charter, whose embedding
@@ -40,12 +40,12 @@ def main() -> int:
     if not CHROME.exists():
         print(f"Google Chrome is not at {CHROME}", file=sys.stderr)
         return 1
-    source = build.render_whitepaper_source()
+    source = build.render_brief_source()
     build.ASSETS.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
-        page = pathlib.Path(tmp) / "whitepaper.html"
+        page = pathlib.Path(tmp) / "brief.html"
         page.write_text(source, encoding="utf-8")
-        out = pathlib.Path(tmp) / "whitepaper.pdf"
+        out = pathlib.Path(tmp) / "galinstan-brief.pdf"
         # Headless Chrome on macOS writes the PDF and then does not always exit, so the
         # file is watched rather than the process: once Chrome reports the bytes written
         # and the size stops changing, it is stopped.
@@ -82,7 +82,7 @@ def main() -> int:
                 chrome.terminate()
                 chrome.wait(timeout=10)
         pdf = out.read_bytes()
-    build.WHITEPAPER_PDF.write_bytes(pdf)
+    build.BRIEF_PDF.write_bytes(pdf)
     lock = {
         "source_sha256": sha256(source.encode("utf-8")),
         "pdf_sha256": sha256(pdf),
@@ -90,9 +90,9 @@ def main() -> int:
             [str(CHROME), "--version"], check=True, capture_output=True, text=True
         ).stdout.strip(),
     }
-    build.WHITEPAPER_LOCK.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
-    print(f"Wrote {build.WHITEPAPER_PDF.relative_to(ROOT)} ({len(pdf):,} bytes)")
-    print(f"Wrote {build.WHITEPAPER_LOCK.relative_to(ROOT)}")
+    build.BRIEF_LOCK.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote {build.BRIEF_PDF.relative_to(ROOT)} ({len(pdf):,} bytes)")
+    print(f"Wrote {build.BRIEF_LOCK.relative_to(ROOT)}")
     return 0
 
 

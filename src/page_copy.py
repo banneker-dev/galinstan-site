@@ -269,91 +269,91 @@ STAGE_2 = [
 LINES += STAGE_2
 
 # --------------------------------------------------------------------------------------
-# The public whitepaper, served as /whitepaper.pdf. Drafted by Cody on Antwain's
+# The product brief, the public paper, served as /galinstan-brief.pdf. Drafted by Cody on Antwain's
 # instruction of 2026-09-25 ("you prepare pdf"), from the three-layer proposal he approved
 # the same day: what the product does and why, with its published sources; how it does it
-# stays out. Rendered by `build.render_whitepaper_source`, in this order. The id says what
-# each string is: wp-h- a section heading, wp-h3- a subheading, wp-li- a list item,
-# wp-ref- a source, wp-p- a paragraph.
+# stays out. Rendered by `build.render_brief_source`, in this order. The id says what
+# each string is: brief-h- a section heading, brief-h3- a subheading, brief-li- a list item,
+# brief-ref- a source, brief-p- a paragraph.
 # --------------------------------------------------------------------------------------
 
-_WP_NOTE = "Drafted by Cody, 2026-09-25, on Antwain's instruction. Awaiting his approval."
+_BRIEF_NOTE = "Drafted by Cody, 2026-09-25, on Antwain's instruction. Awaiting his approval."
 
 
-def _wp(line_id: str, text: str, **kw) -> Line:
-    return Line(id=line_id, status=PENDING, text=text, note=_WP_NOTE, **kw)
+def _brief(line_id: str, text: str, **kw) -> Line:
+    return Line(id=line_id, status=PENDING, text=text, note=_BRIEF_NOTE, **kw)
 
 
-WHITEPAPER = [
-    _wp("wp-meta-title", "How Galinstan works"),
-    _wp("wp-title", "How Galinstan works"),
-    _wp("wp-sub", "Liquidity optimization and DORA audit evidence, produced inside the bank's own perimeter and open to re-performance by its reviewers."),
-    _wp("wp-edition", "Describes release v1.6.0. September 2026."),
+BRIEF = [
+    _brief("brief-meta-title", "How Galinstan works"),
+    _brief("brief-title", "How Galinstan works"),
+    _brief("brief-sub", "Liquidity optimization and DORA audit evidence, produced inside the bank's own perimeter and open to re-performance by its reviewers."),
+    _brief("brief-edition", "Product brief \u00b7 release v1.6.0 \u00b7 September 2026"),
 
-    _wp("wp-h-summary", "Summary"),
-    _wp("wp-p-summary-1", "Galinstan is software for European banks that runs entirely on the bank's own machines, with no network connection, and writes evidence a reviewer can check for themselves. It reads the regulatory returns and records a bank already keeps, and does three things with them."),
-    _wp("wp-li-summary-1", "**Liquidity.** It finds the holding of high-quality liquid assets that gives up the least yield while keeping the liquidity coverage ratio above the floor the bank sets, under a thousand stress scenarios as well as on the day. An independent calculator confirms every result."),
-    _wp("wp-li-summary-2", "**DORA policy evidence.** It assesses the bank's policy on ICT third-party services against the EU technical standard for that policy and proposes a grade for each article, with every finding quoting the policy's own words."),
-    _wp("wp-li-summary-3", "**The Register of Information.** It checks the bank's DORA register against the European Banking Authority's own published checks before the register is submitted, and shows, contract by contract, which of DORA's required contract terms the register records."),
-    _wp("wp-p-summary-2", "Every method choice rests on a published source: the regulation itself, supervisory assessment practice, and auditing and model risk standards. Every proposal is left to a person to decide."),
+    _brief("brief-h-summary", "Summary"),
+    _brief("brief-p-summary-1", "Galinstan is software for European banks that runs entirely on the bank's own machines, with no network connection, and writes evidence a reviewer can check for themselves. It reads the regulatory returns and records a bank already keeps, and does three things with them."),
+    _brief("brief-li-summary-1", "**Liquidity.** It finds the holding of high-quality liquid assets that gives up the least yield while keeping the liquidity coverage ratio above the floor the bank sets, under a thousand stress scenarios as well as on the day. An independent calculator confirms every result."),
+    _brief("brief-li-summary-2", "**DORA policy evidence.** It assesses the bank's policy on ICT third-party services against the EU technical standard for that policy and proposes a grade for each article, with every finding quoting the policy's own words."),
+    _brief("brief-li-summary-3", "**The Register of Information.** It checks the bank's DORA register against the European Banking Authority's own published checks before the register is submitted, and shows, contract by contract, which of DORA's required contract terms the register records."),
+    _brief("brief-p-summary-2", "Every method choice rests on a published source: the regulation itself, supervisory assessment practice, and auditing and model risk standards. Every proposal is left to a person to decide."),
 
-    _wp("wp-h-problem", "Why this work is hard today"),
-    _wp("wp-p-problem-1", "Liquidity buffers are expensive to hold and dangerous to trim. Assets are held in lots, haircuts and caps interact, and an allocation that looks efficient on the reporting date can fall below the floor as soon as markets move. Choosing the position is a combinatorial problem, and a choice made without stress in view is not one a treasurer can defend."),
-    _wp("wp-p-problem-2", "DORA's registers and policies are new, detailed and checked mechanically. In the European Supervisory Authorities' 2024 dry run, only 6.5% of 947 registers passed every data quality check, and 86% of the errors were missing mandatory information."),
-    _wp("wp-p-problem-3", "Both jobs turn on data a bank cannot easily send to an outside service: its positions, its contracts and its providers. Galinstan is built so that none of it has to leave."),
+    _brief("brief-h-problem", "Why this work is hard today"),
+    _brief("brief-p-problem-1", "Liquidity buffers are expensive to hold and dangerous to trim. Assets are held in lots, haircuts and caps interact, and an allocation that looks efficient on the reporting date can fall below the floor as soon as markets move. Choosing the position is a combinatorial problem, and a choice made without stress in view is not one a treasurer can defend."),
+    _brief("brief-p-problem-2", "DORA's registers and policies are new, detailed and checked mechanically. In the European Supervisory Authorities' 2024 dry run, only 6.5% of 947 registers passed every data quality check, and 86% of the errors were missing mandatory information."),
+    _brief("brief-p-problem-3", "Both jobs turn on data a bank cannot easily send to an outside service: its positions, its contracts and its providers. Galinstan is built so that none of it has to leave."),
 
-    _wp("wp-h-principles", "How it works, in principle"),
-    _wp("wp-h3-perimeter", "It runs inside the perimeter"),
-    _wp("wp-p-perimeter", "Galinstan arrives as an offline bundle cut from a signed release, with every dependency, a checksum for every file and a software bill of materials. It installs with no package index and no network, and it makes no outbound connection of any kind. The released bundle has been installed and run on a machine with its network disconnected, with the network sampled throughout the run and never answering."),
-    _wp("wp-h3-reads", "It reads what the bank already files"),
-    _wp("wp-p-reads", "Galinstan does not ask for a new data feed. It reads the returns and records a bank already produces, in the formats the regulators define:"),
-    _wp("wp-li-reads-1", "the LCR return, templates C 72.00 to C 76.00, and the NSFR return, templates C 80.00, C 81.00 and C 84.00, in the EBA's xBRL-CSV format;"),
-    _wp("wp-li-reads-2", "holdings of securities, in the attributes the ECB defines for its statistics on holdings by banking groups, which the largest euro area groups already report;"),
-    _wp("wp-li-reads-3", "the DORA Register of Information, and the policy on ICT third-party services as Word, PDF or plain text."),
-    _wp("wp-h3-reconciles", "It reconciles before it recommends"),
-    _wp("wp-p-reconciles", "Before Galinstan proposes any change to the liquidity position, it shows that it gets the ratios the bank reported. Each return is checked against the instructions in the implementing technical standard on supervisory reporting, then reproduced by an independent calculator written from the regulation's text, and the holdings must reconcile to the return. If any step fails, no figure is stated, and the output says which step."),
-    _wp("wp-h3-apart", "Two calculations that must agree are built apart"),
-    _wp("wp-p-apart", "Every allocation the optimizer proposes is recomputed by a separate calculator that shares no code with it. If the two shared a helper, they would share its mistakes, and the check would prove nothing."),
-    _wp("wp-h3-stress", "Stress is part of the answer"),
-    _wp("wp-p-stress", "The optimizer holds the ratio above the bank's floor across a thousand stress scenarios, not only on the reporting date. On a demonstration book calibrated to published disclosures, the allocation found without stress fell below the floor in 993 of 1,000 scenarios. The allocation Galinstan proposed fell below it in 18."),
-    _wp("wp-h3-cites", "Every finding cites its source"),
-    _wp("wp-p-cites-1", "For the DORA policy, the criteria are the numbered paragraphs of Commission Delegated Regulation (EU) 2024/1773, in the regulation's own words. A language model running on the machine reads the whole policy and, for each criterion, says how far the policy addresses it, citing a section and quoting it. A claim counts only if its quotation is the policy's own words, in the section it cites."),
-    _wp("wp-p-cites-2", "Each article receives a proposed grade on the four-grade scale the Basel Committee uses to assess how its standards are implemented. The grade is a proposal. The Basel Committee and the IMF both describe grading as a judgement, and the reviewer makes it."),
-    _wp("wp-h3-errors", "Errors are measured, and lean the safe way"),
-    _wp("wp-p-errors-1", "The method is measured against test policies whose answer keys were fixed before any model read them, and each error rate is reported with an exact statistical upper bound."),
-    _wp("wp-p-errors-2", "Auditing treats two errors differently. ISA 530 names crediting a control with more than it provides as the error the auditor is primarily concerned with, while crediting it with less only creates work. Galinstan follows that. A favourable finding is held back until a reviewer confirms it, as the PRA's model risk principles ask a known limitation to be met with a documented adjustment, and the report shows each grade both with and without it."),
-    _wp("wp-h3-reperform", "A reviewer can re-perform everything"),
-    _wp("wp-p-reperform-1", "Every run writes one directory of evidence: every result hashed, a hash-chained record of every step including each output of the model, and a workpaper for each article. The time of the run is kept in a separate manifest, so the same inputs give the same evidence."),
-    _wp("wp-p-reperform-2", "A reviewer does not have to take that evidence on trust. One command re-performs a run on the reviewer's own machine and reports, check by check, whether it came out the same. Under the same conditions the evidence is byte-identical on Apple Silicon and on Linux. Each release is a signed tag with a changelog, which answers what changed between the version a bank validated and the version it runs."),
+    _brief("brief-h-principles", "How it works, in principle"),
+    _brief("brief-h3-perimeter", "It runs inside the perimeter"),
+    _brief("brief-p-perimeter", "Galinstan arrives as an offline bundle cut from a signed release, with every dependency, a checksum for every file and a software bill of materials. It installs with no package index and no network, and it makes no outbound connection of any kind. The released bundle has been installed and run on a machine with its network disconnected, with the network sampled throughout the run and never answering."),
+    _brief("brief-h3-reads", "It reads what the bank already files"),
+    _brief("brief-p-reads", "Galinstan does not ask for a new data feed. It reads the returns and records a bank already produces, in the formats the regulators define:"),
+    _brief("brief-li-reads-1", "the LCR return, templates C 72.00 to C 76.00, and the NSFR return, templates C 80.00, C 81.00 and C 84.00, in the EBA's xBRL-CSV format;"),
+    _brief("brief-li-reads-2", "holdings of securities, in the attributes the ECB defines for its statistics on holdings by banking groups, which the largest euro area groups already report;"),
+    _brief("brief-li-reads-3", "the DORA Register of Information, and the policy on ICT third-party services as Word, PDF or plain text."),
+    _brief("brief-h3-reconciles", "It reconciles before it recommends"),
+    _brief("brief-p-reconciles", "Before Galinstan proposes any change to the liquidity position, it shows that it gets the ratios the bank reported. Each return is checked against the instructions in the implementing technical standard on supervisory reporting, then reproduced by an independent calculator written from the regulation's text, and the holdings must reconcile to the return. If any step fails, no figure is stated, and the output says which step."),
+    _brief("brief-h3-apart", "Two calculations that must agree are built apart"),
+    _brief("brief-p-apart", "Every allocation the optimizer proposes is recomputed by a separate calculator that shares no code with it. If the two shared a helper, they would share its mistakes, and the check would prove nothing."),
+    _brief("brief-h3-stress", "Stress is part of the answer"),
+    _brief("brief-p-stress", "The optimizer holds the ratio above the bank's floor across a thousand stress scenarios, not only on the reporting date. On a demonstration book calibrated to published disclosures, the allocation found without stress fell below the floor in 993 of 1,000 scenarios. The allocation Galinstan proposed fell below it in 18."),
+    _brief("brief-h3-cites", "Every finding cites its source"),
+    _brief("brief-p-cites-1", "For the DORA policy, the criteria are the numbered paragraphs of Commission Delegated Regulation (EU) 2024/1773, in the regulation's own words. A language model running on the machine reads the whole policy and, for each criterion, says how far the policy addresses it, citing a section and quoting it. A claim counts only if its quotation is the policy's own words, in the section it cites."),
+    _brief("brief-p-cites-2", "Each article receives a proposed grade on the four-grade scale the Basel Committee uses to assess how its standards are implemented. The grade is a proposal. The Basel Committee and the IMF both describe grading as a judgement, and the reviewer makes it."),
+    _brief("brief-h3-errors", "Errors are measured, and lean the safe way"),
+    _brief("brief-p-errors-1", "The method is measured against test policies whose answer keys were fixed before any model read them, and each error rate is reported with an exact statistical upper bound."),
+    _brief("brief-p-errors-2", "Auditing treats two errors differently. ISA 530 names crediting a control with more than it provides as the error the auditor is primarily concerned with, while crediting it with less only creates work. Galinstan follows that. A favourable finding is held back until a reviewer confirms it, as the PRA's model risk principles ask a known limitation to be met with a documented adjustment, and the report shows each grade both with and without it."),
+    _brief("brief-h3-reperform", "A reviewer can re-perform everything"),
+    _brief("brief-p-reperform-1", "Every run writes one directory of evidence: every result hashed, a hash-chained record of every step including each output of the model, and a workpaper for each article. The time of the run is kept in a separate manifest, so the same inputs give the same evidence."),
+    _brief("brief-p-reperform-2", "A reviewer does not have to take that evidence on trust. One command re-performs a run on the reviewer's own machine and reports, check by check, whether it came out the same. Under the same conditions the evidence is byte-identical on Apple Silicon and on Linux. Each release is a signed tag with a changelog, which answers what changed between the version a bank validated and the version it runs."),
 
-    _wp("wp-h-limits", "What Galinstan does not do"),
-    _wp("wp-li-limits-1", "**It does not decide.** Grades and allocations are proposals. The reviewer and the treasurer decide."),
-    _wp("wp-li-limits-2", "**It does not guess.** A check that needs something an offline machine cannot have, such as the global LEI database, is listed with its reason rather than assumed to pass. Where a figure cannot be reproduced, it is not stated."),
-    _wp("wp-li-limits-3", "**It does not send anything.** There is no service on our side, and nothing in the analysis depends on reaching one."),
+    _brief("brief-h-limits", "What Galinstan does not do"),
+    _brief("brief-li-limits-1", "**It does not decide.** Grades and allocations are proposals. The reviewer and the treasurer decide."),
+    _brief("brief-li-limits-2", "**It does not guess.** A check that needs something an offline machine cannot have, such as the global LEI database, is listed with its reason rather than assumed to pass. Where a figure cannot be reproduced, it is not stated."),
+    _brief("brief-li-limits-3", "**It does not send anything.** There is no service on our side, and nothing in the analysis depends on reaching one."),
 
-    _wp("wp-h-sources", "Sources"),
-    _wp("wp-ref-1", "Regulation (EU) 2022/2554, the Digital Operational Resilience Act (DORA)."),
-    _wp("wp-ref-2", "Commission Delegated Regulation (EU) 2024/1773, on the policy on the use of ICT services provided by ICT third-party service providers."),
-    _wp("wp-ref-3", "Commission Delegated Regulation (EU) 2015/61, on the liquidity coverage requirement."),
-    _wp("wp-ref-4", "Commission Implementing Regulation (EU) 2024/3117, the implementing technical standards on supervisory reporting."),
-    _wp("wp-ref-5", "EBA, reporting framework 4.2, and its overview of the Register of Information technical checks and validation rules (April 2025)."),
-    _wp("wp-ref-6", "ECB, guidance notes to reporting agents on the SHS Regulation for reporting banking groups (May 2020)."),
-    _wp("wp-ref-7", "ESAs, DORA dry run exercise summary report (December 2024)."),
-    _wp("wp-ref-8", "Basel Committee on Banking Supervision, Regulatory Consistency Assessment Programme: Assessment of Basel III regulations, Brazil (2013)."),
-    _wp("wp-ref-9", "IMF, Country Report No. 14/264, Switzerland: Detailed Assessment of Compliance with the Basel Core Principles (2014)."),
-    _wp("wp-ref-10", "IAASB, ISA 530, Audit Sampling."),
-    _wp("wp-ref-11", "Prudential Regulation Authority, SS1/23, Model risk management principles for banks (2023)."),
+    _brief("brief-h-sources", "Sources"),
+    _brief("brief-ref-1", "Regulation (EU) 2022/2554, the Digital Operational Resilience Act (DORA)."),
+    _brief("brief-ref-2", "Commission Delegated Regulation (EU) 2024/1773, on the policy on the use of ICT services provided by ICT third-party service providers."),
+    _brief("brief-ref-3", "Commission Delegated Regulation (EU) 2015/61, on the liquidity coverage requirement."),
+    _brief("brief-ref-4", "Commission Implementing Regulation (EU) 2024/3117, the implementing technical standards on supervisory reporting."),
+    _brief("brief-ref-5", "EBA, reporting framework 4.2, and its overview of the Register of Information technical checks and validation rules (April 2025)."),
+    _brief("brief-ref-6", "ECB, guidance notes to reporting agents on the SHS Regulation for reporting banking groups (May 2020)."),
+    _brief("brief-ref-7", "ESAs, DORA dry run exercise summary report (December 2024)."),
+    _brief("brief-ref-8", "Basel Committee on Banking Supervision, Regulatory Consistency Assessment Programme: Assessment of Basel III regulations, Brazil (2013)."),
+    _brief("brief-ref-9", "IMF, Country Report No. 14/264, Switzerland: Detailed Assessment of Compliance with the Basel Core Principles (2014)."),
+    _brief("brief-ref-10", "IAASB, ISA 530, Audit Sampling."),
+    _brief("brief-ref-11", "Prudential Regulation Authority, SS1/23, Model risk management principles for banks (2023)."),
 
-    _wp("wp-contact-label", "To discuss Galinstan, write to"),
-    _wp(
-        "wp-contact",
+    _brief("brief-contact-label", "To discuss Galinstan, write to"),
+    _brief(
+        "brief-contact",
         "partners@banneker.net",
-        mail_subject="Galinstan enquiry via the whitepaper",
+        mail_subject="Galinstan enquiry via the product brief",
     ),
-    _wp("wp-link", "How Galinstan works, as a PDF"),
+    _brief("brief-link", "How Galinstan works: product brief (PDF)"),
 ]
 
-LINES += WHITEPAPER
+LINES += BRIEF
 
 # Part of the approved `contact` string, kept separate because it is an attribute rather
 # than page text: the pre-filled subject that makes every enquiry self-attributing.

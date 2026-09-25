@@ -230,7 +230,7 @@ def render_stage_2(path: str) -> str:
       <h1>{_markup(t(f"{prefix}-h1"))}</h1>
       <p class="sub">{_markup(t(f"{prefix}-sub"))}</p>
 {body}
-{_whitepaper_link(path)}      <p class="cta">{_mail_link("cta-demo-target", f"{prefix}-cta")}</p>
+{_brief_link(path)}      <p class="cta">{_mail_link("cta-demo-target", f"{prefix}-cta")}</p>
 {_footer()}
     </main>
   </body>
@@ -250,7 +250,7 @@ def render_index() -> str:
 {_nav(None)}
       <h1>{_markup(t("headline"))}</h1>
 {body}
-{_whitepaper_link("/")}      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
+{_brief_link("/")}      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
 {_footer()}
     </main>
   </body>
@@ -302,25 +302,25 @@ def render_404() -> str:
 """
 
 
-# The public whitepaper, served at /whitepaper.pdf.
+# The product brief, the public paper, served at /galinstan-brief.pdf.
 #
 # **The PDF is committed, not built here**, because this build has no dependencies and a
 # typeset PDF needs a browser engine. So the build renders the paper's *source*, an HTML
-# page made only of strings from the copy register, and `tools/make_whitepaper.py` prints
-# that source to `assets/whitepaper.pdf` with a local Chrome and records both hashes in
-# `assets/whitepaper.lock.json`. The guard `whitepaper_matches_its_source` fails the build
+# page made only of strings from the copy register, and `tools/make_brief.py` prints
+# that source to `assets/galinstan-brief.pdf` with a local Chrome and records both hashes in
+# `assets/galinstan-brief.lock.json`. The guard `brief_matches_its_source` fails the build
 # if the register, this template or the PDF changes without the other two: a paper that
 # ships is always the one its approved strings describe.
 #
 # No URL in it but the contact mail link, no author field, no NDA offer (Antwain,
 # 2026-09-25: the technical detail is not offered without a direct conversation first).
 ASSETS = ROOT / "assets"
-WHITEPAPER_PDF = ASSETS / "whitepaper.pdf"
-WHITEPAPER_LOCK = ASSETS / "whitepaper.lock.json"
-WHITEPAPER_PATH = "/whitepaper.pdf"
-WHITEPAPER_LINKED_FROM = ("/", "/audit-evidence", "/deployment")
+BRIEF_PDF = ASSETS / "galinstan-brief.pdf"
+BRIEF_LOCK = ASSETS / "galinstan-brief.lock.json"
+BRIEF_PATH = "/galinstan-brief.pdf"
+BRIEF_LINKED_FROM = ("/", "/audit-evidence", "/deployment")
 
-WHITEPAPER_CSS = """\
+BRIEF_CSS = """\
 @page {
   size: A4;
   margin: 24mm 22mm 24mm 22mm;
@@ -348,17 +348,17 @@ a { color: inherit; }
 .cover { break-after: page; }
 """
 
-_WP_BODY = re.compile(r"wp-(h|h3|p|li|ref)-.+")
+_BRIEF_BODY = re.compile(r"brief-(h|h3|p|li|ref)-.+")
 
 
-def render_whitepaper_source() -> str:
+def render_brief_source() -> str:
     """The paper as HTML, every visible word from the register, in the register's order.
 
     The cover carries the summary, so it reads as a one-page brief on its own; the rest
     follows on the pages after it.
     """
     t = page_copy.text
-    items = [(m.group(1), i.id) for i in page_copy.LINES if (m := _WP_BODY.fullmatch(i.id))]
+    items = [(m.group(1), i.id) for i in page_copy.LINES if (m := _BRIEF_BODY.fullmatch(i.id))]
     out: list[str] = []
     open_list = ""
     for kind, line_id in items:
@@ -367,7 +367,7 @@ def render_whitepaper_source() -> str:
             out.append(f"      </{open_list}>")
             open_list = ""
         if kind == "h":
-            if line_id == "wp-h-problem":  # the cover ends with the summary
+            if line_id == "brief-h-problem":  # the cover ends with the summary
                 out.append("    </section>\n    <section>")
             out.append(f"      <h2>{_markup(t(line_id))}</h2>")
         elif kind == "h3":
@@ -387,19 +387,19 @@ def render_whitepaper_source() -> str:
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{html.escape(t("wp-meta-title"))}</title>
+    <title>{html.escape(t("brief-meta-title"))}</title>
     <style>
-{WHITEPAPER_CSS}    </style>
+{BRIEF_CSS}    </style>
   </head>
   <body>
     <section class="cover">
       <p class="wordmark">{_markup(t("wordmark"))}</p>
-      <h1>{_markup(t("wp-title"))}</h1>
-      <p class="sub">{_markup(t("wp-sub"))}</p>
-      <p class="edition">{_markup(t("wp-edition"))}</p>
+      <h1>{_markup(t("brief-title"))}</h1>
+      <p class="sub">{_markup(t("brief-sub"))}</p>
+      <p class="edition">{_markup(t("brief-edition"))}</p>
 {body}
       <div class="close">
-        <p>{_markup(t("wp-contact-label"))} {_mail_link("wp-contact")}</p>
+        <p>{_markup(t("brief-contact-label"))} {_mail_link("brief-contact")}</p>
         <p>{_markup(t("entity"))}</p>
         <p>{_markup(t("legal-footer"))}</p>
       </div>
@@ -409,14 +409,14 @@ def render_whitepaper_source() -> str:
 """
 
 
-def _whitepaper_link(path: str) -> str:
-    if path not in WHITEPAPER_LINKED_FROM:
+def _brief_link(path: str) -> str:
+    if path not in BRIEF_LINKED_FROM:
         return ""
-    return f'      <p><a href="{WHITEPAPER_PATH}">{_markup(page_copy.text("wp-link"))}</a></p>\n'
+    return f'      <p><a href="{BRIEF_PATH}">{_markup(page_copy.text("brief-link"))}</a></p>\n'
 
 
-def render_whitepaper_pdf() -> bytes:
-    return WHITEPAPER_PDF.read_bytes()
+def render_brief_pdf() -> bytes:
+    return BRIEF_PDF.read_bytes()
 
 
 # The crawler policy, approved by Antwain on 2026-09-21 as option A in
@@ -480,7 +480,7 @@ SITEMAP = {
     "/": lambda: render_index(),
     **{path: (lambda p=path: render_stage_2(p)) for path in PAGES},
     "/privacy": lambda: render_privacy(),
-    WHITEPAPER_PATH: lambda: render_whitepaper_source(),
+    BRIEF_PATH: lambda: render_brief_source(),
 }
 
 
@@ -511,7 +511,7 @@ ALLOWLIST = {
     "404.html": render_404,
     "robots.txt": render_robots,
     "sitemap.xml": render_sitemap,
-    "whitepaper.pdf": render_whitepaper_pdf,
+    "galinstan-brief.pdf": render_brief_pdf,
 }
 
 
