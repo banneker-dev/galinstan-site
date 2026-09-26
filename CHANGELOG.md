@@ -2,6 +2,14 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.19] — the product brief addresses banks
+
+### Changed
+- **`brief-p-summary-1`** opens "Galinstan is software for banks", previously "software for
+  European banks", approved by Antwain 2026-09-26 with the US and EU audience. The PDF is
+  reprinted and its lock updated.
+- `_brief` takes an approval date, so a revised brief string records its own.
+
 ## [site-2026.09.18] — the site addresses US and EU banks
 
 ### Changed
