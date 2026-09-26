@@ -2,7 +2,7 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
-## [Unreleased] — layout, after a review of lusion.co
+## [site-2026.09.16] — layout, after a review of lusion.co
 
 No string changes. Every word a visitor reads is the same approved string in the same
 register; what changes is how the pages are laid out. Nothing is fetched from anywhere but
