@@ -2,6 +2,17 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.18] — the site addresses US and EU banks
+
+### Changed
+- **Four strings revised for a US and EU audience**, approved by Antwain 2026-09-26 (option C in
+  `SITE_COPY_STAGE1.md`, "Proposed 2026-09-26"): `headline` ("Air-gapped liquidity optimization and
+  audit software for banks. The analysis runs inside your perimeter, not ours."), `body-1` (banks bound
+  by a liquidity coverage requirement, including EU and EEA institutions in scope of DORA),
+  `il-meta-description` ("a bank") and `meta-title`, "Galinstan: Air-Gapped Liquidity Optimization And
+  Audit Software For Banks", in title case as every page title, his choice the same day.
+- Figures that describe European banks, such as the Pillar 3 range in `il-body-3`, are unchanged.
+
 ## [site-2026.09.17] — titles in title case
 
 ### Changed
