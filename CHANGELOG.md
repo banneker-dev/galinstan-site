@@ -2,6 +2,22 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.17] — titles in title case
+
+### Changed
+- **Every page title capitalizes each word**, approved by Antwain 2026-09-25 ("website titles
+  should have each word capitalized, not random lowercase words"; the table of new wording
+  approved as shown). `meta-title`, `il-meta-title`, `ae-meta-title`, `dep-meta-title`,
+  `notfound-meta-title`; `privacy-meta-title` was already one capitalized word.
+- **The product brief's title** follows: `brief-meta-title` and `brief-title` read "How
+  Galinstan Works" (Antwain, same day). The PDF is reprinted and its lock updated.
+- Page headings are sentences and are unchanged.
+
+### Fixed
+- The test that proves a brief string changed without reprinting is caught replaced a
+  hardcoded copy of the old title, so after this change it replaced nothing and caught
+  nothing. It now takes the title from the register.
+
 ## [site-2026.09.16] — layout, after a review of lusion.co
 
 No string changes. Every word a visitor reads is the same approved string in the same

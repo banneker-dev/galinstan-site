@@ -436,7 +436,7 @@ class ProductBrief(unittest.TestCase):
 
     def test_a_string_changed_without_reprinting_is_caught(self):
         failures = guards.brief_matches_its_source(
-            self.pdf, self.lock, self.source.replace("How Galinstan works", "How it works")
+            self.pdf, self.lock, self.source.replace(page_copy.text("brief-title"), "How it works")
         )
         self.assertTrue(any("source has changed" in f for f in failures), failures)
 
