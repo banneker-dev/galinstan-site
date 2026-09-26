@@ -13,32 +13,72 @@
   --ink-soft: #3d474f;
   --rule: #d5dade;
   --paper: #fbfbfa;
+  --panel: #eef0f1;
   --flag: #8a3a12;
   --measure: 34rem;
+  --wide: 64rem;
+  --sans: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 6rem; }
 body {
   margin: 0;
-  padding: 3rem 1.5rem 4rem;
   background: var(--paper);
   color: var(--ink);
   font: 400 1.0625rem/1.65 ui-serif, Georgia, "Times New Roman", serif;
 }
-main { max-width: var(--measure); margin: 0 auto; }
+main { max-width: var(--wide); margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+.prose, footer { max-width: var(--measure); }
+.bar {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+  view-transition-name: bar;
+}
+.bar-in {
+  max-width: var(--wide); margin: 0 auto; padding: 0.875rem 1.5rem;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem 2rem;
+}
 .wordmark {
-  font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: var(--sans);
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin: 0 0 2.5rem;
+  margin: 0;
+}
+main > .wordmark { margin: 0 0 2.5rem; }
+.wordmark a { text-decoration: none; }
+nav {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem;
+}
+nav a { color: var(--ink-soft); text-decoration: none; }
+nav a:hover { color: var(--ink); text-decoration: underline; }
+nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+.pill {
+  font-family: var(--sans); font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.02em;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; border-radius: 999px;
+  background: var(--ink); color: var(--paper); text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.pill::before { content: ""; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: currentColor; }
+.pill:hover { transform: translateY(-1px); }
+@media (max-width: 44rem) {
+  .bar-in { grid-template-columns: 1fr auto; }
+  .bar nav { grid-column: 1 / -1; grid-row: 2; }
 }
 h1 {
-  font-size: 1.5rem;
-  font-weight: 400;
-  line-height: 1.35;
-  margin: 0 0 2rem;
+  font-family: var(--sans);
+  font-size: clamp(1.875rem, 1.1rem + 3.4vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  max-width: 22ch;
+  margin: 1rem 0 2.5rem;
   text-wrap: balance;
 }
 p { margin: 0 0 1.25rem; color: var(--ink-soft); }
@@ -46,25 +86,69 @@ footer {
   margin-top: 3.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--rule);
-  font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: var(--sans);
   font-size: 0.8125rem;
   line-height: 1.6;
   color: var(--ink-soft);
 }
 footer p { margin: 0 0 0.375rem; color: inherit; }
-.wordmark a { text-decoration: none; }
-nav {
-  font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-  font-size: 0.875rem;
-  margin: -1.5rem 0 2.5rem;
-  display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem;
-}
-nav a { color: var(--ink-soft); }
-nav a[aria-current="page"] { color: var(--ink); text-decoration: none; font-weight: 600; }
 .sub { color: var(--ink); font-size: 1.125rem; }
 .cta { margin-top: 2rem; }
 strong { color: var(--ink); font-weight: 600; }
 a { color: inherit; text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.ticks {
+  height: 11px; margin: 3rem 0;
+  --x: linear-gradient(var(--ink-soft), var(--ink-soft));
+  background:
+    var(--x) 5px 0 / 1px 11px no-repeat, var(--x) 0 5px / 11px 1px no-repeat,
+    var(--x) 50% 0 / 1px 11px no-repeat, var(--x) 50% 5px / 11px 1px no-repeat,
+    var(--x) calc(100% - 5px) 0 / 1px 11px no-repeat, var(--x) 100% 5px / 11px 1px no-repeat,
+    linear-gradient(var(--rule), var(--rule)) 0 5px / 100% 1px no-repeat;
+}
+.art {
+  margin: 0 0 3rem; border-radius: 1.25rem; overflow: hidden;
+  background: var(--panel);
+  aspect-ratio: 16 / 7;
+}
+.art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 62% 55%; }
+@media (max-width: 44rem) { .art { aspect-ratio: 4 / 3; } .card { min-height: 5.5rem; } }
+.cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem;
+  margin: 0 0 1rem;
+}
+.card {
+  position: relative; display: flex; align-items: flex-end;
+  min-height: 9rem; padding: 1.25rem; border-radius: 1rem;
+  background: var(--panel); color: var(--ink); text-decoration: none;
+  font-family: var(--sans); font-size: 1.25rem; font-weight: 500; letter-spacing: -0.01em;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.card::after {
+  content: ""; position: absolute; top: 1.25rem; right: 1.25rem;
+  width: 0.625rem; height: 0.625rem;
+  border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor;
+  background: linear-gradient(to bottom right, transparent calc(50% - 0.75px), currentColor 0 calc(50% + 0.75px), transparent 0);
+  transition: transform 0.2s ease;
+}
+.card:hover { background: var(--rule); }
+.card:hover::after { transform: translate(2px, -2px); }
+.brief {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  margin: 1rem 0 0; padding: 2rem 1.5rem; border-radius: 1.25rem;
+  background: var(--ink); color: var(--paper); text-decoration: none;
+  font-family: var(--sans); font-size: clamp(1.125rem, 0.9rem + 1vw, 1.5rem); font-weight: 500;
+}
+.brief::after {
+  content: ""; flex: none; width: 3rem; height: 3rem; border-radius: 50%;
+  background:
+    linear-gradient(var(--ink), var(--ink)) 50% 55% / 1.5px 1rem no-repeat,
+    linear-gradient(45deg, transparent 45%, var(--ink) 45% 55%, transparent 55%) 38% 62% / 0.6rem 0.6rem no-repeat,
+    linear-gradient(-45deg, transparent 45%, var(--ink) 45% 55%, transparent 55%) 62% 62% / 0.6rem 0.6rem no-repeat,
+    var(--paper);
+  transition: transform 0.2s ease;
+}
+.brief:hover::after { transform: translateY(2px); }
 .todo {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8125rem;
@@ -74,33 +158,55 @@ a { color: inherit; text-underline-offset: 2px; }
   border-radius: 2px;
   padding: 0.0625rem 0.375rem;
 }
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(1.25rem); } }
+  }
+}
 @media (prefers-color-scheme: dark) {
   :root {
     --ink: #eef1f3; --ink-soft: #b3bcc3; --rule: #2b3238;
-    --paper: #0f1216; --flag: #e8a87c;
+    --paper: #0f1216; --panel: #181d22; --flag: #e8a87c;
   }
   .todo { background: #24170f; }
+  .art img { filter: brightness(0.86); }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+  @view-transition { navigation: none; }
 }
     </style>
   </head>
   <body>
+    <header class="bar">
+      <div class="bar-in">
+        <p class="wordmark"><a href="/">Galinstan</a></p>
+        <nav>
+          <a href="/intraday-liquidity" aria-current="page">Intraday liquidity</a>
+          <a href="/audit-evidence">Audit evidence</a>
+          <a href="/deployment">Deployment</a>
+        </nav>
+        <a class="pill" href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request">Request a demo</a>
+      </div>
+    </header>
     <main>
-      <p class="wordmark"><a href="/">Galinstan</a></p>
-      <nav>
-        <a href="/intraday-liquidity" aria-current="page">Intraday liquidity</a>
-        <a href="/audit-evidence">Audit evidence</a>
-        <a href="/deployment">Deployment</a>
-      </nav>
       <h1>Knowing where the money is, and knowing what to hold, are two different problems.</h1>
+      <div class="prose">
       <p class="sub">Intraday monitoring tells a treasurer what happened. Galinstan is built to answer what to do about it: which assets to hold, which to release, and what the surplus is costing.</p>
       <p>The intraday tooling on the market is built to make positions visible: balances across accounts, payment flows, throttling decisions, the data a supervisor asks for. That work is necessary and it is well served. What we have not found is software that chooses the position.</p>
       <p>The choice is hard on purpose. Assets are held in lots, haircuts and caps interact, and encumbrance removes collateral from the buffer. The objective is to give up as little yield as possible while staying above the requirement all day. That is a combinatorial problem rather than a report, and Galinstan is built to solve it as one.</p>
       <p>The surplus is worth measuring before it is defended. The FY2025 Pillar 3 disclosures of three European banks show average liquidity coverage ratios between 156% and 256%. Some of that headroom is deliberate. The part that is not is high-quality liquid assets the requirement did not call for.</p>
       <p>Galinstan is built to connect to nothing. It reads the position you give it, computes inside your hardware boundary, and writes its answer back to you. There is no service on our end of a line, because there is no line.</p>
+      </div>
+      <div class="prose">
       <p class="cta"><a href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request">Request a demo</a></p>
+      </div>
       <footer>
         <p>Galinstan is built to run inside your perimeter and produce evidence.</p>
         <p>Galinstan is a product of Banneker.</p>

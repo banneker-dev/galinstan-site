@@ -56,32 +56,72 @@ CSS = """\
   --ink-soft: #3d474f;
   --rule: #d5dade;
   --paper: #fbfbfa;
+  --panel: #eef0f1;
   --flag: #8a3a12;
   --measure: 34rem;
+  --wide: 64rem;
+  --sans: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 6rem; }
 body {
   margin: 0;
-  padding: 3rem 1.5rem 4rem;
   background: var(--paper);
   color: var(--ink);
   font: 400 1.0625rem/1.65 ui-serif, Georgia, "Times New Roman", serif;
 }
-main { max-width: var(--measure); margin: 0 auto; }
+main { max-width: var(--wide); margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+.prose, footer { max-width: var(--measure); }
+.bar {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+  view-transition-name: bar;
+}
+.bar-in {
+  max-width: var(--wide); margin: 0 auto; padding: 0.875rem 1.5rem;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem 2rem;
+}
 .wordmark {
-  font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: var(--sans);
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin: 0 0 2.5rem;
+  margin: 0;
+}
+main > .wordmark { margin: 0 0 2.5rem; }
+.wordmark a { text-decoration: none; }
+nav {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem;
+}
+nav a { color: var(--ink-soft); text-decoration: none; }
+nav a:hover { color: var(--ink); text-decoration: underline; }
+nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+.pill {
+  font-family: var(--sans); font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.02em;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; border-radius: 999px;
+  background: var(--ink); color: var(--paper); text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.pill::before { content: ""; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: currentColor; }
+.pill:hover { transform: translateY(-1px); }
+@media (max-width: 44rem) {
+  .bar-in { grid-template-columns: 1fr auto; }
+  .bar nav { grid-column: 1 / -1; grid-row: 2; }
 }
 h1 {
-  font-size: 1.5rem;
-  font-weight: 400;
-  line-height: 1.35;
-  margin: 0 0 2rem;
+  font-family: var(--sans);
+  font-size: clamp(1.875rem, 1.1rem + 3.4vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  max-width: 22ch;
+  margin: 1rem 0 2.5rem;
   text-wrap: balance;
 }
 p { margin: 0 0 1.25rem; color: var(--ink-soft); }
@@ -89,25 +129,69 @@ footer {
   margin-top: 3.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--rule);
-  font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: var(--sans);
   font-size: 0.8125rem;
   line-height: 1.6;
   color: var(--ink-soft);
 }
 footer p { margin: 0 0 0.375rem; color: inherit; }
-.wordmark a { text-decoration: none; }
-nav {
-  font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-  font-size: 0.875rem;
-  margin: -1.5rem 0 2.5rem;
-  display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem;
-}
-nav a { color: var(--ink-soft); }
-nav a[aria-current="page"] { color: var(--ink); text-decoration: none; font-weight: 600; }
 .sub { color: var(--ink); font-size: 1.125rem; }
 .cta { margin-top: 2rem; }
 strong { color: var(--ink); font-weight: 600; }
 a { color: inherit; text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.ticks {
+  height: 11px; margin: 3rem 0;
+  --x: linear-gradient(var(--ink-soft), var(--ink-soft));
+  background:
+    var(--x) 5px 0 / 1px 11px no-repeat, var(--x) 0 5px / 11px 1px no-repeat,
+    var(--x) 50% 0 / 1px 11px no-repeat, var(--x) 50% 5px / 11px 1px no-repeat,
+    var(--x) calc(100% - 5px) 0 / 1px 11px no-repeat, var(--x) 100% 5px / 11px 1px no-repeat,
+    linear-gradient(var(--rule), var(--rule)) 0 5px / 100% 1px no-repeat;
+}
+.art {
+  margin: 0 0 3rem; border-radius: 1.25rem; overflow: hidden;
+  background: var(--panel);
+  aspect-ratio: 16 / 7;
+}
+.art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 62% 55%; }
+@media (max-width: 44rem) { .art { aspect-ratio: 4 / 3; } .card { min-height: 5.5rem; } }
+.cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem;
+  margin: 0 0 1rem;
+}
+.card {
+  position: relative; display: flex; align-items: flex-end;
+  min-height: 9rem; padding: 1.25rem; border-radius: 1rem;
+  background: var(--panel); color: var(--ink); text-decoration: none;
+  font-family: var(--sans); font-size: 1.25rem; font-weight: 500; letter-spacing: -0.01em;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.card::after {
+  content: ""; position: absolute; top: 1.25rem; right: 1.25rem;
+  width: 0.625rem; height: 0.625rem;
+  border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor;
+  background: linear-gradient(to bottom right, transparent calc(50% - 0.75px), currentColor 0 calc(50% + 0.75px), transparent 0);
+  transition: transform 0.2s ease;
+}
+.card:hover { background: var(--rule); }
+.card:hover::after { transform: translate(2px, -2px); }
+.brief {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  margin: 1rem 0 0; padding: 2rem 1.5rem; border-radius: 1.25rem;
+  background: var(--ink); color: var(--paper); text-decoration: none;
+  font-family: var(--sans); font-size: clamp(1.125rem, 0.9rem + 1vw, 1.5rem); font-weight: 500;
+}
+.brief::after {
+  content: ""; flex: none; width: 3rem; height: 3rem; border-radius: 50%;
+  background:
+    linear-gradient(var(--ink), var(--ink)) 50% 55% / 1.5px 1rem no-repeat,
+    linear-gradient(45deg, transparent 45%, var(--ink) 45% 55%, transparent 55%) 38% 62% / 0.6rem 0.6rem no-repeat,
+    linear-gradient(-45deg, transparent 45%, var(--ink) 45% 55%, transparent 55%) 62% 62% / 0.6rem 0.6rem no-repeat,
+    var(--paper);
+  transition: transform 0.2s ease;
+}
+.brief:hover::after { transform: translateY(2px); }
 .todo {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8125rem;
@@ -117,15 +201,28 @@ a { color: inherit; text-underline-offset: 2px; }
   border-radius: 2px;
   padding: 0.0625rem 0.375rem;
 }
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(1.25rem); } }
+  }
+}
 @media (prefers-color-scheme: dark) {
   :root {
     --ink: #eef1f3; --ink-soft: #b3bcc3; --rule: #2b3238;
-    --paper: #0f1216; --flag: #e8a87c;
+    --paper: #0f1216; --panel: #181d22; --flag: #e8a87c;
   }
   .todo { background: #24170f; }
+  .art img { filter: brightness(0.86); }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+  @view-transition { navigation: none; }
 }
 """
 
@@ -184,7 +281,52 @@ def _nav(current: str | None) -> str:
     for path, (_, nav_id) in PAGES.items():
         mark = ' aria-current="page"' if path == current else ""
         links.append(f'<a href="{path}"{mark}>{_markup(page_copy.text(nav_id))}</a>')
-    return "      <nav>\n        " + "\n        ".join(links) + "\n      </nav>"
+    return "        <nav>\n          " + "\n          ".join(links) + "\n        </nav>"
+
+
+def _bar(current: str | None, link: bool = True) -> str:
+    """The header that stays at the top while the page scrolls: wordmark, nav, and the demo
+    request, so the one thing a visitor can do is never further than the top of the screen.
+    Every word in it is already approved: the wordmark, the three nav labels, `cta-demo`."""
+    mark = _markup(page_copy.text("wordmark"))
+    mark = f'<a href="/">{mark}</a>' if link else mark
+    demo = html.escape(mail_href("cta-demo-target"))
+    return f"""    <header class="bar">
+      <div class="bar-in">
+        <p class="wordmark">{mark}</p>
+{_nav(current)}
+        <a class="pill" href="{demo}">{_markup(page_copy.text("cta-demo"))}</a>
+      </div>
+    </header>"""
+
+
+# Section divider: a hairline with a cross at each end and the middle, like the marks on a
+# drawing. Drawn by the stylesheet, so it carries no text and fetches nothing.
+TICKS = '      <div class="ticks" aria-hidden="true"></div>\n'
+
+
+def _cards() -> str:
+    """The three stage 2 pages as cards on the home page. Titles only: they are the nav
+    labels, and a line of description under each would be new copy."""
+    t = page_copy.text
+    cards = "\n".join(
+        f'        <a class="card reveal" href="{path}">{_markup(t(nav_id))}</a>'
+        for path, (_, nav_id) in PAGES.items()
+    )
+    return f'      <div class="cards">\n{cards}\n      </div>\n'
+
+
+# The hero photograph, served from this site rather than an image host: it is two files in
+# the allowlist, like the brief, so it adds no third party. Two widths so a phone does not
+# download the desktop one. `alt=""` marks it decorative: a description a screen reader
+# reads aloud is copy, and none has been approved, so it says nothing rather than
+# something unapproved. Width and height are set so the page does not jump as it loads.
+HERO = ("hero-800.jpg", "hero-1408.jpg")
+HERO_IMG = """\
+      <figure class="art">
+        <img src="/hero-1408.jpg" srcset="/hero-800.jpg 800w, /hero-1408.jpg 1408w" sizes="(max-width: 67rem) 100vw, 64rem" width="1408" height="768" alt="" fetchpriority="high">
+      </figure>
+"""
 
 
 def _footer() -> str:
@@ -236,11 +378,6 @@ def _head(title: str, canonical: str, description: str | None = None, robots: st
   </head>"""
 
 
-def _wordmark(link: bool = True) -> str:
-    mark = _markup(page_copy.text("wordmark"))
-    return f'      <p class="wordmark"><a href="/">{mark}</a></p>' if link else f'      <p class="wordmark">{mark}</p>'
-
-
 def render_stage_2(path: str) -> str:
     prefix, _ = PAGES[path]
     t = page_copy.text
@@ -248,14 +385,17 @@ def render_stage_2(path: str) -> str:
     body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in bodies)
     return f"""{_head(t(f"{prefix}-meta-title"), path, t(f"{prefix}-meta-description"))}
   <body>
+{_bar(path)}
     <main>
-{_wordmark()}
-{_nav(path)}
       <h1>{_markup(t(f"{prefix}-h1"))}</h1>
+      <div class="prose">
       <p class="sub">{_markup(t(f"{prefix}-sub"))}</p>
 {body}
-{_brief_link(path)}      <p class="cta">{_mail_link("cta-demo-target", f"{prefix}-cta")}</p>
-{_footer()}
+      </div>
+      <div class="prose">
+      <p class="cta">{_mail_link("cta-demo-target", f"{prefix}-cta")}</p>
+      </div>
+{_brief_link(path)}{_footer()}
     </main>
   </body>
 </html>
@@ -269,13 +409,14 @@ def render_index() -> str:
     )
     return f"""{_head(t("meta-title"), "/", t("meta-description"), extra=render_structured_data())}
   <body>
+{_bar(None, link=False)}
     <main>
-{_wordmark(link=False)}
-{_nav(None)}
       <h1>{_markup(t("headline"))}</h1>
+{HERO_IMG}      <div class="prose">
 {body}
-{_brief_link("/")}      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
-{_footer()}
+      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
+      </div>
+{TICKS}{_cards()}{_brief_link("/")}{_footer()}
     </main>
   </body>
 </html>
@@ -286,13 +427,14 @@ def render_privacy() -> str:
     t = page_copy.text
     return f"""{_head(t("privacy-meta-title"), "/privacy")}
   <body>
+{_bar(None)}
     <main>
-{_wordmark()}
-{_nav(None)}
       <h1>{_markup(t("privacy-meta-title"))}</h1>
+      <div class="prose">
       <p>{_markup(t("privacy-controller"))}</p>
       <p>{_markup(t("privacy-analytics"))}</p>
       <p>{_markup(t("privacy-contact-label"))} {_contact_link()}</p>
+      </div>
       <footer>
         <p>{_markup(t("entity"))}</p>
         <p>{_markup(t("legal-footer"))}</p>
@@ -436,7 +578,7 @@ def render_brief_source() -> str:
 def _brief_link(path: str) -> str:
     if path not in BRIEF_LINKED_FROM:
         return ""
-    return f'      <p><a href="{BRIEF_PATH}">{_markup(page_copy.text("brief-link"))}</a></p>\n'
+    return f'      <a class="brief reveal" href="{BRIEF_PATH}">{_markup(page_copy.text("brief-link"))}</a>\n'
 
 
 def render_brief_pdf() -> bytes:
@@ -537,6 +679,7 @@ ALLOWLIST = {
     "robots.txt": render_robots,
     "sitemap.xml": render_sitemap,
     "galinstan-brief.pdf": render_brief_pdf,
+    **{name: (lambda n=name: (ASSETS / n).read_bytes()) for name in HERO},
 }
 
 
