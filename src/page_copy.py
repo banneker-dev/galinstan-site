@@ -288,7 +288,8 @@ _BRIEF_NOTE = (
 
 def _brief(line_id: str, text: str, **kw) -> Line:
     kw.setdefault("note", _BRIEF_NOTE)
-    return Line(id=line_id, status=APPROVED, approved_on="2026-09-25", text=text, **kw)
+    kw.setdefault("approved_on", "2026-09-25")
+    return Line(id=line_id, status=APPROVED, text=text, **kw)
 
 
 BRIEF = [
@@ -298,7 +299,7 @@ BRIEF = [
     _brief("brief-edition", "Product brief \u00b7 release v1.6.0 \u00b7 September 2026"),
 
     _brief("brief-h-summary", "Summary"),
-    _brief("brief-p-summary-1", "Galinstan is software for European banks that runs entirely on the bank's own machines, with no network connection, and writes evidence a reviewer can check for themselves. It reads the regulatory returns and records a bank already keeps, and does three things with them."),
+    _brief("brief-p-summary-1", "Galinstan is software for banks that runs entirely on the bank's own machines, with no network connection, and writes evidence a reviewer can check for themselves. It reads the regulatory returns and records a bank already keeps, and does three things with them.", approved_on="2026-09-26", note="Revision approved 2026-09-26 (Antwain): 'software for banks', previously 'software for European banks', with the US and EU audience. " + _BRIEF_NOTE),
     _brief("brief-li-summary-1", "**Liquidity.** It finds the holding of high-quality liquid assets that gives up the least yield while keeping the liquidity coverage ratio above the floor the bank sets, under a thousand stress scenarios as well as on the day. An independent calculator confirms every result."),
     _brief("brief-li-summary-2", "**DORA policy evidence.** It assesses the bank's policy on ICT third-party services against the EU technical standard for that policy and proposes a grade for each article, with every finding quoting the policy's own words."),
     _brief("brief-li-summary-3", "**The Register of Information.** It checks the bank's DORA register against the European Banking Authority's own published checks before the register is submitted, and shows, contract by contract, which of DORA's required contract terms the register records."),
