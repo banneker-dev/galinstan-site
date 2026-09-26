@@ -63,25 +63,27 @@ LINES = [
     Line(
         id="headline",
         status=APPROVED,
-        approved_on="2026-09-25",
+        approved_on="2026-09-26",
         text=(
-            "Air-gapped optimization and audit software for European banks. The analysis runs inside your perimeter, not ours."
+            "Air-gapped liquidity optimization and audit software for banks. The analysis runs inside your perimeter, not ours."
         ),
-        note='Approved 2026-09-25 (Antwain), rejected row r01 closed. Dashes out per RULES.md D2; this wording is now his.',
+        note="Revision approved 2026-09-26 (Antwain): option C in SITE_COPY_STAGE1.md, 'Proposed 2026-09-26'; the site addresses US and EU banks both. Previously 'Air-gapped optimization and audit software for European banks.' (approved 2026-09-25, rejected row r01 closed).",
     ),
     Line(
         id="body-1",
         status=APPROVED,
-        approved_on="2026-09-22",
+        approved_on="2026-09-26",
         text=(
-            "Galinstan is built for treasury and resilience teams at EU and EEA "
-            "institutions in scope of DORA. It is built to do two things inside your own "
+            "Galinstan is built for treasury and resilience teams at banks bound by a "
+            "liquidity coverage requirement, including EU and EEA institutions in scope of "
+            "DORA. It is built to do two things inside your own "
             "hardware boundary: find the most efficient way to hold a regulatory liquidity "
             "position, and produce audit evidence that can be relied on."
         ),
         note=(
-            "Revision approved 2026-09-22: 'Galinstan is built to...' throughout, so the "
-            "live page and stage 2 read the same. Previously 'is being built... designed to'."
+            "Revision approved 2026-09-26 (Antwain) with the US and EU audience: banks bound by a "
+            "liquidity coverage requirement, previously 'EU and EEA institutions in scope of DORA'. "
+            "Revision approved 2026-09-22: 'Galinstan is built to...' throughout."
         ),
     ),
     Line(
@@ -182,9 +184,9 @@ LINES = [
     Line(
         id="meta-title",
         status=APPROVED,
-        approved_on="2026-09-25",
-        text="Galinstan: Air-Gapped Liquidity Optimization And Audit Software For EU Banks",
-        note="Revision approved 2026-09-23 (Antwain): no dashes in client-facing copy. Title case approved 2026-09-25 (Antwain, 'table approved'): every word capitalized.",
+        approved_on="2026-09-26",
+        text="Galinstan: Air-Gapped Liquidity Optimization And Audit Software For Banks",
+        note="Revision approved 2026-09-26 (Antwain): 'For Banks', no longer 'For EU Banks', with the US and EU audience; in title case, his choice the same day, as every page title since 2026-09-25. Revision approved 2026-09-23: no dashes in client-facing copy.",
     ),
     Line(
         id="meta-description",
@@ -245,7 +247,7 @@ STAGE_2 = [
     Line(id="dep-body-5", status=APPROVED, approved_on="2026-09-23", text="**Escrow and exit.** Every release is built to be deposited: source, bundle and checksums as one versioned artefact. We agree escrow and exit terms in the contract rather than pointing at a policy page."),
     Line(id="dep-cta", status=APPROVED, approved_on="2026-09-22", text="Request a demo"),
     Line(id="il-meta-title", status=APPROVED, approved_on="2026-09-25", text="Galinstan: Intraday Liquidity Optimization That Runs On Your Own Hardware", note="Title case approved 2026-09-25 (Antwain, 'table approved')."),
-    Line(id="il-meta-description", status=APPROVED, approved_on="2026-09-22", text="Software built to decide what an EU bank should hold against its intraday and LCR requirements, and to run the decision inside the institution's own hardware boundary."),
+    Line(id="il-meta-description", status=APPROVED, approved_on="2026-09-26", note="Revision approved 2026-09-26 (Antwain) with the US and EU audience: 'a bank', previously 'an EU bank'.", text="Software built to decide what a bank should hold against its intraday and LCR requirements, and to run the decision inside the institution's own hardware boundary."),
     Line(id="il-h1", status=APPROVED, approved_on="2026-09-22", text="Knowing where the money is, and knowing what to hold, are two different problems."),
     Line(id="il-sub", status=APPROVED, approved_on="2026-09-23", text="Intraday monitoring tells a treasurer what happened. Galinstan is built to answer what to do about it: which assets to hold, which to release, and what the surplus is costing."),
     Line(id="il-body-1", status=APPROVED, approved_on="2026-09-22", text="The intraday tooling on the market is built to make positions visible: balances across accounts, payment flows, throttling decisions, the data a supervisor asks for. That work is necessary and it is well served. What we have not found is software that chooses the position."),
