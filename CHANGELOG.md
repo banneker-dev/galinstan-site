@@ -5,8 +5,8 @@ Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 ## [Unreleased] — layout, after a review of lusion.co
 
 No string changes. Every word a visitor reads is the same approved string in the same
-register; what changes is how the pages are laid out. Nothing new is fetched: the additions
-are CSS and one inline SVG, and the page is still one file.
+register; what changes is how the pages are laid out. Nothing is fetched from anywhere but
+galinstan.ai: the additions are CSS and one photograph served from the site itself.
 
 ### Added
 - **A header that stays at the top while scrolling**, with the wordmark, the nav and a
@@ -15,23 +15,18 @@ are CSS and one inline SVG, and the page is still one file.
   labels; a line under each would be new copy.
 - **The product brief as a panel** on `/`, `/audit-evidence` and `/deployment`, in place of
   a text link. Same string, same address.
-- **An inline SVG of the air gap on the home page**: nodes inside a perimeter, and one line
-  that stops at the boundary. No labels, because a label would be copy; `aria-hidden`, because
-  it says nothing the headline does not.
+- **A hero photograph on the home page**, liquid metal on a machined cube. Served from this
+  site as two allowlisted files (`hero-800.jpg`, `hero-1408.jpg`, 44 KB and 120 KB), so it
+  adds no third party. `alt=""`: a description read aloud would be copy, and none is approved.
 - **Section marks**: a hairline with crosses, drawn by the stylesheet.
 - **Motion, all of it CSS and all of it off under `prefers-reduced-motion`**: the browser's
-  own cross-fade between pages (`@view-transition`), cards and panels rising in as they
-  scroll into view where `animation-timeline` is supported, and traffic along the drawing's
-  edges.
+  own cross-fade between pages (`@view-transition`), with the header held still across it,
+  and cards and panels rising in as they scroll into view where `animation-timeline` is
+  supported.
 
 ### Changed
 - The `h1` is set in the system sans at a size that scales with the viewport, up to 3.5rem.
   Body text stays serif at the 34rem measure; the page container widens to 64rem around it.
-
-### Not done, on purpose
-- The header is not given its own `view-transition-name`. With `backdrop-filter` on a sticky
-  element, Chromium painted it partway down the viewport over a blank band. The page
-  cross-fades as a whole instead.
 
 ## [site-2026.09.15] — AI may learn about Galinstan, and knows it is software
 

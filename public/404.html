@@ -29,9 +29,10 @@ main { max-width: var(--wide); margin: 0 auto; padding: 3rem 1.5rem 4rem; }
 .prose, footer { max-width: var(--measure); }
 .bar {
   position: sticky; top: 0; z-index: 10;
-  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--rule);
+  view-transition-name: bar;
 }
 .bar-in {
   max-width: var(--wide); margin: 0 auto; padding: 0.875rem 1.5rem;
@@ -105,14 +106,10 @@ a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 }
 .art {
   margin: 0 0 3rem; border-radius: 1.25rem; overflow: hidden;
-  background: #101418; color: #b3bcc3;
+  background: var(--panel);
   aspect-ratio: 16 / 7;
 }
-.art svg { display: block; width: 100%; height: 100%; }
-.art .flow { stroke-dasharray: 4 10; animation: flow 2.4s linear infinite; }
-.art .halt { animation: halt 2.4s ease-in-out infinite; }
-@keyframes flow { to { stroke-dashoffset: -28; } }
-@keyframes halt { 50% { opacity: 0.35; } }
+.art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 62% 55%; }
 @media (max-width: 44rem) { .art { aspect-ratio: 4 / 3; } .card { min-height: 5.5rem; } }
 .cards {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem;
@@ -176,7 +173,7 @@ a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
     --paper: #0f1216; --panel: #181d22; --flag: #e8a87c;
   }
   .todo { background: #24170f; }
-  .art { background: #181d22; }
+  .art img { filter: brightness(0.86); }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }

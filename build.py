@@ -74,9 +74,10 @@ main { max-width: var(--wide); margin: 0 auto; padding: 3rem 1.5rem 4rem; }
 .prose, footer { max-width: var(--measure); }
 .bar {
   position: sticky; top: 0; z-index: 10;
-  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--rule);
+  view-transition-name: bar;
 }
 .bar-in {
   max-width: var(--wide); margin: 0 auto; padding: 0.875rem 1.5rem;
@@ -150,14 +151,10 @@ a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 }
 .art {
   margin: 0 0 3rem; border-radius: 1.25rem; overflow: hidden;
-  background: #101418; color: #b3bcc3;
+  background: var(--panel);
   aspect-ratio: 16 / 7;
 }
-.art svg { display: block; width: 100%; height: 100%; }
-.art .flow { stroke-dasharray: 4 10; animation: flow 2.4s linear infinite; }
-.art .halt { animation: halt 2.4s ease-in-out infinite; }
-@keyframes flow { to { stroke-dashoffset: -28; } }
-@keyframes halt { 50% { opacity: 0.35; } }
+.art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 62% 55%; }
 @media (max-width: 44rem) { .art { aspect-ratio: 4 / 3; } .card { min-height: 5.5rem; } }
 .cards {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem;
@@ -221,7 +218,7 @@ a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
     --paper: #0f1216; --panel: #181d22; --flag: #e8a87c;
   }
   .todo { background: #24170f; }
-  .art { background: #181d22; }
+  .art img { filter: brightness(0.86); }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
@@ -319,38 +316,15 @@ def _cards() -> str:
     return f'      <div class="cards">\n{cards}\n      </div>\n'
 
 
-# The air gap, drawn: a network of nodes inside a perimeter, traffic moving along its
-# edges, and one line that runs to the boundary and stops there. Inline SVG, so it is part
-# of the page rather than a fetch, and it has no labels, because a label would be copy.
-# No `xmlns`: SVG inside HTML does not need one, and leaving it out keeps the page free of
-# any URL at all.
-AIR_GAP_SVG = """\
-      <figure class="art reveal" aria-hidden="true">
-        <svg viewBox="0 0 800 350" preserveAspectRatio="xMidYMid slice" fill="none" stroke="currentColor">
-          <g opacity="0.22" stroke-width="1">
-            <path d="M0 70H800M0 140H800M0 210H800M0 280H800M100 0V350M200 0V350M300 0V350M400 0V350M500 0V350M600 0V350M700 0V350" stroke-dasharray="2 6"/>
-          </g>
-          <g transform="translate(60 0)">
-          <rect x="130" y="55" width="420" height="240" rx="18" stroke-width="1.5"/>
-          <rect x="120" y="45" width="440" height="260" rx="24" stroke-width="1" opacity="0.4"/>
-          <g stroke-width="1.25" opacity="0.8">
-            <path d="M210 120L300 175L390 110L470 170L390 240L300 175M210 120L230 235L300 175M390 110L390 240M470 170L540 170"/>
-          </g>
-          <g stroke-width="1.5" class="flow">
-            <path d="M210 120L300 175L390 110L470 170"/>
-            <path d="M230 235L300 175L390 240"/>
-          </g>
-          <g fill="currentColor" stroke="none">
-            <circle cx="210" cy="120" r="5"/><circle cx="230" cy="235" r="5"/>
-            <circle cx="300" cy="175" r="7"/><circle cx="390" cy="110" r="5"/>
-            <circle cx="390" cy="240" r="5"/><circle cx="470" cy="170" r="6"/>
-          </g>
-          <path class="halt" d="M540 158V182" stroke-width="3"/>
-          </g>
-          <g opacity="0.3" fill="currentColor" stroke="none">
-            <circle cx="690" cy="110" r="4"/><circle cx="720" cy="220" r="4"/><circle cx="760" cy="150" r="4"/>
-          </g>
-        </svg>
+# The hero photograph, served from this site rather than an image host: it is two files in
+# the allowlist, like the brief, so it adds no third party. Two widths so a phone does not
+# download the desktop one. `alt=""` marks it decorative: a description a screen reader
+# reads aloud is copy, and none has been approved, so it says nothing rather than
+# something unapproved. Width and height are set so the page does not jump as it loads.
+HERO = ("hero-800.jpg", "hero-1408.jpg")
+HERO_IMG = """\
+      <figure class="art">
+        <img src="/hero-1408.jpg" srcset="/hero-800.jpg 800w, /hero-1408.jpg 1408w" sizes="(max-width: 67rem) 100vw, 64rem" width="1408" height="768" alt="" fetchpriority="high">
       </figure>
 """
 
@@ -438,7 +412,7 @@ def render_index() -> str:
 {_bar(None, link=False)}
     <main>
       <h1>{_markup(t("headline"))}</h1>
-{AIR_GAP_SVG}      <div class="prose">
+{HERO_IMG}      <div class="prose">
 {body}
       <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
       </div>
@@ -705,6 +679,7 @@ ALLOWLIST = {
     "robots.txt": render_robots,
     "sitemap.xml": render_sitemap,
     "galinstan-brief.pdf": render_brief_pdf,
+    **{name: (lambda n=name: (ASSETS / n).read_bytes()) for name in HERO},
 }
 
 
