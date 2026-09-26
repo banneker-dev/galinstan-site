@@ -182,9 +182,9 @@ LINES = [
     Line(
         id="meta-title",
         status=APPROVED,
-        approved_on="2026-09-23",
-        text="Galinstan: air-gapped liquidity optimization and audit software for EU banks",
-        note="Revision approved 2026-09-23 (Antwain): no dashes in client-facing copy.",
+        approved_on="2026-09-25",
+        text="Galinstan: Air-Gapped Liquidity Optimization And Audit Software For EU Banks",
+        note="Revision approved 2026-09-23 (Antwain): no dashes in client-facing copy. Title case approved 2026-09-25 (Antwain, 'table approved'): every word capitalized.",
     ),
     Line(
         id="meta-description",
@@ -204,8 +204,8 @@ LINES = [
         note="Approved 2026-09-25 (Antwain): 'just say Privacy, you dont need to repeat the product'. The wordmark is already on the page.",
     ),
     Line(
-        id="notfound-meta-title", status=APPROVED, approved_on="2026-09-25", text="Not found",
-        note="Approved 2026-09-25 (Antwain), same reason as privacy-meta-title. The page is noindex and absent from the sitemap; it exists so the host does not serve its own error page instead.",
+        id="notfound-meta-title", status=APPROVED, approved_on="2026-09-25", text="Not Found",
+        note="Title case approved 2026-09-25 (Antwain, 'table approved'). Approved 2026-09-25 (Antwain), same reason as privacy-meta-title. The page is noindex and absent from the sitemap; it exists so the host does not serve its own error page instead.",
     ),
     # Moved in on 2026-09-25 so that no prose a visitor can read sits outside this register.
     # The wording of all three is unchanged and has been live since site-2026.09.1; what is
@@ -232,7 +232,7 @@ LINES = [
 # --------------------------------------------------------------------------------------
 
 STAGE_2 = [
-    Line(id="dep-meta-title", status=APPROVED, approved_on="2026-09-22", text="How Galinstan is deployed: no egress, your hardware, escrow and exit"),
+    Line(id="dep-meta-title", status=APPROVED, approved_on="2026-09-25", text="How Galinstan Is Deployed: No Egress, Your Hardware, Escrow And Exit", note="Title case approved 2026-09-25 (Antwain, 'table approved')."),
     Line(id="dep-meta-description", status=APPROVED, approved_on="2026-09-22", text="What an institution installs, what it must buy, what leaves the perimeter, how an offline instance is upgraded, and what happens at exit."),
     Line(id="dep-h1", status=APPROVED, approved_on="2026-09-22", text="The questions a diligence reviewer asks first, answered on the page rather than in the third meeting."),
     Line(id="dep-sub", status=APPROVED, approved_on="2026-09-22", text="Galinstan is built as software you install and run inside your own perimeter. There is no tenancy and no console on our side."),
@@ -244,7 +244,7 @@ STAGE_2 = [
     Line(id="dep-body-4", status=APPROVED, approved_on="2026-09-22", text="**Upgrades.** Every version is cut as a signed release: an offline bundle with a checksum for every file and a software bill of materials. It installs with no package index and no network, and the instance never reaches out for it."),
     Line(id="dep-body-5", status=APPROVED, approved_on="2026-09-23", text="**Escrow and exit.** Every release is built to be deposited: source, bundle and checksums as one versioned artefact. We agree escrow and exit terms in the contract rather than pointing at a policy page."),
     Line(id="dep-cta", status=APPROVED, approved_on="2026-09-22", text="Request a demo"),
-    Line(id="il-meta-title", status=APPROVED, approved_on="2026-09-23", text="Galinstan: intraday liquidity optimization that runs on your own hardware"),
+    Line(id="il-meta-title", status=APPROVED, approved_on="2026-09-25", text="Galinstan: Intraday Liquidity Optimization That Runs On Your Own Hardware", note="Title case approved 2026-09-25 (Antwain, 'table approved')."),
     Line(id="il-meta-description", status=APPROVED, approved_on="2026-09-22", text="Software built to decide what an EU bank should hold against its intraday and LCR requirements, and to run the decision inside the institution's own hardware boundary."),
     Line(id="il-h1", status=APPROVED, approved_on="2026-09-22", text="Knowing where the money is, and knowing what to hold, are two different problems."),
     Line(id="il-sub", status=APPROVED, approved_on="2026-09-23", text="Intraday monitoring tells a treasurer what happened. Galinstan is built to answer what to do about it: which assets to hold, which to release, and what the surplus is costing."),
@@ -253,7 +253,7 @@ STAGE_2 = [
     Line(id="il-body-3", status=APPROVED, approved_on="2026-09-22", text="The surplus is worth measuring before it is defended. The FY2025 Pillar 3 disclosures of three European banks show average liquidity coverage ratios between 156% and 256%. Some of that headroom is deliberate. The part that is not is high-quality liquid assets the requirement did not call for."),
     Line(id="il-body-4", status=APPROVED, approved_on="2026-09-22", text="Galinstan is built to connect to nothing. It reads the position you give it, computes inside your hardware boundary, and writes its answer back to you. There is no service on our end of a line, because there is no line."),
     Line(id="il-cta", status=APPROVED, approved_on="2026-09-22", text="Request a demo"),
-    Line(id="ae-meta-title", status=APPROVED, approved_on="2026-09-23", text="Galinstan: audit evidence produced inside your own perimeter"),
+    Line(id="ae-meta-title", status=APPROVED, approved_on="2026-09-25", text="Galinstan: Audit Evidence Produced Inside Your Own Perimeter", note="Title case approved 2026-09-25 (Antwain, 'table approved')."),
     Line(id="ae-meta-description", status=APPROVED, approved_on="2026-09-22", text="Software built to produce control-testing and gap-analysis evidence inside the institution's own hardware boundary, with the inputs and method recorded alongside the result."),
     Line(id="ae-h1", status=APPROVED, approved_on="2026-09-23", text="Audit evidence that never leaves the institution that produced it."),
     Line(id="ae-sub", status=APPROVED, approved_on="2026-09-23", text="Galinstan is built to produce control testing and gap analysis evidence inside your own hardware boundary, with each finding citing where it came from."),
@@ -285,12 +285,13 @@ _BRIEF_NOTE = (
 
 
 def _brief(line_id: str, text: str, **kw) -> Line:
-    return Line(id=line_id, status=APPROVED, approved_on="2026-09-25", text=text, note=_BRIEF_NOTE, **kw)
+    kw.setdefault("note", _BRIEF_NOTE)
+    return Line(id=line_id, status=APPROVED, approved_on="2026-09-25", text=text, **kw)
 
 
 BRIEF = [
-    _brief("brief-meta-title", "How Galinstan works"),
-    _brief("brief-title", "How Galinstan works"),
+    _brief("brief-meta-title", "How Galinstan Works", note=_BRIEF_NOTE + " Title case approved 2026-09-25 (Antwain, 'and brief title')."),
+    _brief("brief-title", "How Galinstan Works", note=_BRIEF_NOTE + " Title case approved 2026-09-25 (Antwain, 'and brief title')."),
     _brief("brief-sub", "Liquidity optimization and DORA audit evidence, produced inside the bank's own perimeter and open to re-performance by its reviewers."),
     _brief("brief-edition", "Product brief \u00b7 release v1.6.0 \u00b7 September 2026"),
 
