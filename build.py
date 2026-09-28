@@ -125,6 +125,14 @@ h1 {
   text-wrap: balance;
 }
 p { margin: 0 0 1.25rem; color: var(--ink-soft); }
+h2 {
+  font-family: var(--sans); font-size: 1.25rem; font-weight: 500; letter-spacing: -0.01em;
+  color: var(--ink); margin: 2.5rem 0 1rem;
+}
+.roles { list-style: none; margin: 0 0 2.5rem; padding: 0; }
+.roles li { margin: 0; padding: 0.875rem 0; border-top: 1px solid var(--rule); color: var(--ink-soft); }
+.roles li:last-child { border-bottom: 1px solid var(--rule); }
+.roles a { font-family: var(--sans); font-size: 0.875rem; white-space: nowrap; }
 footer {
   margin-top: 3.5rem;
   padding-top: 1.25rem;
@@ -316,6 +324,29 @@ def _cards() -> str:
     return f'      <div class="cards">\n{cards}\n      </div>\n'
 
 
+def _roles() -> str:
+    """The role block on the home page: one line for each seat on the buying committee.
+
+    Each approved line ends with the name of the page that carries its argument, and that
+    name is a nav label, so it renders as a link to the page and nothing is invented. A line
+    that does not end with a nav label fails the build rather than shipping without its link.
+    """
+    t = page_copy.text
+    by_label = {t(nav_id): path for path, (_, nav_id) in PAGES.items()}
+    items = []
+    for line_id in ("roles-treasury", "roles-dora", "roles-security", "roles-audit"):
+        raw = t(line_id)
+        label = next((lab for lab in by_label if raw.endswith(" " + lab)), None)
+        if label is None:
+            raise ValueError(f"{line_id} does not end with a page name")
+        lead = raw[: -len(label)].rstrip()
+        items.append(f'        <li>{_markup(lead)} <a href="{by_label[label]}">{_markup(label)}</a></li>')
+    return (
+        f'      <h2>{_markup(t("roles-h2"))}</h2>\n'
+        '      <ul class="roles">\n' + "\n".join(items) + "\n      </ul>\n"
+    )
+
+
 # The hero photograph, served from this site rather than an image host: it is two files in
 # the allowlist, like the brief, so it adds no third party. Two widths so a phone does not
 # download the desktop one. `alt=""` marks it decorative: a description a screen reader
@@ -404,9 +435,8 @@ def render_stage_2(path: str) -> str:
 
 def render_index() -> str:
     t = page_copy.text
-    body = "\n".join(
-        f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2", "body-3")
-    )
+    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2"))
+    body += "\n" + _roles() + f"      <p>{_markup(t('body-3'))}</p>"
     return f"""{_head(t("meta-title"), "/", t("meta-description"), extra=render_structured_data())}
   <body>
 {_bar(None, link=False)}

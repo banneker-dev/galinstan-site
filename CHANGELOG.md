@@ -2,6 +2,20 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.20] — the committee that buys it
+
+### Added
+- **The role block on the home page**, between `body-2` and `body-3`: `roles-h2` and four lines, one for
+  each seat on the buying committee, approved by Antwain 2026-09-28 (`SITE_COPY_STAGE1.md`, "Proposed
+  2026-09-28"; Cowork's ask 77). The page name ending each line is a nav label and renders as a link to
+  that page; a line that names no page fails the build. `meta-description` is unchanged: its revision is
+  not approved.
+
+### Changed
+- **`il-body-1`** reads "Intraday tools show the position. Galinstan is built to choose it, beside the
+  systems a bank already runs.", approved by Antwain 2026-09-28 (`SITE_COPY_STAGE2.md`, "Shortened
+  2026-09-28"; Cowork's ask 87). It replaces the whole string.
+
 ## [site-2026.09.19] — the product brief addresses banks
 
 ### Changed
