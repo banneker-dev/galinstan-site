@@ -82,6 +82,14 @@ h1 {
   text-wrap: balance;
 }
 p { margin: 0 0 1.25rem; color: var(--ink-soft); }
+h2 {
+  font-family: var(--sans); font-size: 1.25rem; font-weight: 500; letter-spacing: -0.01em;
+  color: var(--ink); margin: 2.5rem 0 1rem;
+}
+.roles { list-style: none; margin: 0 0 2.5rem; padding: 0; }
+.roles li { margin: 0; padding: 0.875rem 0; border-top: 1px solid var(--rule); color: var(--ink-soft); }
+.roles li:last-child { border-bottom: 1px solid var(--rule); }
+.roles a { font-family: var(--sans); font-size: 0.875rem; white-space: nowrap; }
 footer {
   margin-top: 3.5rem;
   padding-top: 1.25rem;
@@ -199,7 +207,7 @@ a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
       <h1>Knowing where the money is, and knowing what to hold, are two different problems.</h1>
       <div class="prose">
       <p class="sub">Intraday monitoring tells a treasurer what happened. Galinstan is built to answer what to do about it: which assets to hold, which to release, and what the surplus is costing.</p>
-      <p>The intraday tooling on the market is built to make positions visible: balances across accounts, payment flows, throttling decisions, the data a supervisor asks for. That work is necessary and it is well served. What we have not found is software that chooses the position.</p>
+      <p>Intraday tools show the position. Galinstan is built to choose it, beside the systems a bank already runs.</p>
       <p>The choice is hard on purpose. Assets are held in lots, haircuts and caps interact, and encumbrance removes collateral from the buffer. The objective is to give up as little yield as possible while staying above the requirement all day. That is a combinatorial problem rather than a report, and Galinstan is built to solve it as one.</p>
       <p>The surplus is worth measuring before it is defended. The FY2025 Pillar 3 disclosures of three European banks show average liquidity coverage ratios between 156% and 256%. Some of that headroom is deliberate. The part that is not is high-quality liquid assets the requirement did not call for.</p>
       <p>Galinstan is built to connect to nothing. It reads the position you give it, computes inside your hardware boundary, and writes its answer back to you. There is no service on our end of a line, because there is no line.</p>

@@ -104,6 +104,35 @@ class BuildTests(unittest.TestCase):
         self.assertNotIn('href="https://banneker.net', body)
 
 
+class RoleBlock(unittest.TestCase):
+    """Cowork's ask 77: each role line ends with a page name, rendered as a link to that page."""
+
+    def test_each_line_links_to_the_page_it_names(self):
+        page = (ROOT / "public" / "index.html").read_text(encoding="utf-8")
+        for line_id, path in (
+            ("roles-treasury", "/intraday-liquidity"),
+            ("roles-dora", "/deployment"),
+            ("roles-security", "/deployment"),
+            ("roles-audit", "/audit-evidence"),
+        ):
+            label = page_copy.text(line_id).rsplit(". ", 1)[1]
+            self.assertIn(f'<a href="{path}">{label}</a></li>', page, line_id)
+
+    def test_it_sits_between_body_2_and_body_3(self):
+        page = (ROOT / "public" / "index.html").read_text(encoding="utf-8")
+        at = [page.index(build._markup(page_copy.text(k))) for k in ("body-2", "roles-h2", "body-3")]
+        self.assertEqual(at, sorted(at))
+
+    def test_a_line_without_a_page_name_fails_the_build(self):
+        original = page_copy.BY_ID["roles-dora"]
+        page_copy.BY_ID["roles-dora"] = dataclasses.replace(original, text="**DORA.** No page named here.")
+        try:
+            with self.assertRaises(ValueError):
+                build._roles()
+        finally:
+            page_copy.BY_ID["roles-dora"] = original
+
+
 class GuardsPassOnTheRealBuild(unittest.TestCase):
     def test_no_external_references(self):
         self.assertEqual(guards.no_external_references(), [])

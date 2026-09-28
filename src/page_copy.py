@@ -17,7 +17,7 @@ Three statuses, and the build treats them differently:
 APPROVED, and the production deploy refuses to run while it is False. A preview URL
 still builds, so the page can be looked at and argued about before it can be published.
 
-**Every string is approved as of 2026-09-25** — the stage 1 page, the demo route (ask 47)
+**Every string is approved as of 2026-09-28** — the stage 1 page, the demo route (ask 47)
 and the stage 2 release set (ask 54), each on Antwain's approval as recorded in
 `50_Claude_Outputs/SITE_COPY_STAGE1.md` and `SITE_COPY_STAGE2.md`, and the product brief,
 approved by him in conversation with Cody on 2026-09-25 and recorded below. That is not a reason to
@@ -101,6 +101,14 @@ LINES = [
             "record Banneker. This states only what the design guarantees."
         ),
     ),
+    # The role block, between body-2 and body-3. Source: SITE_COPY_STAGE1.md, "Proposed
+    # 2026-09-28", all five approved by Antwain on 2026-09-28 (Cowork's ask 77). The page
+    # name ending each line is a nav label, and the build renders it as a link to that page.
+    Line(id="roles-h2", status=APPROVED, approved_on="2026-09-28", text="Built for the committee that buys it."),
+    Line(id="roles-treasury", status=APPROVED, approved_on="2026-09-28", text="**Group treasury and ALM.** Which assets to hold against the requirement, which to release, and what the surplus is costing. Intraday liquidity"),
+    Line(id="roles-dora", status=APPROVED, approved_on="2026-09-28", text="**DORA programme and third-party risk.** What the software connects to, what leaves the perimeter, and what happens at exit. Deployment"),
+    Line(id="roles-security", status=APPROVED, approved_on="2026-09-28", text="**CISO and infrastructure.** Every version installs from a signed offline bundle with a software bill of materials, and makes no outbound connection of any kind. Deployment"),
+    Line(id="roles-audit", status=APPROVED, approved_on="2026-09-28", text="**Internal and external audit.** Control testing and gap analysis evidence, built to be produced inside the institution, with each finding citing where it came from. Audit evidence"),
     Line(
         id="body-3",
         status=APPROVED,
@@ -250,7 +258,7 @@ STAGE_2 = [
     Line(id="il-meta-description", status=APPROVED, approved_on="2026-09-26", note="Revision approved 2026-09-26 (Antwain) with the US and EU audience: 'a bank', previously 'an EU bank'.", text="Software built to decide what a bank should hold against its intraday and LCR requirements, and to run the decision inside the institution's own hardware boundary."),
     Line(id="il-h1", status=APPROVED, approved_on="2026-09-22", text="Knowing where the money is, and knowing what to hold, are two different problems."),
     Line(id="il-sub", status=APPROVED, approved_on="2026-09-23", text="Intraday monitoring tells a treasurer what happened. Galinstan is built to answer what to do about it: which assets to hold, which to release, and what the surplus is costing."),
-    Line(id="il-body-1", status=APPROVED, approved_on="2026-09-22", text="The intraday tooling on the market is built to make positions visible: balances across accounts, payment flows, throttling decisions, the data a supervisor asks for. That work is necessary and it is well served. What we have not found is software that chooses the position."),
+    Line(id="il-body-1", status=APPROVED, approved_on="2026-09-28", text="Intraday tools show the position. Galinstan is built to choose it, beside the systems a bank already runs.", note="Revision approved 2026-09-28 (Antwain: \"too wordy\"), SITE_COPY_STAGE2.md, \"Shortened 2026-09-28\". It replaces the whole string: the peer read found HQLA buffer optimisation claimed by a platform vendor, so the earlier \"What we have not found is software that chooses the position\" no longer held (PEER_SET.md section 6). Earlier text approved 2026-09-22."),
     Line(id="il-body-2", status=APPROVED, approved_on="2026-09-23", text="The choice is hard on purpose. Assets are held in lots, haircuts and caps interact, and encumbrance removes collateral from the buffer. The objective is to give up as little yield as possible while staying above the requirement all day. That is a combinatorial problem rather than a report, and Galinstan is built to solve it as one."),
     Line(id="il-body-3", status=APPROVED, approved_on="2026-09-22", text="The surplus is worth measuring before it is defended. The FY2025 Pillar 3 disclosures of three European banks show average liquidity coverage ratios between 156% and 256%. Some of that headroom is deliberate. The part that is not is high-quality liquid assets the requirement did not call for."),
     Line(id="il-body-4", status=APPROVED, approved_on="2026-09-22", text="Galinstan is built to connect to nothing. It reads the position you give it, computes inside your hardware boundary, and writes its answer back to you. There is no service on our end of a line, because there is no line."),
