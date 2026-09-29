@@ -2,6 +2,14 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.21] — the audit evidence page names what Module 2 reads
+
+### Changed
+- **`ae-body-3`** reads "... control testing and gap analysis against DORA and its technical standards, ...",
+  approved by Antwain 2026-09-29 (option A of Cowork's open decision 25; their ask 92). The EBA outsourcing
+  guidelines are being repealed by guidelines for non-ICT services, and nothing in the product reads them, so
+  the page no longer names them. No other served string named them.
+
 ## [site-2026.09.20] — the committee that buys it
 
 ### Added
