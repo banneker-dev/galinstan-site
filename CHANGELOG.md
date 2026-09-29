@@ -2,6 +2,17 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.09.22] — who does what
+
+### Added
+- **`dep-body-6`** on `/deployment`, after `dep-body-5`: "**Who does what.** We follow a shared responsibility
+  model, as cloud providers do. ...", approved by Antwain 2026-09-29 with `/deployment` as its page
+  (`SITE_COPY_STAGE2.md`, "Approved 2026-09-29"; Cowork's ask 96).
+- **`brief-p-responsibility`** in the product brief, approved by Antwain 2026-09-29. It follows the list under
+  "What Galinstan does not do": the list says what is left to the institution, the paragraph says who is
+  responsible for what. No new heading, so no new string. The PDF is reprinted and its lock updated; it is
+  still four pages, and the brief's edition line is unchanged.
+
 ## [site-2026.09.21] — the audit evidence page names what Module 2 reads
 
 ### Changed
