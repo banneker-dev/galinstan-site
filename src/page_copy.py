@@ -268,7 +268,9 @@ STAGE_2 = [
     Line(id="ae-h1", status=APPROVED, approved_on="2026-09-23", text="Audit evidence that never leaves the institution that produced it."),
     Line(id="ae-sub", status=APPROVED, approved_on="2026-09-23", text="Galinstan is built to produce control testing and gap analysis evidence inside your own hardware boundary, with each finding citing where it came from."),
     Line(id="ae-body-2", status=APPROVED, approved_on="2026-09-22", text="A different standard is possible when the software runs inside the institution. The inputs never leave. The version that produced the result sits on the institution's own disk. Nothing is rewritten between the calculation and the report by a service neither party controls."),
-    Line(id="ae-body-3", status=APPROVED, approved_on="2026-09-22", text="Module 2 is built around that: control testing and gap analysis against DORA and the EBA outsourcing guidelines, with the evidence for each finding citing where it came from, and with the model and method that produced it recorded beside it rather than described afterwards."),
+    Line(
+        id="ae-body-3", status=APPROVED, approved_on="2026-09-29", text="Module 2 is built around that: control testing and gap analysis against DORA and its technical standards, with the evidence for each finding citing where it came from, and with the model and method that produced it recorded beside it rather than described afterwards.",
+        note="Revision approved 2026-09-29 (Antwain): option A of open decision 25 in CURRENT_STATE.md. The EBA outsourcing guidelines are being repealed, so Module 2 reads DORA and its technical standards and the phrase is cut. Previously '... against DORA and the EBA outsourcing guidelines, ...' (approved 2026-09-22)."),
     Line(id="ae-cta", status=APPROVED, approved_on="2026-09-22", text="Request a demo"),
     Line(id="nav-1", status=APPROVED, approved_on="2026-09-22", text="Intraday liquidity"),
     Line(id="nav-2", status=APPROVED, approved_on="2026-09-22", text="Audit evidence"),
