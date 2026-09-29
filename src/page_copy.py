@@ -253,6 +253,9 @@ STAGE_2 = [
         id="dep-body-3", status=APPROVED, approved_on="2026-09-22", text="**What we are to your register.** We license Galinstan annually with support, patches and calibration. None of your data reaches us, and no part of the analysis depends on us being reachable.", note="Revision approved 2026-09-22 (Antwain): a sentence removed from the approved text."),
     Line(id="dep-body-4", status=APPROVED, approved_on="2026-09-22", text="**Upgrades.** Every version is cut as a signed release: an offline bundle with a checksum for every file and a software bill of materials. It installs with no package index and no network, and the instance never reaches out for it."),
     Line(id="dep-body-5", status=APPROVED, approved_on="2026-09-23", text="**Escrow and exit.** Every release is built to be deposited: source, bundle and checksums as one versioned artefact. We agree escrow and exit terms in the contract rather than pointing at a policy page."),
+    Line(
+        id="dep-body-6", status=APPROVED, approved_on="2026-09-29", text="**Who does what.** We follow a shared responsibility model, as cloud providers do. We are responsible for the correctness of the evidence: the regulatory parameters read from the primary text, the calculations, the reconciliations to what you report, and the signed software that produces them, each with evidence your reviewer can re-perform. You are responsible for the perimeter it runs in, the data you give it, and the decisions and submissions you make on it. Calibration and updates are shared: we supply them, and you approve and install them. Together, the two complete the steps each regulation asks for.",
+        note="Approved 2026-09-29 (Antwain, with /deployment as the page): SITE_COPY_STAGE2.md, 'Approved 2026-09-29'. Cowork's wording; Cowork's ask 96."),
     Line(id="dep-cta", status=APPROVED, approved_on="2026-09-22", text="Request a demo"),
     Line(id="il-meta-title", status=APPROVED, approved_on="2026-09-25", text="Galinstan: Intraday Liquidity Optimization That Runs On Your Own Hardware", note="Title case approved 2026-09-25 (Antwain, 'table approved')."),
     Line(id="il-meta-description", status=APPROVED, approved_on="2026-09-26", note="Revision approved 2026-09-26 (Antwain) with the US and EU audience: 'a bank', previously 'an EU bank'.", text="Software built to decide what a bank should hold against its intraday and LCR requirements, and to run the decision inside the institution's own hardware boundary."),
@@ -348,6 +351,12 @@ BRIEF = [
     _brief("brief-li-limits-1", "**It does not decide.** Grades and allocations are proposals. The reviewer and the treasurer decide."),
     _brief("brief-li-limits-2", "**It does not guess.** A check that needs something an offline machine cannot have, such as the global LEI database, is listed with its reason rather than assumed to pass. Where a figure cannot be reproduced, it is not stated."),
     _brief("brief-li-limits-3", "**It does not send anything.** There is no service on our side, and nothing in the analysis depends on reaching one."),
+    _brief(
+        "brief-p-responsibility",
+        "Galinstan follows a shared responsibility model, as cloud providers do. We are responsible for the correctness of the evidence: the regulatory parameters read from the primary text, the calculations and reconciliations, and the signed software that produces them, each of which the institution's reviewer can re-perform. The institution is responsible for the perimeter Galinstan runs in, the data it is given, and the decisions and submissions made on it. Calibration and updates are shared: we supply them, and the institution approves and installs them. Together, the two complete the steps each regulation asks for.",
+        approved_on="2026-09-29",
+        note="Approved 2026-09-29 (Antwain): SITE_COPY_STAGE2.md, 'Approved 2026-09-29'. Cowork's wording; Cowork's ask 96. Placed by Cody after the limits list, which it completes: the list says what Galinstan leaves to the institution, the paragraph says who is responsible for what.",
+    ),
 
     _brief("brief-h-sources", "Sources"),
     _brief("brief-ref-1", "Regulation (EU) 2022/2554, the Digital Operational Resilience Act (DORA)."),
