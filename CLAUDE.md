@@ -23,3 +23,4 @@ repository needs in front of it.
    a package, it is worth being sure the page needs the something.
 6. **A placeholder renders as a visible marker, never as a blank.** A blank and a zero
    read differently, and a silent blank ships.
+7. **Release mechanics are not asks.** Merge on green, tag and publish without asking: `RULES.md` D11.
