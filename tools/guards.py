@@ -398,6 +398,51 @@ def brief_matches_its_source(pdf=None, lock=None, source=None) -> list[str]:
     return failures
 
 
+# RULES.md D12: Antwain's struck statements, from the one list both lanes share. The list of record is
+# `00_Start_Here/STRUCK_STATEMENTS.md` in the Galinstan Drive; CI cannot see the Drive, so this repository carries a copy,
+# `docs/STRUCK_STATEMENTS.md`, which must be identical to it wherever the Drive is mounted. A pattern is column 3 of each
+# S-row; a match with a quotation mark directly before or after it is a record of the strike, not a use of it (Cowork's
+# rule in `50_Claude_Outputs/TOOLS/struck_check.py`, and the product's `tools/struck.py`).
+STRUCK_COPY = ROOT / "docs" / "STRUCK_STATEMENTS.md"
+STRUCK_RECORD = (pathlib.Path.home() / "Library/CloudStorage/GoogleDrive-antwain@jethrojustice.org/Shared drives/Galinstan"
+                 / "00_Start_Here" / "STRUCK_STATEMENTS.md")
+_QUOTES = '"\u201c\u201d'
+
+
+def struck_patterns(path: pathlib.Path = STRUCK_COPY) -> list[tuple[str, re.Pattern]]:
+    out = []
+    for row in path.read_text(encoding="utf-8").splitlines():
+        cells = [c.strip() for c in re.split(r"(?<!\\)\|", row.strip().strip("|"))]
+        if len(cells) >= 3 and re.fullmatch(r"S\d+", cells[0]):
+            out.append((cells[0], re.compile(cells[2].strip("`").replace("\\|", "|"), re.I)))
+    return out
+
+
+def _struck_in(text: str, where: str, patterns) -> list[str]:
+    hits = []
+    for n, row in enumerate(text.splitlines(), 1):
+        for sid, rx in patterns:
+            for m in rx.finditer(row):
+                before = row[m.start() - 1] if m.start() else ""
+                after = row[m.end()] if m.end() < len(row) else ""
+                if not ((before and before in _QUOTES) or (after and after in _QUOTES)):
+                    hits.append(f"{sid} {where}:{n}: {row.strip()[:120]}")
+    return hits
+
+
+def no_struck_statements(pages=None, record: pathlib.Path = STRUCK_RECORD) -> list[str]:
+    """RULES.md D12: no statement Antwain has struck, in the copy register or on any page."""
+    failures = []
+    if record.exists() and record.read_bytes() != STRUCK_COPY.read_bytes():
+        failures.append("docs/STRUCK_STATEMENTS.md differs from the list of record in the Drive; copy it across")
+    patterns = struck_patterns()
+    for line in page_copy.LINES:
+        failures += _struck_in(line.text, f"register {line.id}", patterns)
+    for name, text in (pages if pages is not None else _pages()):
+        failures += _struck_in(text, name, patterns)
+    return failures
+
+
 ALWAYS = {
     "no external references": no_external_references,
     "no dashes as punctuation": no_dashes_as_punctuation,
@@ -407,6 +452,7 @@ ALWAYS = {
     "crawler policy": crawler_policy,
     "mail targets carry their subjects": mail_targets_carry_their_subjects,
     "brief matches its source": brief_matches_its_source,
+    "no struck statements": no_struck_statements,
 }
 
 PRODUCTION_ONLY = {"publication gate": publication_gate}
