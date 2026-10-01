@@ -150,6 +150,22 @@ class GuardsPassOnTheRealBuild(unittest.TestCase):
 class GuardsFailWhenTheyShould(unittest.TestCase):
     """The other direction. A guard that has never failed has never been shown to run."""
 
+    def test_a_struck_statement_on_a_page_fails_and_a_quoted_one_does_not(self):
+        """RULES.md D12: the six strikes load from the shared list, and Cowork's quotation rule holds."""
+        self.assertEqual([sid for sid, _ in guards.struck_patterns()], ["S1", "S2", "S3", "S4", "S5", "S6"])
+        caught = guards.no_struck_statements(pages=[("p.html", "<p>It certifies nothing.</p>")], record=ROOT / "absent")
+        self.assertTrue(any(f.startswith("S1 p.html") for f in caught))
+        quoted = guards.no_struck_statements(pages=[("p.html", '<p>He struck "certifies nothing".</p>')], record=ROOT / "absent")
+        self.assertEqual(quoted, [])
+
+    def test_the_copy_of_the_list_must_match_the_drive_where_it_is_mounted(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as d:
+            other = pathlib.Path(d) / "STRUCK_STATEMENTS.md"
+            other.write_text(guards.STRUCK_COPY.read_text() + "| S7 | x | `x` | y | z |\n")
+            self.assertIn("differs from the list of record", guards.no_struck_statements(pages=[], record=other)[0])
+
     def test_external_script_is_caught(self):
         page = [("index.html", '<script src="https://cdn.example.com/a.js"></script>')]
         self.assertTrue(guards.no_external_references(page))

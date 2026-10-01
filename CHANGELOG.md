@@ -2,6 +2,16 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [Unreleased]
+
+### Added
+- **Guard: no struck statements** (`RULES.md` D12, approved by Antwain 2026-09-30). It reads the one list both lanes
+  share, `00_Start_Here/STRUCK_STATEMENTS.md` in the Galinstan Drive, through a copy at `docs/STRUCK_STATEMENTS.md` that
+  must match it wherever the Drive is mounted. It fails on any of Antwain's struck statements in the copy register, on
+  any page, or in the brief's source. A match directly beside a quotation mark is a record of the strike, as in
+  Cowork's own check. Its own commit (`RULES.md` r32). Nothing served changes, and the site carries none of the six
+  today, so this is no release on its own.
+
 ## [site-2026.09.22] — who does what
 
 ### Added
