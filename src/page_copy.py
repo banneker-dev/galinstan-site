@@ -48,6 +48,10 @@ class Line:
         return self.status != APPROVED
 
 
+# The decision behind the 2026-10-02 revisions of the offline phrase, cited in each one's note.
+NOTE = 'Decided, "Plain phrases for offline", Round 107; Cowork\'s ask 141'
+
+
 # --------------------------------------------------------------------------------------
 # The page, in document order. Source: 50_Claude_Outputs/SITE_COPY_STAGE1.md
 # --------------------------------------------------------------------------------------
@@ -89,13 +93,15 @@ LINES = [
     Line(
         id="body-2",
         status=APPROVED,
-        approved_on="2026-09-21",
+        approved_on="2026-10-02",
         text=(
             "By design, no data leaves the institution, there is no cloud service to depend "
-            "on, and the software makes no outbound connection of any kind."
+            "on, and the software works completely offline."
         ),
         note=(
-            "Revised 2026-09-21. The earlier draft claimed there is no entry to add to the "
+            "Revised 2026-10-02: 'works completely offline' for 'makes no outbound connection of "
+            "any kind', the phrase Antwain approved for treasury, ALM and CRO readers (CURRENT_STATE.md, "
+            + NOTE + "). Revised 2026-09-21. The earlier draft claimed there is no entry to add to the "
             "critical ICT provider register. Supervisory guidance says a licence sold with "
             "ongoing support can itself be an ICT service, so a bank would likely still "
             "record Banneker. This states only what the design guarantees."
@@ -107,7 +113,7 @@ LINES = [
     Line(id="roles-h2", status=APPROVED, approved_on="2026-09-28", text="Built for the committee that buys it."),
     Line(id="roles-treasury", status=APPROVED, approved_on="2026-09-28", text="**Group treasury and ALM.** Which assets to hold against the requirement, which to release, and what the surplus is costing. Intraday liquidity"),
     Line(id="roles-dora", status=APPROVED, approved_on="2026-09-28", text="**DORA programme and third-party risk.** What the software connects to, what leaves the perimeter, and what happens at exit. Deployment"),
-    Line(id="roles-security", status=APPROVED, approved_on="2026-09-28", text="**CISO and infrastructure.** Every version installs from a signed offline bundle with a software bill of materials, and makes no outbound connection of any kind. Deployment"),
+    Line(id="roles-security", status=APPROVED, approved_on="2026-09-28", text="**CISO and infrastructure.** Every version installs from a signed offline bundle with a software bill of materials, and never connects to the internet. Deployment", note="Revised 2026-10-02: 'never connects to the internet', the phrase approved for CISO and infrastructure readers (CURRENT_STATE.md, " + NOTE + ")."),
     Line(id="roles-audit", status=APPROVED, approved_on="2026-09-28", text="**Internal and external audit.** Control testing and gap analysis evidence, built to be produced inside the institution, with each finding citing where it came from. Audit evidence"),
     Line(
         id="body-3",
@@ -199,13 +205,14 @@ LINES = [
     Line(
         id="meta-description",
         status=APPROVED,
-        approved_on="2026-09-22",
+        approved_on="2026-10-02",
         text=(
             "Software built for intraday liquidity, ALM and DORA third-party risk work, "
-            "to run on-premise inside the institution's own hardware boundary with no "
-            "outbound connection."
+            "to run on-premise inside the institution's own hardware boundary. It works "
+            "completely offline."
         ),
-        note="Revision approved 2026-09-22: the 'built to' tense, as body-1.",
+        note="Revised 2026-10-02: 'works completely offline' for 'with no outbound connection', the home page's "
+             "phrase (CURRENT_STATE.md, " + NOTE + "). Revision approved 2026-09-22: the 'built to' tense, as body-1.",
     ),
     # Moved into the register on 2026-09-25 (Antwain). Both were hardcoded in build.py, and
     # being outside the register is how they kept an em dash through every copy review.
@@ -246,7 +253,7 @@ STAGE_2 = [
     Line(id="dep-meta-description", status=APPROVED, approved_on="2026-09-22", text="What an institution installs, what it must buy, what leaves the perimeter, how an offline instance is upgraded, and what happens at exit."),
     Line(id="dep-h1", status=APPROVED, approved_on="2026-09-22", text="The questions a diligence reviewer asks first, answered on the page rather than in the third meeting."),
     Line(id="dep-sub", status=APPROVED, approved_on="2026-09-22", text="Galinstan is built as software you install and run inside your own perimeter. There is no tenancy and no console on our side."),
-    Line(id="dep-body-1", status=APPROVED, approved_on="2026-09-23", text="**What leaves.** Nothing, by design. The software makes no outbound connection of any kind. Not for licensing, not for telemetry, not for model weights, not for updates. It is built to run on a machine with no route to the internet, and it has nothing to reach if it is given one."),
+    Line(id="dep-body-1", status=APPROVED, approved_on="2026-10-02", note="Revised 2026-10-02 in the words of Cowork's ask 141: 'never connects to the internet', the phrase approved for deployment readers (CURRENT_STATE.md, " + NOTE + ").", text="**What leaves.** Nothing, by design. The software never connects to the internet: not for licensing, not for telemetry, not for model weights, not for updates. It is built to run on a machine with no route to the internet, and it has nothing to reach if it is given one."),
     Line(
         id="dep-body-2", status=APPROVED, approved_on="2026-09-22", text="**What you buy.** Galinstan is built to run on hardware you already know how to procure.", note="Revision approved 2026-09-22 (Antwain): a sentence removed from the approved text."),
     Line(
@@ -325,7 +332,7 @@ BRIEF = [
 
     _brief("brief-h-principles", "How it works, in principle"),
     _brief("brief-h3-perimeter", "It runs inside the perimeter"),
-    _brief("brief-p-perimeter", "Galinstan arrives as an offline bundle cut from a signed release, with every dependency, a checksum for every file and a software bill of materials. It installs with no package index and no network, and it makes no outbound connection of any kind. The released bundle has been installed and run on a machine with its network disconnected, with the network sampled throughout the run and never answering."),
+    _brief("brief-p-perimeter", "Galinstan arrives as an offline bundle cut from a signed release, with every dependency, a checksum for every file and a software bill of materials. It installs with no package index and no network, and it never connects to the internet. The released bundle has been installed and run on a machine with its network disconnected, with the network sampled throughout the run and never answering.", approved_on="2026-10-02", note="Revised 2026-10-02: 'never connects to the internet' for 'makes no outbound connection of any kind', the phrase approved for infrastructure readers (CURRENT_STATE.md, " + NOTE + "). " + _BRIEF_NOTE),
     _brief("brief-h3-reads", "It reads what the bank already files"),
     _brief("brief-p-reads", "Galinstan does not ask for a new data feed. It reads the returns and records a bank already produces, in the formats the regulators define:"),
     _brief("brief-li-reads-1", "the LCR return, templates C 72.00 to C 76.00, and the NSFR return, templates C 80.00, C 81.00 and C 84.00, in the EBA's xBRL-CSV format;"),
