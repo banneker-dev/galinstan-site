@@ -2,7 +2,19 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
-## [Unreleased]
+## [site-2026.10.1] — "works completely offline", by reader
+
+### Changed
+- **The offline phrase, by reader** (Cowork's ask 141; approved by Antwain 2026-10-02, "these alternatives are approved,
+  let's choose based on our target audience", `CURRENT_STATE.md` Decided, "Plain phrases for offline"). "Makes no
+  outbound connection" is gone from every page and the brief:
+  - `body-2` (home): "...and the software works completely offline."
+  - `meta-description` (home): "...inside the institution's own hardware boundary. It works completely offline."
+  - `roles-security` (home, CISO and infrastructure): "...and never connects to the internet."
+  - `dep-body-1` (`/deployment`): "The software never connects to the internet: not for licensing, not for telemetry,
+    not for model weights, not for updates."
+  - `brief-p-perimeter` (the product brief, how it installs): "...and it never connects to the internet." The PDF is
+    reprinted and its lock updated; still four pages.
 
 ### Added
 - **Guard: no method terms** (`RULES.md` D14, approved by Antwain 2026-10-02; Cowork's ask 142). It reads the list
