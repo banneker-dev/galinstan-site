@@ -409,11 +409,13 @@ STRUCK_RECORD = (pathlib.Path.home() / "Library/CloudStorage/GoogleDrive-antwain
 _QUOTES = '"\u201c\u201d'
 
 
-def struck_patterns(path: pathlib.Path = STRUCK_COPY) -> list[tuple[str, re.Pattern]]:
+def struck_patterns(path: pathlib.Path = STRUCK_COPY, prefix: str = "S") -> list[tuple[str, re.Pattern]]:
+    """Each row's id and pattern. `prefix` is the row letter: `S` for the struck statements, `M` for the method terms,
+    which Cowork's list writes in the same table format."""
     out = []
     for row in path.read_text(encoding="utf-8").splitlines():
         cells = [c.strip() for c in re.split(r"(?<!\\)\|", row.strip().strip("|"))]
-        if len(cells) >= 3 and re.fullmatch(r"S\d+", cells[0]):
+        if len(cells) >= 3 and re.fullmatch(rf"{prefix}\d+", cells[0]):
             out.append((cells[0], re.compile(cells[2].strip("`").replace("\\|", "|"), re.I)))
     return out
 
@@ -443,6 +445,26 @@ def no_struck_statements(pages=None, record: pathlib.Path = STRUCK_RECORD) -> li
     return failures
 
 
+# RULES.md D14: results and their checks may be published; the method may not. The list of record is
+# `00_Start_Here/METHOD_TERMS.md` in the Galinstan Drive, read by Cowork's `50_Claude_Outputs/TOOLS/method_check.py` and the
+# product's `tools/method_terms.py` the same way as the struck statements: column 3 of each M-row, Cowork's quotation rule.
+METHOD_COPY = ROOT / "docs" / "METHOD_TERMS.md"
+METHOD_RECORD = STRUCK_RECORD.parent / "METHOD_TERMS.md"
+
+
+def no_method_terms(pages=None, record: pathlib.Path = METHOD_RECORD) -> list[str]:
+    """RULES.md D14: no method term in the copy register or on any page."""
+    failures = []
+    if record.exists() and record.read_bytes() != METHOD_COPY.read_bytes():
+        failures.append("docs/METHOD_TERMS.md differs from the list of record in the Drive; copy it across")
+    patterns = struck_patterns(METHOD_COPY, prefix="M")
+    for line in page_copy.LINES:
+        failures += _struck_in(line.text, f"register {line.id}", patterns)
+    for name, text in (pages if pages is not None else _pages()):
+        failures += _struck_in(text, name, patterns)
+    return failures
+
+
 ALWAYS = {
     "no external references": no_external_references,
     "no dashes as punctuation": no_dashes_as_punctuation,
@@ -453,6 +475,7 @@ ALWAYS = {
     "mail targets carry their subjects": mail_targets_carry_their_subjects,
     "brief matches its source": brief_matches_its_source,
     "no struck statements": no_struck_statements,
+    "no method terms": no_method_terms,
 }
 
 PRODUCTION_ONLY = {"publication gate": publication_gate}
