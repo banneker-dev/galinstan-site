@@ -158,6 +158,23 @@ class GuardsFailWhenTheyShould(unittest.TestCase):
         quoted = guards.no_struck_statements(pages=[("p.html", '<p>He struck "certifies nothing".</p>')], record=ROOT / "absent")
         self.assertEqual(quoted, [])
 
+    def test_a_method_term_on_a_page_fails_and_a_quoted_one_does_not(self):
+        """RULES.md D14: the ten method terms load from the shared list, and Cowork's quotation rule holds."""
+        self.assertEqual([m for m, _ in guards.struck_patterns(guards.METHOD_COPY, prefix="M")],
+                         [f"M{n}" for n in range(1, 11)])
+        caught = guards.no_method_terms(pages=[("p.html", "<p>Our formulation is exact.</p>")], record=ROOT / "absent")
+        self.assertTrue(any(f.startswith("M2 p.html") for f in caught))
+        quoted = guards.no_method_terms(pages=[("p.html", '<p>Never say "formulation".</p>')], record=ROOT / "absent")
+        self.assertEqual(quoted, [])
+
+    def test_the_method_list_must_match_the_drive_where_it_is_mounted(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as d:
+            other = pathlib.Path(d) / "METHOD_TERMS.md"
+            other.write_text(guards.METHOD_COPY.read_text() + "| M11 | x | `x` |\n")
+            self.assertIn("differs from the list of record", guards.no_method_terms(pages=[], record=other)[0])
+
     def test_the_copy_of_the_list_must_match_the_drive_where_it_is_mounted(self):
         import tempfile
 

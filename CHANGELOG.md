@@ -5,6 +5,11 @@ Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 ## [Unreleased]
 
 ### Added
+- **Guard: no method terms** (`RULES.md` D14, approved by Antwain 2026-10-02; Cowork's ask 142). It reads the list
+  both lanes share, `00_Start_Here/METHOD_TERMS.md`, through a copy at `docs/METHOD_TERMS.md` that must match it wherever
+  the Drive is mounted, and fails on any method term in the copy register or on any page. Read as the struck statements
+  are, with Cowork's quotation rule. Its own commit (`RULES.md` r32). The site carries none of the ten today, so nothing
+  served changes.
 - **Guard: no struck statements** (`RULES.md` D12, approved by Antwain 2026-09-30). It reads the one list both lanes
   share, `00_Start_Here/STRUCK_STATEMENTS.md` in the Galinstan Drive, through a copy at `docs/STRUCK_STATEMENTS.md` that
   must match it wherever the Drive is mounted. It fails on any of Antwain's struck statements in the copy register, on
