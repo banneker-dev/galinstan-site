@@ -2,6 +2,22 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.10.2] — the brief's edition line, and its stress paragraph in the house voice
+
+### Changed
+- **The brief's edition line** (Cowork's ask 160; approved by Antwain 2026-10-03, "A approved", `CURRENT_STATE.md`
+  Decided, "The product brief's edition line (Round 148)"): `brief-edition` reads "Product brief · release v1.120.0 ·
+  October 2026", for "release v1.6.0 · September 2026". The brief's two figures re-checked on `v1.120.0`, seed 7:
+  993 of 1,000 scenarios below the floor without stress, 18 with. Neither moved.
+- **`brief-p-stress` in the house voice** (`RULES.md` D17; Cowork's ask 159; approved by Antwain 2026-10-03,
+  `HOUSE_VOICE_REVIEW_2026-10-03.md` row 2.4, `CURRENT_STATE.md` Decided, "Scenario rows in the house voice, second
+  batch (Round 144)"): "...not only on the reporting date. The difference matters. On a demonstration book calibrated to
+  published disclosures, the cheapest allocation found on a calm day fell below the floor in 993 of 1,000 scenarios.
+  The allocation Galinstan proposed fell below it in 18."
+- The PDF is reprinted and its lock updated; still four pages.
+- The site's copy of the struck statements list brought to seven (S7, "byte for byte"), matching the Drive. No page
+  carries it.
+
 ## [site-2026.10.1] — "works completely offline", by reader
 
 ### Changed
