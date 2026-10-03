@@ -151,8 +151,8 @@ class GuardsFailWhenTheyShould(unittest.TestCase):
     """The other direction. A guard that has never failed has never been shown to run."""
 
     def test_a_struck_statement_on_a_page_fails_and_a_quoted_one_does_not(self):
-        """RULES.md D12: the six strikes load from the shared list, and Cowork's quotation rule holds."""
-        self.assertEqual([sid for sid, _ in guards.struck_patterns()], ["S1", "S2", "S3", "S4", "S5", "S6"])
+        """RULES.md D12: the seven strikes load from the shared list, and Cowork's quotation rule holds."""
+        self.assertEqual([sid for sid, _ in guards.struck_patterns()], ["S1", "S2", "S3", "S4", "S5", "S6", "S7"])
         caught = guards.no_struck_statements(pages=[("p.html", "<p>It certifies nothing.</p>")], record=ROOT / "absent")
         self.assertTrue(any(f.startswith("S1 p.html") for f in caught))
         quoted = guards.no_struck_statements(pages=[("p.html", '<p>He struck "certifies nothing".</p>')], record=ROOT / "absent")
