@@ -2,6 +2,17 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.10.3] — the intraday line on the home page
+
+### Changed
+- **The intraday line on the home page** (Cowork's ask 175.4; Antwain, 2026-10-08: "1 and 2 approved", on the
+  recommendation to promote the approved string as it stands, `CURRENT_STATE_REPO.md` Round 114). `il-body-1`,
+  approved 2026-09-28, now also follows `body-2` on the home page: "Intraday tools show the position. Galinstan is
+  built to choose it, beside the systems a bank already runs." No string is new or changed; `/intraday-liquidity`
+  is unchanged.
+- The site's copy of the struck statements list brought to nine (S8 and S9, `galinstan-site#31`), matching the Drive.
+  No page carries either.
+
 ## [site-2026.10.2] — the brief's edition line, and its stress paragraph in the house voice
 
 ### Changed
