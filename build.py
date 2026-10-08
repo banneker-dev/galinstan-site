@@ -435,7 +435,8 @@ def render_stage_2(path: str) -> str:
 
 def render_index() -> str:
     t = page_copy.text
-    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2"))
+    # `il-body-1` is the intraday page's approved line, shown here as it stands (Cowork's ask 175.4).
+    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2", "il-body-1"))
     body += "\n" + _roles() + f"      <p>{_markup(t('body-3'))}</p>"
     return f"""{_head(t("meta-title"), "/", t("meta-description"), extra=render_structured_data())}
   <body>
