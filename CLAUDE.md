@@ -4,10 +4,11 @@
 the code and wins over anything here. This file holds only what a session working in this
 repository needs in front of it.
 
-1. **Do not write page copy.** Copy comes from `50_Claude_Outputs/SITE_COPY_STAGE1.md`
-   and is entered in `src/page_copy.py` with its status. Do not promote a string from
-   `pending` to `approved`: approval is Antwain's, and the date and wording are recorded
-   with it.
+1. **Labels are yours; claims are Antwain's.** A heading, navigation item, column name,
+   button, unit or empty state is entered in `src/page_copy.py` as `LABEL` and ships final.
+   A sentence that asserts something is a claim: it stays `pending` until Antwain says yes
+   on the rendered page, and only then becomes `approved`, with his date and wording. No
+   page ever states its own approval status (Antwain, 2026-10-10, "approved 1 to 5").
 2. **Do not delete a guard to make a build pass.** If a guard is wrong, change it on
    purpose, in its own commit, with the reason in the commit message.
 3. **Almost nothing is fetched at page load, and on demo paths, nothing at all.** No font

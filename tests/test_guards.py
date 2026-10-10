@@ -362,8 +362,13 @@ class PublicationGate(unittest.TestCase):
 
     def test_every_string_carries_the_date_it_was_approved(self):
         for line in page_copy.LINES:
+            if line.status == page_copy.LABEL:  # a label is final as written and carries no approval date
+                continue
             self.assertEqual(line.status, page_copy.APPROVED, line.id)
             self.assertRegex(line.approved_on, r"^\d{4}-\d{2}-\d{2}$", line.id)
+
+    def test_a_label_ships_without_an_approval(self):
+        self.assertFalse(page_copy.Line(id="probe", status=page_copy.LABEL, text="Deployment").blocks_publication)
 
     def test_an_unapproved_string_still_blocks_a_release(self):
         original = page_copy.BY_ID["body-1"]
