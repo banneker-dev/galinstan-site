@@ -5,11 +5,15 @@ else in this repository is allowed to contain page prose. The reason is in
 `50_Claude_Outputs/METHOD_FROM_JJ.md` section 3: sessions do not improvise a string to
 fill a gap, and an approval is only complete when it is written down.
 
-Three statuses, and the build treats them differently:
+Four statuses, and the build treats them differently:
 
-  APPROVED     Antwain approved this exact text, on the date recorded. Ships.
-  PENDING      Drafted by Cowork, not yet approved. Renders in a preview build,
-               and blocks a production release.
+  LABEL        A heading, navigation item, column name, button, unit or empty state: Cody's,
+               final as written, and ships (Antwain, 2026-10-10, "approved 1 to 5"; D158 in
+               the product repository). Changed when he asks, in the next release.
+  APPROVED     A claim Antwain said yes to, in this exact text, on the date recorded. Ships.
+  PENDING      A claim (a sentence asserting something about Galinstan, a bank, a regulation
+               or a result) he has not yet said yes to. Renders in a preview build, and
+               blocks a production release. No page ever states its own approval status.
   PLACEHOLDER  A fact nobody has supplied yet — an address, a registration number.
                Renders as a visible marker, and blocks a production release.
 
@@ -27,6 +31,7 @@ relax the mechanism: the next string added starts unapproved.
 from dataclasses import dataclass
 
 APPROVED = "approved"
+LABEL = "label"
 PENDING = "pending"
 PLACEHOLDER = "placeholder"
 
@@ -45,7 +50,7 @@ class Line:
 
     @property
     def blocks_publication(self) -> bool:
-        return self.status != APPROVED
+        return self.status not in (APPROVED, LABEL)
 
 
 # The decision behind the 2026-10-02 revisions of the offline phrase, cited in each one's note.
