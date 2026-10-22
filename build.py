@@ -19,6 +19,7 @@ and `tools/guards.py` fails the build over it.
 """
 
 import argparse
+import base64
 import filecmp
 import html
 import json
@@ -54,6 +55,10 @@ CSS = """\
 @font-face {
   font-family: "Source Serif 4"; font-weight: 600; font-style: normal; font-display: swap;
   src: url("/source-serif-4-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono"; font-weight: 400; font-style: normal; font-display: swap;
+  src: url("/ibm-plex-mono-400.woff2") format("woff2");
 }
 :root {
   color-scheme: light;
@@ -93,12 +98,21 @@ main { max-width: var(--wide); margin: 0 auto; padding: 3rem 1.5rem 4rem; }
   display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0 2rem;
 }
 .wordmark {
+  display: flex; align-items: center; gap: 0.75rem;
   font-family: var(--serif);
   font-size: 1.3125rem;
   font-weight: 600;
   margin: 0;
   padding-bottom: 1rem;
 }
+.wordmark::before {
+  content: "G" / "";
+  flex: none; display: flex; align-items: center; justify-content: center;
+  width: 2.125rem; height: 2.125rem; border: 1.5px solid var(--ink); border-radius: 50%;
+  font-size: 1.125rem; color: var(--teal2);
+}
+.wordmark .wm { white-space: nowrap; }
+.wordmark .wm span { color: var(--teal2); }
 main > .wordmark { margin: 0 0 2.5rem; }
 .wordmark a { text-decoration: none; }
 nav {
@@ -121,8 +135,11 @@ nav a[aria-current="page"] { color: var(--ink); font-weight: 600; border-bottom-
 }
 .pill:hover { background: var(--card); }
 @media (max-width: 44rem) {
-  .bar-in { grid-template-columns: 1fr auto; }
+  .bar-in { grid-template-columns: 1fr auto; column-gap: 0.75rem; }
   .bar nav { grid-column: 1 / -1; grid-row: 2; gap: 0 1.125rem; font-size: 0.8125rem; }
+  .bar .wordmark { font-size: 1rem; gap: 0.5rem; }
+  .bar .wordmark::before { width: 1.75rem; height: 1.75rem; font-size: 0.9375rem; }
+  .pill { padding: 0.4375rem 0.75rem; font-size: 0.8125rem; }
 }
 h1 {
   font-family: var(--serif);
@@ -142,7 +159,7 @@ h2 {
 .roles { list-style: none; margin: 0 0 2.5rem; padding: 0; }
 .roles li { margin: 0; padding: 0.875rem 0; border-top: 1px solid var(--hair); color: var(--ink); }
 .roles li:last-child { border-bottom: 1px solid var(--hair); }
-.roles a { font-size: 0.875rem; font-weight: 600; color: var(--teal2); white-space: nowrap; }
+.roles a { font-family: var(--mono); font-size: 0.78125rem; color: var(--teal2); white-space: nowrap; }
 footer {
   margin-top: 3.5rem;
   padding-top: 1.25rem;
@@ -296,11 +313,18 @@ def _nav(current: str | None) -> str:
     return "        <nav>\n          " + "\n          ".join(links) + "\n        </nav>"
 
 
+def _wordmark() -> str:
+    """The demo's masthead: the product name, then its product line in the accent. The ringed
+    G before it is drawn by the stylesheet and hidden from screen readers (Antwain, 2026-10-22)."""
+    t = page_copy.text
+    return f'<span class="wm">{_markup(t("wordmark"))} <span>{_markup(t("wordmark-product"))}</span></span>'
+
+
 def _bar(current: str | None, link: bool = True) -> str:
     """The header that stays at the top while the page scrolls: wordmark, nav, and the demo
     request, so the one thing a visitor can do is never further than the top of the screen.
     Every word in it is already approved: the wordmark, the three nav labels, `cta-demo`."""
-    mark = _markup(page_copy.text("wordmark"))
+    mark = _wordmark()
     mark = f'<a href="/">{mark}</a>' if link else mark
     demo = html.escape(mail_href("cta-demo-target"))
     return f"""    <header class="bar">
@@ -360,10 +384,12 @@ def _roles() -> str:
 # something unapproved. Width and height are set so the page does not jump as it loads.
 HERO = ("hero-800.jpg", "hero-2000.webp")
 
-# The headline voice, Source Serif 4 at 600, is the demo's own file (`src/galinstan/demo/fonts`
-# in the product repository), served from this site so no font service is fetched. Its SIL
-# Open Font License sits beside it in `assets/fonts`.
-FONT = "source-serif-4-600.woff2"
+# The headline and evidence voices, Source Serif 4 at 600 and IBM Plex Mono at 400, are the
+# demo's own files (`src/galinstan/demo/fonts` in the product repository), served from this
+# site so no font service is fetched. Their SIL Open Font Licenses sit beside them in
+# `assets/fonts`, with Source Serif 4 at 400, which only the brief uses.
+FONTS = ("source-serif-4-600.woff2", "ibm-plex-mono-400.woff2")
+FONTS_DIR = pathlib.Path(__file__).resolve().parent / "assets" / "fonts"
 HERO_IMG = """\
       <figure class="art">
         <img src="/hero-2000.webp" srcset="/hero-800.jpg 800w, /hero-2000.webp 2000w" sizes="(max-width: 44rem) 175vw, (max-width: 67rem) 100vw, 64rem" width="2000" height="857" alt="" fetchpriority="high">
@@ -501,7 +527,7 @@ def render_404() -> str:
   </head>
   <body>
     <main>
-      <p class="wordmark">{_markup(t("wordmark"))}</p>
+      <p class="wordmark">{_wordmark()}</p>
       <h1>{_markup(t("notfound-h1"))}</h1>
       <p><a href="/">{_markup(t("notfound-link"))}</a></p>
     </main>
@@ -532,31 +558,48 @@ BRIEF_CSS = """\
 @page {
   size: A4;
   margin: 24mm 22mm 24mm 22mm;
-  @bottom-left { content: "Galinstan"; font: 400 8pt Charter, serif; letter-spacing: 0.14em; color: #6b747b; }
-  @bottom-right { content: counter(page); font: 400 8pt Charter, serif; color: #6b747b; }
+  @bottom-left { content: "Galinstan"; font: 600 8pt "Source Serif 4", serif; color: #7c7361; }
+  @bottom-right { content: counter(page); font: 400 8pt "IBM Plex Mono", monospace; color: #7c7361; }
 }
 @page :first { @bottom-left { content: none; } @bottom-right { content: none; } }
 * { box-sizing: border-box; }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-body { margin: 0; color: #101418; font: 400 10.5pt/1.55 Charter, Georgia, serif; }
-.wordmark { font-size: 9pt; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 30mm; }
-h1 { font-size: 28pt; font-weight: 400; line-height: 1.15; margin: 0 0 6mm; }
-.sub { font-size: 13.5pt; line-height: 1.45; color: #3d474f; max-width: 130mm; margin: 0 0 12mm; }
-.edition { font-size: 9pt; color: #6b747b; border-top: 0.5pt solid #b8c0c6; padding-top: 3mm; margin: 0 0 14mm; }
-h2 { font-size: 15pt; font-weight: 700; margin: 9mm 0 3mm; break-after: avoid; }
-h3 { font-size: 11pt; font-weight: 700; margin: 6mm 0 1.5mm; break-after: avoid; }
+body { margin: 0; color: #1e1a13; font: 400 10pt/1.5 "Source Serif 4", Georgia, serif; }
+.wordmark { display: flex; align-items: center; gap: 3mm; font-size: 13pt; font-weight: 600; margin: 0 0 30mm; }
+.wordmark::before {
+  content: "G"; display: flex; align-items: center; justify-content: center;
+  width: 8.5mm; height: 8.5mm; border: 0.75pt solid #1e1a13; border-radius: 50%; font-size: 11pt; color: #0a5a4e;
+}
+.wm span { color: #0a5a4e; }
+h1 { font-size: 28pt; font-weight: 600; line-height: 1.15; margin: 0 0 6mm; }
+.sub { font-size: 13.5pt; line-height: 1.45; color: #7c7361; max-width: 130mm; margin: 0 0 12mm; }
+.edition { font: 400 8.5pt/1.5 "IBM Plex Mono", monospace; color: #7c7361; border-top: 0.5pt solid #e2dbc9; padding-top: 3mm; margin: 0 0 14mm; }
+h2 { font-size: 15pt; font-weight: 600; margin: 8mm 0 2.5mm; break-after: avoid; }
+h3 { font-size: 11pt; font-weight: 600; margin: 6mm 0 1.5mm; break-after: avoid; }
 p { margin: 0 0 3mm; orphans: 3; widows: 3; }
 ul { margin: 0 0 3.5mm; padding-left: 5mm; }
 li { margin: 0 0 1.8mm; }
-ol.sources { font-size: 9pt; line-height: 1.45; padding-left: 6mm; color: #3d474f; }
-strong { font-weight: 700; }
-a { color: inherit; }
-.close { margin-top: 10mm; padding-top: 3mm; border-top: 0.5pt solid #b8c0c6; font-size: 9.5pt; }
+ol.sources { font-size: 9pt; line-height: 1.45; padding-left: 6mm; color: #7c7361; }
+strong { font-weight: 600; }
+a { color: #0a5a4e; }
+.close { margin-top: 10mm; padding-top: 3mm; border-top: 0.5pt solid #e2dbc9; font-size: 9.5pt; }
 .close p { margin: 0 0 1.5mm; }
 .cover { break-after: page; }
 """
 
 _BRIEF_BODY = re.compile(r"brief-(h|h3|p|li|ref)-.+")
+
+
+def _brief_faces() -> str:
+    """The demo's fonts inlined as data, so Chrome prints the brief with nothing to fetch."""
+    faces = ""
+    for family, weight, name in (("Source Serif 4", 400, "source-serif-4-400"),
+                                 ("Source Serif 4", 600, "source-serif-4-600"),
+                                 ("IBM Plex Mono", 400, "ibm-plex-mono-400")):
+        data = base64.b64encode((FONTS_DIR / f"{name}.woff2").read_bytes()).decode("ascii")
+        faces += (f'@font-face {{ font-family: "{family}"; font-weight: {weight}; font-style: normal; '
+                  f'src: url(data:font/woff2;base64,{data}) format("woff2"); }}\n')
+    return faces
 
 
 def render_brief_source() -> str:
@@ -597,11 +640,11 @@ def render_brief_source() -> str:
     <meta charset="utf-8">
     <title>{html.escape(t("brief-meta-title"))}</title>
     <style>
-{BRIEF_CSS}    </style>
+{_brief_faces()}{BRIEF_CSS}    </style>
   </head>
   <body>
     <section class="cover">
-      <p class="wordmark">{_markup(t("wordmark"))}</p>
+      <p class="wordmark">{_wordmark()}</p>
       <h1>{_markup(t("brief-title"))}</h1>
       <p class="sub">{_markup(t("brief-sub"))}</p>
       <p class="edition">{_markup(t("brief-edition"))}</p>
@@ -722,7 +765,7 @@ ALLOWLIST = {
     "sitemap.xml": render_sitemap,
     "galinstan-brief.pdf": render_brief_pdf,
     **{name: (lambda n=name: (ASSETS / n).read_bytes()) for name in HERO},
-    FONT: lambda: (ASSETS / "fonts" / FONT).read_bytes(),
+    **{name: (lambda n=name: (FONTS_DIR / n).read_bytes()) for name in FONTS},
 }
 
 

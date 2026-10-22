@@ -70,6 +70,12 @@ LINES = [
         note="The product name.",
     ),
     Line(
+        id="wordmark-product",
+        status=LABEL,
+        text="Liquidity",
+        note="The product line after the name in the masthead, as the demo's masthead reads (Antwain, 2026-10-22, \"bring those over\").",
+    ),
+    Line(
         id="headline",
         status=APPROVED,
         approved_on="2026-09-26",

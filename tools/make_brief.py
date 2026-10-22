@@ -12,8 +12,8 @@ engine is one. CI never runs it. CI runs the guard that checks its output, which
 `brief_matches_its_source` in `tools/guards.py`.
 
 The source is printed from a file in a temporary directory, with no network: every
-word and style is inline and the font is the machine's own (Charter, whose embedding
-permission is preview and print), so there is nothing for Chrome to fetch.
+word, style and font is inline (the demo's Source Serif 4 and IBM Plex Mono, under the SIL
+Open Font License, which permits embedding), so there is nothing for Chrome to fetch.
 """
 
 import hashlib
