@@ -2,6 +2,15 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.10.4] — a new hero image
+
+### Changed
+- **The hero image** is Antwain's new one (supplied 2026-10-22): stacked glass panes lit along their edges over a
+  faint grid. `hero-2000.webp` is his file byte for byte (67 KB); `hero-800.jpg` is made from it for phones (37 KB).
+  `hero-1408.jpg` is gone from the allowlist. The frame now holds the image's right side, where the panes are, so the
+  phone's 4:3 crop keeps them; `sizes` says the phone draws it at 1.75 times the frame's width, so a 2x phone gets the
+  2000. No string is new or changed.
+
 ## [site-2026.10.3] — the intraday line on the home page
 
 ### Changed
