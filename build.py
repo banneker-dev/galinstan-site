@@ -162,7 +162,7 @@ a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   background: var(--panel);
   aspect-ratio: 16 / 7;
 }
-.art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 62% 55%; }
+.art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 100% 50%; }
 @media (max-width: 44rem) { .art { aspect-ratio: 4 / 3; } .card { min-height: 5.5rem; } }
 .cards {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem;
@@ -347,15 +347,17 @@ def _roles() -> str:
     )
 
 
-# The hero photograph, served from this site rather than an image host: it is two files in
+# The hero image, served from this site rather than an image host: it is two files in
 # the allowlist, like the brief, so it adds no third party. Two widths so a phone does not
-# download the desktop one. `alt=""` marks it decorative: a description a screen reader
+# download the desktop one: the 2000 is Antwain's WebP as he supplied it, the 800 a JPEG
+# made from it. Below 44rem the frame is 4:3 and the image is cropped to its height, so it
+# is drawn at about 1.75 times the frame's width, which is what `sizes` says. `alt=""` marks it decorative: a description a screen reader
 # reads aloud is copy, and none has been approved, so it says nothing rather than
 # something unapproved. Width and height are set so the page does not jump as it loads.
-HERO = ("hero-800.jpg", "hero-1408.jpg")
+HERO = ("hero-800.jpg", "hero-2000.webp")
 HERO_IMG = """\
       <figure class="art">
-        <img src="/hero-1408.jpg" srcset="/hero-800.jpg 800w, /hero-1408.jpg 1408w" sizes="(max-width: 67rem) 100vw, 64rem" width="1408" height="768" alt="" fetchpriority="high">
+        <img src="/hero-2000.webp" srcset="/hero-800.jpg 800w, /hero-2000.webp 2000w" sizes="(max-width: 44rem) 175vw, (max-width: 67rem) 100vw, 64rem" width="2000" height="857" alt="" fetchpriority="high">
       </figure>
 """
 
