@@ -51,115 +51,125 @@ SITE_URL = "https://galinstan.ai"
 ANALYTICS = "cloudflare-web-analytics (edge-injected; verified against the live response)"
 
 CSS = """\
+@font-face {
+  font-family: "Source Serif 4"; font-weight: 600; font-style: normal; font-display: swap;
+  src: url("/source-serif-4-600.woff2") format("woff2");
+}
 :root {
-  --ink: #101418;
-  --ink-soft: #3d474f;
-  --rule: #d5dade;
-  --paper: #fbfbfa;
-  --panel: #eef0f1;
-  --flag: #8a3a12;
+  color-scheme: light;
+  --paper: #f6f4ee;
+  --card: #fffdf8;
+  --hair: #e2dbc9;
+  --hair2: #ece7d8;
+  --ink: #1e1a13;
+  --muted: #7c7361;
+  --teal: #0e7c6b;
+  --teal2: #0a5a4e;
+  --risk: #b3402e;
   --measure: 34rem;
   --wide: 64rem;
-  --sans: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-padding-top: 6rem; }
+html { -webkit-text-size-adjust: 100%; background: var(--paper); }
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 400 1.0625rem/1.65 ui-serif, Georgia, "Times New Roman", serif;
+  font: 400 1rem/1.65 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
 }
 main { max-width: var(--wide); margin: 0 auto; padding: 3rem 1.5rem 4rem; }
 .prose, footer { max-width: var(--measure); }
 .bar {
-  position: sticky; top: 0; z-index: 10;
-  background: color-mix(in srgb, var(--paper) 90%, transparent);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--rule);
+  border-top: 4px solid var(--ink);
+  border-bottom: 1px solid var(--hair);
   view-transition-name: bar;
 }
 .bar-in {
-  max-width: var(--wide); margin: 0 auto; padding: 0.875rem 1.5rem;
-  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem 2rem;
+  max-width: var(--wide); margin: 0 auto; padding: 1rem 1.5rem 0;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0 2rem;
 }
 .wordmark {
-  font-family: var(--sans);
-  font-size: 0.9375rem;
+  font-family: var(--serif);
+  font-size: 1.3125rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   margin: 0;
+  padding-bottom: 1rem;
 }
 main > .wordmark { margin: 0 0 2.5rem; }
 .wordmark a { text-decoration: none; }
 nav {
-  font-family: var(--sans);
-  font-size: 0.875rem;
-  display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem;
+  font-size: 0.84375rem; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 0 1.75rem;
+  align-self: stretch; align-items: flex-end;
 }
-nav a { color: var(--ink-soft); text-decoration: none; }
-nav a:hover { color: var(--ink); text-decoration: underline; }
-nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+nav a {
+  color: var(--muted); text-decoration: none;
+  padding: 0.8125rem 0.125rem; margin-bottom: -1px; border-bottom: 2px solid transparent;
+}
+nav a:hover { color: var(--ink); }
+nav a[aria-current="page"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--teal2); }
 .pill {
-  font-family: var(--sans); font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.02em;
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 1rem; border-radius: 999px;
-  background: var(--ink); color: var(--paper); text-decoration: none;
-  transition: transform 0.2s ease;
+  font-size: 0.875rem; font-weight: 600;
+  display: inline-block; margin-bottom: 1rem;
+  padding: 0.5rem 1.125rem; border-radius: 8px;
+  border: 1.5px solid var(--teal2); color: var(--teal2); text-decoration: none;
+  transition: background-color 0.2s ease;
 }
-.pill::before { content: ""; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: currentColor; }
-.pill:hover { transform: translateY(-1px); }
+.pill:hover { background: var(--card); }
 @media (max-width: 44rem) {
   .bar-in { grid-template-columns: 1fr auto; }
-  .bar nav { grid-column: 1 / -1; grid-row: 2; }
+  .bar nav { grid-column: 1 / -1; grid-row: 2; gap: 0 1.125rem; font-size: 0.8125rem; }
 }
 h1 {
-  font-family: var(--sans);
-  font-size: clamp(1.875rem, 1.1rem + 3.4vw, 3.5rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  font-family: var(--serif);
+  font-size: clamp(1.875rem, 1.1rem + 3.2vw, 3.25rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
   max-width: 22ch;
   margin: 1rem 0 2.5rem;
   text-wrap: balance;
 }
-p { margin: 0 0 1.25rem; color: var(--ink-soft); }
+p { margin: 0 0 1.25rem; color: var(--ink); }
 h2 {
-  font-family: var(--sans); font-size: 1.25rem; font-weight: 500; letter-spacing: -0.01em;
+  font-family: var(--serif); font-size: 1.375rem; font-weight: 600;
   color: var(--ink); margin: 2.5rem 0 1rem;
 }
 .roles { list-style: none; margin: 0 0 2.5rem; padding: 0; }
-.roles li { margin: 0; padding: 0.875rem 0; border-top: 1px solid var(--rule); color: var(--ink-soft); }
-.roles li:last-child { border-bottom: 1px solid var(--rule); }
-.roles a { font-family: var(--sans); font-size: 0.875rem; white-space: nowrap; }
+.roles li { margin: 0; padding: 0.875rem 0; border-top: 1px solid var(--hair); color: var(--ink); }
+.roles li:last-child { border-bottom: 1px solid var(--hair); }
+.roles a { font-size: 0.875rem; font-weight: 600; color: var(--teal2); white-space: nowrap; }
 footer {
   margin-top: 3.5rem;
   padding-top: 1.25rem;
-  border-top: 1px solid var(--rule);
-  font-family: var(--sans);
+  border-top: 1px solid var(--hair);
   font-size: 0.8125rem;
   line-height: 1.6;
-  color: var(--ink-soft);
+  color: var(--muted);
 }
 footer p { margin: 0 0 0.375rem; color: inherit; }
 .sub { color: var(--ink); font-size: 1.125rem; }
 .cta { margin-top: 2rem; }
+.cta a { font-weight: 600; color: var(--teal2); text-decoration: none; border-bottom: 1px solid var(--teal2); }
 strong { color: var(--ink); font-weight: 600; }
 a { color: inherit; text-underline-offset: 2px; }
-a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
 .ticks {
   height: 11px; margin: 3rem 0;
-  --x: linear-gradient(var(--ink-soft), var(--ink-soft));
+  --x: linear-gradient(var(--muted), var(--muted));
   background:
     var(--x) 5px 0 / 1px 11px no-repeat, var(--x) 0 5px / 11px 1px no-repeat,
     var(--x) 50% 0 / 1px 11px no-repeat, var(--x) 50% 5px / 11px 1px no-repeat,
     var(--x) calc(100% - 5px) 0 / 1px 11px no-repeat, var(--x) 100% 5px / 11px 1px no-repeat,
-    linear-gradient(var(--rule), var(--rule)) 0 5px / 100% 1px no-repeat;
+    linear-gradient(var(--hair), var(--hair)) 0 5px / 100% 1px no-repeat;
 }
 .art {
-  margin: 0 0 3rem; border-radius: 1.25rem; overflow: hidden;
-  background: var(--panel);
+  margin: 0 0 3rem; border-radius: 8px; overflow: hidden;
+  background: var(--card); border: 1px solid var(--hair);
   aspect-ratio: 16 / 7;
 }
 .art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 100% 50%; }
@@ -170,42 +180,44 @@ a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 }
 .card {
   position: relative; display: flex; align-items: flex-end;
-  min-height: 9rem; padding: 1.25rem; border-radius: 1rem;
-  background: var(--panel); color: var(--ink); text-decoration: none;
-  font-family: var(--sans); font-size: 1.25rem; font-weight: 500; letter-spacing: -0.01em;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  min-height: 9rem; padding: 1.25rem; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none;
+  font-family: var(--serif); font-size: 1.25rem; font-weight: 600;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 .card::after {
   content: ""; position: absolute; top: 1.25rem; right: 1.25rem;
-  width: 0.625rem; height: 0.625rem;
+  width: 0.625rem; height: 0.625rem; color: var(--teal2);
   border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor;
   background: linear-gradient(to bottom right, transparent calc(50% - 0.75px), currentColor 0 calc(50% + 0.75px), transparent 0);
   transition: transform 0.2s ease;
 }
-.card:hover { background: var(--rule); }
+.card:hover { border-color: var(--teal2); }
 .card:hover::after { transform: translate(2px, -2px); }
 .brief {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  margin: 1rem 0 0; padding: 2rem 1.5rem; border-radius: 1.25rem;
-  background: var(--ink); color: var(--paper); text-decoration: none;
-  font-family: var(--sans); font-size: clamp(1.125rem, 0.9rem + 1vw, 1.5rem); font-weight: 500;
+  margin: 1rem 0 0; padding: 1.75rem 1.5rem; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none;
+  font-family: var(--serif); font-size: clamp(1.125rem, 0.9rem + 1vw, 1.5rem); font-weight: 600;
+  transition: border-color 0.2s ease;
 }
+.brief:hover { border-color: var(--teal2); }
 .brief::after {
   content: ""; flex: none; width: 3rem; height: 3rem; border-radius: 50%;
   background:
-    linear-gradient(var(--ink), var(--ink)) 50% 55% / 1.5px 1rem no-repeat,
-    linear-gradient(45deg, transparent 45%, var(--ink) 45% 55%, transparent 55%) 38% 62% / 0.6rem 0.6rem no-repeat,
-    linear-gradient(-45deg, transparent 45%, var(--ink) 45% 55%, transparent 55%) 62% 62% / 0.6rem 0.6rem no-repeat,
-    var(--paper);
+    linear-gradient(var(--card), var(--card)) 50% 55% / 1.5px 1rem no-repeat,
+    linear-gradient(45deg, transparent 45%, var(--card) 45% 55%, transparent 55%) 38% 62% / 0.6rem 0.6rem no-repeat,
+    linear-gradient(-45deg, transparent 45%, var(--card) 45% 55%, transparent 55%) 62% 62% / 0.6rem 0.6rem no-repeat,
+    var(--teal2);
   transition: transform 0.2s ease;
 }
 .brief:hover::after { transform: translateY(2px); }
 .todo {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--mono);
   font-size: 0.8125rem;
-  color: var(--flag);
-  background: #fdf2ec;
-  border: 1px dashed var(--flag);
+  color: var(--risk);
+  background: var(--card);
+  border: 1px dashed var(--risk);
   border-radius: 2px;
   padding: 0.0625rem 0.375rem;
 }
@@ -219,14 +231,6 @@ a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
     }
     @keyframes rise { from { opacity: 0; transform: translateY(1.25rem); } }
   }
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ink: #eef1f3; --ink-soft: #b3bcc3; --rule: #2b3238;
-    --paper: #0f1216; --panel: #181d22; --flag: #e8a87c;
-  }
-  .todo { background: #24170f; }
-  .art img { filter: brightness(0.86); }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
@@ -355,6 +359,11 @@ def _roles() -> str:
 # reads aloud is copy, and none has been approved, so it says nothing rather than
 # something unapproved. Width and height are set so the page does not jump as it loads.
 HERO = ("hero-800.jpg", "hero-2000.webp")
+
+# The headline voice, Source Serif 4 at 600, is the demo's own file (`src/galinstan/demo/fonts`
+# in the product repository), served from this site so no font service is fetched. Its SIL
+# Open Font License sits beside it in `assets/fonts`.
+FONT = "source-serif-4-600.woff2"
 HERO_IMG = """\
       <figure class="art">
         <img src="/hero-2000.webp" srcset="/hero-800.jpg 800w, /hero-2000.webp 2000w" sizes="(max-width: 44rem) 175vw, (max-width: 67rem) 100vw, 64rem" width="2000" height="857" alt="" fetchpriority="high">
@@ -713,6 +722,7 @@ ALLOWLIST = {
     "sitemap.xml": render_sitemap,
     "galinstan-brief.pdf": render_brief_pdf,
     **{name: (lambda n=name: (ASSETS / n).read_bytes()) for name in HERO},
+    FONT: lambda: (ASSETS / "fonts" / FONT).read_bytes(),
 }
 
 

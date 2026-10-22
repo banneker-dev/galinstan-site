@@ -2,6 +2,19 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.10.5] — the demo's audit-paper theme
+
+### Changed
+- **Every page now wears the demo's audit-paper theme** (Antwain, 2026-10-22, on Spot's ask
+  `CODY_ASK_GALINSTAN_AI_THEME_FIX_2026-10-22.md`): the demo's tokens (paper `#f6f4ee`, card `#fffdf8`, hairline
+  `#e2dbc9`, ink `#1e1a13`, muted `#7c7361`, teal `#0e7c6b`/`#0a5a4e`), radii at 8px, a masthead with a 4px ink
+  rule and text tabs in place of the blurred sticky bar, and the demo's three voices: Source Serif 4 for the
+  wordmark and headings, the system sans for body text, IBM Plex Mono kept for the placeholder marker. Request a
+  demo is a bordered teal button, not a black pill. No dark variant: the demo has none.
+- `source-serif-4-600.woff2` is the demo's own file, served from this site; its licence is in `assets/fonts`.
+- Only `<style>` changed in every page; no string, link, address or page structure changed. The brief PDF is
+  unchanged.
+
 ## [site-2026.10.4] — a new hero image
 
 ### Changed
