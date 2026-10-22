@@ -2,6 +2,20 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.10.6] — the demo's masthead, the evidence voice, and the brief in audit paper
+
+### Changed
+- Antwain's answers of 2026-10-22 to the theme fix's open questions: light only; update the brief; give the mono
+  voice its place; bring the demo's masthead over; keep the glass image.
+- **Masthead as the demo's:** a ringed G (drawn by the stylesheet, hidden from screen readers) and "Galinstan
+  Liquidity", the product line in teal. `wordmark-product` ("Liquidity") is a new label in the register; the
+  `wordmark` string and the structured data are unchanged. The 404 page and the brief's cover carry it too.
+- **The evidence voice:** the cross-reference after each role on the home page is set in IBM Plex Mono in teal, as
+  the demo sets its evidence links. `ibm-plex-mono-400.woff2` is the demo's own file, served from this site.
+- **The brief in audit paper:** Source Serif 4 for text and headings, IBM Plex Mono for the edition line and page
+  numbers, the demo's ink, muted and hairline colours, the masthead on the cover. The fonts are inlined, so
+  printing still fetches nothing. Still four pages; no string changed. Reprinted with Chrome 155.
+
 ## [site-2026.10.5] — the demo's audit-paper theme
 
 ### Changed
