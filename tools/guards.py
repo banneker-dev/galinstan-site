@@ -198,7 +198,7 @@ def required_metadata(pages=None) -> list[str]:
     content_page = ["<html lang=", "<title>", 'name="description"', 'rel="canonical"', "viewport"]
     required = {
         "index.html": content_page,
-        **{f"{path[1:]}.html": content_page for path in build.SITEMAP if path not in ("/", "/privacy", build.BRIEF_PATH)},
+        **{f"{path[1:]}.html": content_page for path in build.SITEMAP if path not in ("/", "/privacy", *build.BRIEF_PATHS)},
         "privacy.html": ["<html lang=", "<title>", 'rel="canonical"', "viewport"],
         "404.html": ["<html lang=", "<title>", 'name="robots" content="noindex"'],
     }
@@ -280,7 +280,7 @@ def declared_addresses_agree(pages=None, sitemap=None) -> list[str]:
     canonical_of = {
         path: ("index.html" if path == "/" else f"{path[1:]}.html")
         for path in build.SITEMAP
-        if path != build.BRIEF_PATH  # a PDF has no canonical tag to agree with
+        if path not in build.BRIEF_PATHS  # a PDF has no canonical tag to agree with
     }
 
     if sitemap is None:
@@ -401,6 +401,18 @@ def brief_matches_its_source(pdf=None, lock=None, source=None) -> list[str]:
     return failures
 
 
+def us_brief_matches_its_source() -> list[str]:
+    """The same check for the US funnel's paper."""
+    import json
+
+    if not build.US_BRIEF_LOCK.exists() or not build.US_BRIEF_PDF.exists():
+        return [f"{build.US_BRIEF_PDF.name}: missing; run tools/make_brief.py"]
+    failures = brief_matches_its_source(build.US_BRIEF_PDF.read_bytes(),
+                                        json.loads(build.US_BRIEF_LOCK.read_text(encoding="utf-8")),
+                                        build.render_brief_source("usbrief"))
+    return [f.replace("galinstan-brief.pdf", build.US_BRIEF_PDF.name) for f in failures]
+
+
 # RULES.md D12: Antwain's struck statements, from the one list both lanes share. The list of record is
 # `00_Start_Here/STRUCK_STATEMENTS.md` in the Galinstan Drive; CI cannot see the Drive, so this repository carries a copy,
 # `docs/STRUCK_STATEMENTS.md`, which must be identical to it wherever the Drive is mounted. A pattern is column 3 of each
@@ -477,6 +489,7 @@ ALWAYS = {
     "crawler policy": crawler_policy,
     "mail targets carry their subjects": mail_targets_carry_their_subjects,
     "brief matches its source": brief_matches_its_source,
+    "US brief matches its source": us_brief_matches_its_source,
     "no struck statements": no_struck_statements,
     "no method terms": no_method_terms,
 }

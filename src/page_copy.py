@@ -329,6 +329,57 @@ def _brief(line_id: str, text: str, **kw) -> Line:
     return Line(id=line_id, status=APPROVED, text=text, **kw)
 
 
+US_BRIEF_NOTE = "Drafted by Cody, 2026-10-30, on Antwain's instruction: 'add task to provide US product review'. Pending his approval, through Spot."
+
+US_BRIEF = [
+    Line(id="usbrief-meta-title", status=PENDING, text="How Galinstan Works For US Banks", note=US_BRIEF_NOTE),
+    Line(id="usbrief-title", status=PENDING, text="How Galinstan Works For US Banks", note=US_BRIEF_NOTE),
+    Line(id="usbrief-sub", status=PENDING, text="Liquidity optimization and evidence a validator can re-perform, produced in the bank's own environment.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-edition", status=PENDING, text="Product brief \u00b7 release v1.136.0 \u00b7 October 2026", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h-summary", status=PENDING, text="Summary", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-summary-1", status=PENDING, text="Galinstan is software for US banks that runs in the bank's own environment and writes evidence a reviewer can check for themselves. It reads the files a bank's teams already produce, and does three things with them.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-summary-1", status=PENDING, text="**The position.** It calculates the liquidity coverage ratio and the net stable funding ratio from the text of 12 CFR part 249, and finds the least costly change that reaches the level the bank sets. A separate calculator confirms every result.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-summary-2", status=PENDING, text="**The day.** It reads a day's payments and statements, finds the intraday low and what drove it, and sets the bank's own limit and flat cushion against the day's peaks.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-summary-3", status=PENDING, text="**The change.** It shows what moved from month to month by the bank's own labels, classifies tokenized deposit flows by the bank's own mapping, and brings two banks' books together before a close, listing where they treat the same position differently.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-summary-2", status=PENDING, text="There is no AI in the liquidity calculation. Every treatment comes from a published rule, and every proposal is left to a person to decide.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h-problem", status=PENDING, text="Why this work is hard today", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-problem-1", status=PENDING, text="Liquidity buffers are expensive to hold and dangerous to trim. Assets are held in lots, haircuts and caps interact, and encumbrance removes collateral from the buffer. Choosing the position is a combinatorial problem, and a surplus nobody has measured is hard to defend or to release.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-problem-2", status=PENDING, text="Most US banks are outside the Federal Reserve's LCR rule and still have to answer for their liquidity. The 2010 interagency policy statement applies to institutions of every size, and asks for cash flow projections, targets for unencumbered liquid assets, and a board that reviews them. A bank below the rule's scope often has no regulatory figure to start from.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-problem-3", status=PENDING, text="These jobs turn on data a bank cannot easily send to an outside service: its positions, its payments and its counterparties. Galinstan is built so that none of it has to leave.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h-principles", status=PENDING, text="How it works, in principle", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h3-environment", status=PENDING, text="It runs where the bank chooses", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-environment", status=PENDING, text="Galinstan installs in the bank's own cloud account or on its own servers, and runs air-gapped if the bank's policy requires it. It arrives as an offline bundle cut from a signed release, with a checksum for every file and a software bill of materials, and it can be run as a container built from that bundle. It listens on nothing and makes no outbound connection.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h3-reads", status=PENDING, text="It reads the files a bank already produces", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-reads", status=PENDING, text="A pilot starts from extracts, not from a new data feed. Galinstan reads:", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-reads-1", status=PENDING, text="the bank's position exports, mapped to one simple book of stated facts, which is how a bank that does not file an FR 2052a starts;", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-reads-2", status=PENDING, text="the FR 2052a, for a bank that files it;", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-reads-3", status=PENDING, text="a day's payments, and account statements in camt.052 and camt.053;", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-reads-4", status=PENDING, text="tokenized deposit flows, with the bank's mapping of each state to a treatment.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h3-size", status=PENDING, text="No bank is turned away for its size", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-size", status=PENDING, text="Below the rule's scope, Galinstan computes the rule's arithmetic and states beside the figures why part 249 does not apply. The result is an internal measure, not a regulatory one, and it says so.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h3-apart", status=PENDING, text="Two calculations that must agree are built apart", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-apart", status=PENDING, text="Every change the optimizer proposes is recomputed by a separate calculator that shares no code with it. If the two shared a helper, they would share its mistakes, and the check would prove nothing.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h3-treatment", status=PENDING, text="The treatment is the rule's or the bank's, never ours", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-treatment", status=PENDING, text="The calculator decides each paragraph and rate from the facts a line states, and each is read from a dated parameter file with its source. No US rule sets a treatment for a tokenized deposit, so that mapping is the bank's, versioned and dated. A flow the mapping does not cover is listed, and no ratio is given on an incomplete book.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h3-reperform", status=PENDING, text="A reviewer can re-perform everything", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-reperform-1", status=PENDING, text="Every run writes one directory of evidence, with the inputs and the result recorded together. The time of the run is kept in a separate manifest, so the same inputs give the same evidence.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-reperform-2", status=PENDING, text="A validator does not have to take that evidence on trust. One command re-performs a run on the validator's own machine and reports, check by check, whether it came out the same. Each release is a signed tag with a changelog, which answers what changed between the version a bank validated and the version it runs. The bank's model inventory can be tiered by the factors SR 26-2 names, on the bank's own policy.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h3-pilot", status=PENDING, text="A pilot is judged on agreed figures", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-pilot", status=PENDING, text="Success criteria are agreed before the first run: each figure, and the tolerance it must meet. At day 90 the pack lists what was tested, what passed, what did not, and why. A figure whose evidence does not re-perform does not pass, and a figure with no agreed tolerance does not pass. The decision stays with the bank.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h-limits", status=PENDING, text="What Galinstan does not do", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-limits-1", status=PENDING, text="**It does not decide.** Allocations and limits are proposals. The validator and the treasurer decide.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-limits-2", status=PENDING, text="**It does not guess.** A line the calculator has no treatment for is listed with its reason, never defaulted. Where a figure cannot be reproduced, it is not stated.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-limits-3", status=PENDING, text="**It does not send anything.** There is no service on our side, and nothing in the analysis depends on reaching one.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-responsibility", status=PENDING, text="Galinstan follows a shared responsibility model, as cloud providers do. We are responsible for the correctness of the evidence: the regulatory parameters read from the primary text, the calculations, and the signed software that produces them, each of which the institution's validator can re-perform. The institution is responsible for the environment Galinstan runs in, the data it is given, and the decisions made on it. Updates are shared: we supply them, and the institution approves and installs them.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h-sources", status=PENDING, text="Sources", note=US_BRIEF_NOTE),
+    Line(id="usbrief-ref-1", status=PENDING, text="12 CFR part 249, Liquidity Risk Measurement Standards (Regulation WW).", note=US_BRIEF_NOTE),
+    Line(id="usbrief-ref-2", status=PENDING, text="Federal Reserve, Complex Institution Liquidity Monitoring Report, FR 2052a.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-ref-3", status=PENDING, text="Interagency Policy Statement on Funding and Liquidity Risk Management, 75 FR 13656 (2010).", note=US_BRIEF_NOTE),
+    Line(id="usbrief-ref-4", status=PENDING, text="Basel Committee on Banking Supervision, Monitoring tools for intraday liquidity management, BCBS 248 (2013).", note=US_BRIEF_NOTE),
+    Line(id="usbrief-ref-5", status=PENDING, text="Federal Reserve, SR 26-2, on model risk management (2026).", note=US_BRIEF_NOTE),
+    Line(id="usbrief-link", status=PENDING, text="How Galinstan works: US product brief (PDF)", note=US_BRIEF_NOTE),
+]
+
 BRIEF = [
     _brief("brief-meta-title", "How Galinstan Works", note=_BRIEF_NOTE + " Title case approved 2026-09-25 (Antwain, 'and brief title')."),
     _brief("brief-title", "How Galinstan Works", note=_BRIEF_NOTE + " Title case approved 2026-09-25 (Antwain, 'and brief title')."),
@@ -405,6 +456,7 @@ BRIEF = [
 ]
 
 LINES += BRIEF
+LINES += US_BRIEF
 
 # Structured data on the home page (build.render_structured_data). The product's name is
 # `wordmark` and its description `meta-description`, both already approved; this is the one

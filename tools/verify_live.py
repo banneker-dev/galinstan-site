@@ -119,7 +119,7 @@ EXPECTED = {
 # Declared addresses that are not pages. The product brief is checked by its bytes: the
 # served file must be the one `assets/galinstan-brief.lock.json` records, which is the one the
 # build-time guard tied to the approved strings.
-BINARY = {"/galinstan-brief.pdf"}
+BINARY = {"/galinstan-brief.pdf", "/galinstan-us-brief.pdf"}
 
 # Rewrites the edge performs on the response, which no build-time guard can see because
 # they happen after the build. Each entry is a marker that must NOT appear, and the reason.
@@ -162,7 +162,8 @@ def verify_brief(url: str) -> list[str]:
     failures = []
     if not kind.startswith("application/pdf"):
         failures.append(f"{url}: served as {kind!r}, not application/pdf")
-    lock = json.loads(build.BRIEF_LOCK.read_text(encoding="utf-8"))
+    lock_file = build.US_BRIEF_LOCK if build.US_BRIEF_PATH in url else build.BRIEF_LOCK
+    lock = json.loads(lock_file.read_text(encoding="utf-8"))
     if hashlib.sha256(body).hexdigest() != lock["pdf_sha256"]:
         failures.append(f"{url}: the served file is not the one the lock records")
     return failures
