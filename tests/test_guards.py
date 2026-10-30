@@ -480,6 +480,17 @@ class RegionFunnels(unittest.TestCase):
                 self.assertNotIn(build._markup(page_copy.text(line_id)), page, path)
         self.assertNotIn(page_copy.text("il-meta-title"), self._page("/us-banks/intraday-liquidity"))
 
+    def test_the_us_landing_has_the_committee_section_and_no_brief(self):
+        page = self._page("/us-banks")
+        self.assertIn(page_copy.text("roles-h2"), page)
+        for line_id, path in (("us-roles-treasury", "/us-banks/intraday-liquidity"), ("us-roles-model", "/us-banks/audit-evidence"),
+                              ("us-roles-security", "/us-banks/deployment")):
+            label = page_copy.text(line_id).rsplit(". ", 1)[1]
+            self.assertIn(f'<a href="{path}">{label}</a></li>', page)
+        self.assertNotIn("galinstan-brief.pdf", page)
+        self.assertEqual(page.count(build._markup(page_copy.text("home-body-2"))), 1)
+        self.assertEqual(page.count(build._markup(page_copy.text("us-il-figure"))), 1)
+
     def test_an_idea_appears_once_in_each_funnel(self):
         once = {"us": ("home-body-1", "home-body-2", "us-il-figure", "il-body-1"), "eu": ("il-body-1", "il-body-3")}
         for region, lines in once.items():
