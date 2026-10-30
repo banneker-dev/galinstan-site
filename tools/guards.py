@@ -177,6 +177,9 @@ def page_prose_comes_from_the_register(pages=None) -> list[str]:
     """
     approved = [_flat(item.text.replace("**", "")) for item in page_copy.LINES]
     approved += [_flat(item.mail_subject) for item in page_copy.LINES if item.mail_subject]
+    # A placeholder renders as its own visible marker (CLAUDE.md rule 6), which blocks a
+    # production release on its own; the marker is the register's text for it.
+    approved += [_flat(page_copy.text(item.id)) for item in page_copy.LINES if item.status == page_copy.PLACEHOLDER]
 
     failures = []
     for name, text in pages if pages is not None else _pages():
@@ -195,7 +198,7 @@ def required_metadata(pages=None) -> list[str]:
     content_page = ["<html lang=", "<title>", 'name="description"', 'rel="canonical"', "viewport"]
     required = {
         "index.html": content_page,
-        **{f"{path[1:]}.html": content_page for path in build.PAGES},
+        **{f"{path[1:]}.html": content_page for path in build.SITEMAP if path not in ("/", "/privacy", build.BRIEF_PATH)},
         "privacy.html": ["<html lang=", "<title>", 'rel="canonical"', "viewport"],
         "404.html": ["<html lang=", "<title>", 'name="robots" content="noindex"'],
     }
