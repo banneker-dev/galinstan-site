@@ -3,12 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Galinstan: Liquidity Optimization And Audit Software For Banks</title>
-    <meta name="description" content="Hold the most efficient position that stays above the requirement, all day.">
-    <link rel="canonical" href="https://galinstan.ai/">
+    <title>Galinstan: Audit Evidence Produced Inside Your Own Perimeter</title>
+    <meta name="description" content="Software built to produce control-testing and gap-analysis evidence inside the institution&#x27;s own hardware boundary, with the inputs and method recorded alongside the result.">
+    <link rel="canonical" href="https://galinstan.ai/eu-banks/audit-evidence">
     <meta name="robots" content="index, follow">
-    <script>try { var r = localStorage.getItem("galinstan-region"); if (r === "us") location.replace("/us-banks"); else if (r === "eu") location.replace("/eu-banks"); } catch (e) {}</script>
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Galinstan","url":"https://galinstan.ai/","description":"Software built for intraday liquidity, ALM and DORA third-party risk work, to run on-premise inside the institution's own hardware boundary. It works completely offline.","applicationCategory":"BusinessApplication","publisher":{"@type":"Organization","name":"Banneker","url":"https://banneker.net"}}</script>
     <style>
 @font-face {
   font-family: "Source Serif 4"; font-weight: 600; font-style: normal; font-display: swap;
@@ -93,28 +91,8 @@ nav a[aria-current="page"] { color: var(--ink); font-weight: 600; border-bottom-
 }
 .pill:hover { background: var(--card); }
 .mid { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 1.75rem; align-self: stretch; }
-.region { gap: 0; }
-.region a { padding-left: 0.625rem; padding-right: 0.625rem; }
-.region a + a { border-left: 1px solid var(--hair); }
-.region a[aria-current="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--teal2); }
-.banner:not([hidden]) {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem;
-  margin: 0 0 2rem; padding: 0.75rem 1rem; border: 1px solid var(--hair); border-radius: 8px; background: var(--card);
-}
-.banner p { margin: 0; }
-.banner a { font-weight: 600; color: var(--teal2); }
-.banner button {
-  font: inherit; font-size: 0.875rem; color: var(--muted); background: none;
-  border: 1px solid var(--hair); border-radius: 6px; padding: 0.25rem 0.75rem; cursor: pointer;
-}
-.doors { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
-.door {
-  display: block; height: 100%; padding: 1.25rem; border-radius: 8px;
-  background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none;
-  transition: border-color 0.2s ease;
-}
-.door:hover { border-color: var(--teal2); }
-.door strong { display: block; font-family: var(--serif); font-size: 1.25rem; margin-bottom: 0.375rem; }
+.change { align-self: center; padding-bottom: 1rem; font-size: 0.8125rem; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.change:hover { color: var(--ink); }
 @media (max-width: 44rem) {
   .bar-in { grid-template-columns: 1fr auto; column-gap: 0.75rem; }
   .bar .mid { grid-column: 1 / -1; grid-row: 2; gap: 0 1.125rem; }
@@ -237,38 +215,32 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
 }
     </style>
   </head>
-  <body data-asset="home" data-asset-region="all" data-page="/">
+  <body data-asset="eu-audit-evidence" data-asset-region="eu" data-page="/eu-banks/audit-evidence" data-region-served="eu">
     <header class="bar">
       <div class="bar-in">
-        <p class="wordmark"><span class="wm">Galinstan <span>Liquidity</span></span></p>
+        <p class="wordmark"><a href="/eu-banks"><span class="wm">Galinstan <span>Liquidity</span></span></a></p>
         <div class="mid">
-          <nav class="region" aria-label="Region"><a href="/us-banks" data-region="us" data-asset="switcher-to-us" data-event="region_switch" data-destination-track="us" data-source-page="/">US banks</a><a href="/eu-banks" data-region="eu" data-asset="switcher-to-eu" data-event="region_switch" data-destination-track="eu" data-source-page="/">EU banks</a></nav>
+        <nav>
+          <a href="/eu-banks/intraday-liquidity">Intraday liquidity</a>
+          <a href="/eu-banks/audit-evidence" aria-current="page">Audit evidence</a>
+          <a href="/eu-banks/deployment">Deployment</a>
+        </nav>
+          <a class="change" href="/us-banks" data-asset="region-change-to-us" data-event="region_switch" data-destination-track="us" data-source-page="/eu-banks/audit-evidence">US banks →</a>
         </div>
-        <a class="pill" href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request" data-asset="demo-request-header" data-event="demo_request_click" data-landing-page="/">Request a demo</a>
+        <a class="pill" href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request" data-asset="demo-request-header" data-event="demo_request_click" data-landing-page="/eu-banks/audit-evidence">Request a demo</a>
       </div>
     </header>
     <main>
-      <div class="banner" id="region-banner" data-asset="root-banner" hidden>
-        <p>Looking for the US bank version? <a href="/us-banks" data-region="us" data-asset="root-banner-click" data-event="region_banner" data-banner-action="click" data-destination-track="us" data-source-page="/">US banks</a></p>
-        <button type="button" data-asset="root-banner-dismiss" data-event="region_banner" data-banner-action="dismiss" data-source-page="/">Dismiss</button>
-      </div>
-      <h1>Hold the most efficient position that stays above the requirement, all day.</h1>
-      <figure class="art">
-        <img src="/hero-2000.webp" srcset="/hero-800.jpg 800w, /hero-2000.webp 2000w" sizes="(max-width: 44rem) 175vw, (max-width: 67rem) 100vw, 64rem" width="2000" height="857" alt="" fetchpriority="high">
-      </figure>
+      <h1>Audit evidence that never leaves the institution that produced it.</h1>
       <div class="prose">
-      <p>Intraday tools show the position. Galinstan is built to choose it, beside the systems a bank already runs: which assets to hold, which to release, and what the surplus is costing. That is a combinatorial problem rather than a report (assets held in lots, haircuts and caps interacting, encumbrance removing collateral from the buffer), and Galinstan is built to solve it as one.</p>
-      <p>The surplus is worth measuring before it is defended. Headroom above the requirement is not all deliberate: part of it is high-quality liquid assets the requirement did not call for.</p>
-      <p>Galinstan is built to produce audit evidence that can be relied on, inside your own hardware boundary, with each finding citing where it came from.</p>
+      <p class="sub">Galinstan is built to produce control testing and gap analysis evidence inside your own hardware boundary, with each finding citing where it came from.</p>
+      <p>A different standard is possible when the software runs inside the institution. The inputs never leave. The version that produced the result sits on the institution's own disk. Nothing is rewritten between the calculation and the report by a service neither party controls.</p>
+      <p>Module 2 is built around that: control testing and gap analysis against DORA and its technical standards, with the evidence for each finding citing where it came from, and with the model and method that produced it recorded beside it rather than described afterwards.</p>
       </div>
-      <h2>Choose your track</h2>
-      <ul class="doors">
-        <li><a class="door" href="/us-banks" data-asset="home-door-us" data-event="door_click" data-destination-track="us" data-source-page="/"><strong>US banks.</strong> Liquidity coverage under Regulation WW, model validation, and reconciliation to what the bank reports.</a></li>
-        <li><a class="door" href="/eu-banks" data-asset="home-door-eu" data-event="door_click" data-destination-track="eu" data-source-page="/"><strong>EU banks.</strong> Liquidity coverage and DORA third-party risk, with air-gapped deployment, exit, and escrow.</a></li>
-      </ul>
       <div class="prose">
-      <p class="cta"><a href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request" data-asset="demo-request-body" data-event="demo_request_click" data-landing-page="/">Request a demo</a></p>
+      <p class="cta"><a href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request" data-asset="demo-request-body" data-event="demo_request_click" data-landing-page="/eu-banks/audit-evidence">Request a demo</a></p>
       </div>
+      <a class="brief reveal" href="/galinstan-brief.pdf">How Galinstan works: product brief (PDF)</a>
       <footer>
         <p>Galinstan is built to run inside your perimeter and produce evidence.</p>
         <p>Galinstan is a product of Banneker.</p>
@@ -279,25 +251,23 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
     </main>
     <script>
 (function () {
-  var key = "galinstan-region", dismissed = "galinstan-region-banner", store;
-  try { store = window.localStorage; store.getItem(key); } catch (e) { return; }
-  document.querySelectorAll("a[data-region]").forEach(function (a) {
+  document.querySelectorAll('a[data-event="region_switch"]').forEach(function (a) {
     a.addEventListener("click", function () {
-      try { store.setItem(key, a.getAttribute("data-region")); } catch (e) {}
+      document.cookie = "region=" + a.getAttribute("data-destination-track") + "; Path=/; Max-Age=31536000; SameSite=Lax; Secure";
     });
   });
-  var banner = document.getElementById("region-banner");
-  if (!banner) return;
-  var zone = "";
-  try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
-  if (store.getItem(key) || store.getItem(dismissed) || zone.indexOf("America/") !== 0) return;
-  banner.hidden = false;
-  // For measurement only: says the banner was shown, to whatever listens; changes nothing on the page.
-  document.dispatchEvent(new CustomEvent("galinstan:asset", { detail: { event: "region_banner", asset: "root-banner-view", banner_action: "view", source_page: "/" } }));
-  banner.querySelector("button").addEventListener("click", function () {
-    banner.hidden = true;
-    try { store.setItem(dismissed, "1"); } catch (e) {}
-  });
+  try {
+    var query = new URLSearchParams(location.search), asked = query.get("region_source");
+    if (asked) {
+      query.delete("region_source");
+      var rest = query.toString();
+      history.replaceState(null, "", location.pathname + (rest ? "?" + rest : "") + location.hash);
+    }
+    if (!sessionStorage.getItem("galinstan-visit")) {
+      sessionStorage.setItem("galinstan-visit", "1");
+      document.body.setAttribute("data-region-source", asked === "stored-choice" || asked === "edge-country" ? asked : "explicit-url");
+    }
+  } catch (e) {}
 })();
     </script>
   </body>

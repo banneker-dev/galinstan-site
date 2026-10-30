@@ -135,28 +135,8 @@ nav a[aria-current="page"] { color: var(--ink); font-weight: 600; border-bottom-
 }
 .pill:hover { background: var(--card); }
 .mid { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 1.75rem; align-self: stretch; }
-.region { gap: 0; }
-.region a { padding-left: 0.625rem; padding-right: 0.625rem; }
-.region a + a { border-left: 1px solid var(--hair); }
-.region a[aria-current="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--teal2); }
-.banner:not([hidden]) {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem;
-  margin: 0 0 2rem; padding: 0.75rem 1rem; border: 1px solid var(--hair); border-radius: 8px; background: var(--card);
-}
-.banner p { margin: 0; }
-.banner a { font-weight: 600; color: var(--teal2); }
-.banner button {
-  font: inherit; font-size: 0.875rem; color: var(--muted); background: none;
-  border: 1px solid var(--hair); border-radius: 6px; padding: 0.25rem 0.75rem; cursor: pointer;
-}
-.doors { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
-.door {
-  display: block; height: 100%; padding: 1.25rem; border-radius: 8px;
-  background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none;
-  transition: border-color 0.2s ease;
-}
-.door:hover { border-color: var(--teal2); }
-.door strong { display: block; font-family: var(--serif); font-size: 1.25rem; margin-bottom: 0.375rem; }
+.change { align-self: center; padding-bottom: 1rem; font-size: 0.8125rem; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.change:hover { color: var(--ink); }
 @media (max-width: 44rem) {
   .bar-in { grid-template-columns: 1fr auto; column-gap: 0.75rem; }
   .bar .mid { grid-column: 1 / -1; grid-row: 2; gap: 0 1.125rem; }
@@ -323,80 +303,70 @@ def _mail_link(target_id: str, label_id: str | None = None, attrs: str = "") -> 
 # The stage 2 pages, in nav order. The address is the file's name without `.html`, which
 # is how the host serves it; `SITEMAP` below is what declares it.
 PAGES = {
-    "/intraday-liquidity": ("il", "nav-1"),
-    "/audit-evidence": ("ae", "nav-2"),
-    "/deployment": ("dep", "nav-3"),
+    "/eu-banks/intraday-liquidity": ("il", "nav-1"),
+    "/eu-banks/audit-evidence": ("ae", "nav-2"),
+    "/eu-banks/deployment": ("dep", "nav-3"),
 }
 
 
-# The US track (Spot's ask, 2026-10-30): the US pages under /us-banks, and Deployment shared.
-# Each US page names the lines it renders, in order; a line the EU page carries in the same
-# words is the EU page's approved line, not a copy of it.
+# Two funnels (Cowork's ask 202, 2026-10-30), each with its own landing, feature pages and deployment page, and each
+# linking only to itself. Each US page names the lines it renders, in order; a line the EU page carries in the same
+# words is the EU page's approved line, not a copy of it. Each idea appears on one page per funnel.
 US_TRACK = "/us-banks"
 EU_TRACK = "/eu-banks"
 US_PAGES = {
     "/us-banks/intraday-liquidity": {
-        "nav": "nav-1", "title": "il-meta-title", "description": "il-meta-description", "h1": "il-h1",
-        "sub": "il-sub", "cta": "il-cta",
-        "body": ("il-body-1", "il-body-2", "home-body-2", "us-il-figure", "il-body-4", "us-il-body-5"),
+        "nav": "nav-1", "title": "us-il-meta-title", "description": "il-meta-description", "h1": "il-h1",
+        "sub": "il-sub", "cta": "il-cta", "body": ("il-body-2", "us-il-body-5"),
     },
     "/us-banks/audit-evidence": {
         "nav": "nav-2", "title": "ae-meta-title", "description": "ae-meta-description", "h1": "ae-h1",
         "sub": "ae-sub", "cta": "ae-cta", "body": ("ae-body-2", "us-ae-body-3", "us-ae-body-4"),
     },
+    "/us-banks/deployment": {
+        "nav": "nav-3", "title": "us-dep-meta-title", "description": "us-dep-h1", "h1": "us-dep-h1", "cta": "dep-cta",
+        "body": ("us-dep-where", "us-dep-reads", "dep-body-3", "us-dep-upgrades", "dep-body-5", "dep-body-6"),
+    },
 }
-US_NAV = {**{path: spec["nav"] for path, spec in US_PAGES.items()}, "/deployment": "nav-3"}
+US_NAV = {path: spec["nav"] for path, spec in US_PAGES.items()}
 EU_NAV = {path: nav_id for path, (_, nav_id) in PAGES.items()}
 
-# Region, in Spot's order: the address decides, always. A page in a track has a counterpart in
-# the other one where the same page exists; anywhere else the switcher goes to the tracks.
-COUNTERPART = {
-    "/intraday-liquidity": "/us-banks/intraday-liquidity",
-    "/audit-evidence": "/us-banks/audit-evidence",
-    EU_TRACK: US_TRACK,
+# The addresses the EU pages had until 2026-10-30. Pages serves a permanent redirect from each (`render_redirects`).
+MOVED = {
+    "/intraday-liquidity": "/eu-banks/intraday-liquidity",
+    "/audit-evidence": "/eu-banks/audit-evidence",
+    "/deployment": "/eu-banks/deployment",
 }
-COUNTERPART |= {us: eu for eu, us in COUNTERPART.items()}
-EU_PATHS = {EU_TRACK, "/intraday-liquidity", "/audit-evidence"}
 
 
 def region_of(path: str | None) -> str | None:
-    if path and (path == US_TRACK or path.startswith(US_TRACK + "/")):
-        return "us"
-    return "eu" if path in EU_PATHS else None
+    for region, track in (("us", US_TRACK), ("eu", EU_TRACK)):
+        if path and (path == track or path.startswith(track + "/")):
+            return region
+    return None
 
 
-def switch_targets(path: str | None) -> dict[str, str]:
-    """Where the switcher's two links go from `path`: the same page in the other track where it
-    exists, this page for its own track, and the track pages otherwise."""
-    here = region_of(path)
-    other = COUNTERPART.get(path or "")
-    if here == "us":
-        return {"us": path, "eu": other or EU_TRACK}
-    if here == "eu":
-        return {"us": other or US_TRACK, "eu": path}
-    return {"us": US_TRACK, "eu": EU_TRACK}
-
-
-# Asset labels for measurement (Spot's ask of 2026-10-30, `CODY_ASK_GOOGLE_ANALYTICS_LABELS`): Cody names each
-# measurable thing, Cowork's tag reads the names. They are inert attributes: nothing here sends, stores or fetches
-# anything, and a page without the tag behaves exactly as before. Each label belongs to a canonical address, never to
-# a visitor. `docs/ANALYTICS_LABELS.md` is the table Cowork maps its tags to.
+# Asset labels for measurement (Spot's ask of 2026-10-30, `CODY_ASK_GOOGLE_ANALYTICS_LABELS`, revised by Cowork's ask
+# 202): Cody names each measurable thing, Cowork's tag reads the names. They are inert attributes: nothing here sends or
+# fetches anything, and a page without the tag behaves exactly as before. Each label belongs to a canonical address,
+# never to a visitor. `docs/ANALYTICS_LABELS.md` is the table Cowork maps its tags to.
 PAGE_LABELS = {
-    "/": ("home", "all"),
     "/us-banks": ("us-track", "us"),
     "/us-banks/intraday-liquidity": ("us-intraday-liquidity", "us"),
     "/us-banks/audit-evidence": ("us-audit-evidence", "us"),
+    "/us-banks/deployment": ("us-deployment", "us"),
     "/eu-banks": ("eu-track", "eu"),
-    "/intraday-liquidity": ("eu-intraday-liquidity", "eu"),
-    "/audit-evidence": ("eu-audit-evidence", "eu"),
-    "/deployment": ("deployment", "shared"),
+    "/eu-banks/intraday-liquidity": ("eu-intraday-liquidity", "eu"),
+    "/eu-banks/audit-evidence": ("eu-audit-evidence", "eu"),
+    "/eu-banks/deployment": ("eu-deployment", "eu"),
     "/privacy": ("privacy", "shared"),
 }
 
 
 def _body(path: str) -> str:
     asset, region = PAGE_LABELS[path]
-    return f'<body data-asset="{asset}" data-asset-region="{region}" data-page="{path}">'
+    served = f' data-region-served="{region}"' if region in ("us", "eu") else ""
+    return f'<body data-asset="{asset}" data-asset-region="{region}" data-page="{path}"{served}>'
 
 
 def asset_attrs(asset: str, event: str, **params: str) -> str:
@@ -412,59 +382,47 @@ def _demo_attrs(path: str, where: str) -> str:
     return asset_attrs(f"demo-request-{where}", "demo_request_click", landing_page=path)
 
 
-def _switcher(current: str | None) -> str:
-    """The "US banks | EU banks" switcher, in the header of every page. Plain links, so it works
-    with scripts off; with them on, a click also stores the choice for the root (`REGION_SCRIPT`)."""
-    t = page_copy.text
+def _region_change(current: str | None) -> str:
+    """The one cross-region element on a page: a small link to the other funnel's landing page. A plain link, so it
+    works with scripts off; with them on, the click also stores the choice for the root (`REGION_SCRIPT`)."""
     here = region_of(current)
-    links = []
-    for region, href in switch_targets(current).items():
-        mark = ' aria-current="true"' if region == here else ""
-        labels = asset_attrs(f"switcher-to-{region}", "region_switch", destination_track=region, source_page=current or "/")
-        links.append(f'<a href="{href}" data-region="{region}"{labels}{mark}>{_markup(t(f"region-{region}"))}</a>')
-    label = html.escape(t("region-label"), quote=True)
-    return f'          <nav class="region" aria-label="{label}">' + "".join(links) + "</nav>"
+    if here is None:
+        return ""
+    there, track = ("eu", EU_TRACK) if here == "us" else ("us", US_TRACK)
+    labels = asset_attrs(f"region-change-to-{there}", "region_switch", destination_track=there, source_page=current)
+    return f'          <a class="change" href="{track}"{labels}>{_markup(page_copy.text(f"region-change-to-{there}"))}</a>'
 
 
-# The visitor's own choice, and nothing else: no address, no location, no third party. A click
-# on the switcher (or on the banner's link) stores `us` or `eu` in this browser only. The banner
-# appears on the root alone, only when nothing is stored, nothing was dismissed and the browser's
-# own time zone is in the Americas; it suggests and never moves the visitor.
+# The visitor's own choice, and where the visit began. A click on the change link sets `region`, a first-party cookie
+# holding `us` or `eu` and nothing else, which the edge reads at the root (`functions/index.js`). No click, no cookie.
+# The first page of a visit records how it was reached, for the tag to read, and takes `region_source` out of the address.
 REGION_SCRIPT = """    <script>
 (function () {
-  var key = "galinstan-region", dismissed = "galinstan-region-banner", store;
-  try { store = window.localStorage; store.getItem(key); } catch (e) { return; }
-  document.querySelectorAll("a[data-region]").forEach(function (a) {
+  document.querySelectorAll('a[data-event="region_switch"]').forEach(function (a) {
     a.addEventListener("click", function () {
-      try { store.setItem(key, a.getAttribute("data-region")); } catch (e) {}
+      document.cookie = "region=" + a.getAttribute("data-destination-track") + "; Path=/; Max-Age=31536000; SameSite=Lax; Secure";
     });
   });
-  var banner = document.getElementById("region-banner");
-  if (!banner) return;
-  var zone = "";
-  try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
-  if (store.getItem(key) || store.getItem(dismissed) || zone.indexOf("America/") !== 0) return;
-  banner.hidden = false;
-  // For measurement only: says the banner was shown, to whatever listens; changes nothing on the page.
-  document.dispatchEvent(new CustomEvent("galinstan:asset", { detail: { event: "region_banner", asset: "root-banner-view", banner_action: "view", source_page: "/" } }));
-  banner.querySelector("button").addEventListener("click", function () {
-    banner.hidden = true;
-    try { store.setItem(dismissed, "1"); } catch (e) {}
-  });
+  try {
+    var query = new URLSearchParams(location.search), asked = query.get("region_source");
+    if (asked) {
+      query.delete("region_source");
+      var rest = query.toString();
+      history.replaceState(null, "", location.pathname + (rest ? "?" + rest : "") + location.hash);
+    }
+    if (!sessionStorage.getItem("galinstan-visit")) {
+      sessionStorage.setItem("galinstan-visit", "1");
+      document.body.setAttribute("data-region-source", asked === "stored-choice" || asked === "edge-country" ? asked : "explicit-url");
+    }
+  } catch (e) {}
 })();
     </script>
 """
 
-# The root only, before anything is drawn: a choice the visitor stored takes them to that
-# track. An explicit address never consults it, and without a stored choice the root stays.
-ROOT_SCRIPT = """
-    <script>try { var r = localStorage.getItem("galinstan-region"); if (r === "us") location.replace("/us-banks"); else if (r === "eu") location.replace("/eu-banks"); } catch (e) {}</script>"""
 
-
-def _nav(current: str | None, pages: dict[str, str] | None = None) -> str:
-    pages = EU_NAV if pages is None else pages
+def _nav(current: str | None, pages: dict[str, str]) -> str:
     if not pages:
-        return ""  # the root belongs to neither track, so its header carries the switcher alone
+        return ""  # a page in neither funnel links to neither
     links = []
     for path, nav_id in pages.items():
         mark = ' aria-current="page"' if path == current else ""
@@ -479,18 +437,19 @@ def _wordmark() -> str:
     return f'<span class="wm">{_markup(t("wordmark"))} <span>{_markup(t("wordmark-product"))}</span></span>'
 
 
-def _bar(current: str | None, link: bool = True) -> str:
-    """The header that stays at the top while the page scrolls: wordmark, nav, and the demo
-    request, so the one thing a visitor can do is never further than the top of the screen.
-    Every word in it is already approved: the wordmark, the three nav labels, `cta-demo`."""
-    mark = _wordmark()
-    mark = f'<a href="/">{mark}</a>' if link else mark
+def _bar(current: str | None) -> str:
+    """The header that stays at the top while the page scrolls: wordmark, the funnel's nav, the link to the other
+    funnel, and the demo request. The wordmark goes to this funnel's landing page: the root would ask the edge, which
+    could send someone who chose this funnel's address to the other one."""
+    region = region_of(current)
+    home = {"us": US_TRACK, "eu": EU_TRACK}.get(region, "/")
+    pages = {"us": US_NAV, "eu": EU_NAV}.get(region, {})
     demo = html.escape(mail_href("cta-demo-target"))
     return f"""    <header class="bar">
       <div class="bar-in">
-        <p class="wordmark">{mark}</p>
+        <p class="wordmark"><a href="{home}">{_wordmark()}</a></p>
         <div class="mid">
-{_nav(current, US_NAV if region_of(current) == "us" else ({} if current == "/" else EU_NAV))}{_switcher(current)}
+{_nav(current, pages)}{_region_change(current)}
         </div>
         <a class="pill" href="{demo}"{_demo_attrs(current or "/", "header")}>{_markup(page_copy.text("cta-demo"))}</a>
       </div>
@@ -502,13 +461,13 @@ def _bar(current: str | None, link: bool = True) -> str:
 TICKS = '      <div class="ticks" aria-hidden="true"></div>\n'
 
 
-def _cards(pages: dict[str, str] | None = None) -> str:
-    """A track's pages as cards on its track page. Titles only: they are the nav
+def _cards(pages: dict[str, str]) -> str:
+    """A funnel's pages as cards on its landing page. Titles only: they are the nav
     labels, and a line of description under each would be new copy."""
     t = page_copy.text
     cards = "\n".join(
         f'        <a class="card reveal" href="{path}">{_markup(t(nav_id))}</a>'
-        for path, nav_id in (EU_NAV if pages is None else pages).items()
+        for path, nav_id in pages.items()
     )
     return f'      <div class="cards">\n{cards}\n      </div>\n'
 
@@ -569,7 +528,7 @@ def _footer() -> str:
       </footer>"""
 
 
-def render_structured_data() -> str:
+def render_structured_data(description: str = "meta-description") -> str:
     """JSON-LD saying what Galinstan is and who publishes it, for search and AI answers.
 
     "Galinstan" is also a gallium alloy, and a model asked about the name answers about the
@@ -584,7 +543,7 @@ def render_structured_data() -> str:
         "@type": "SoftwareApplication",
         "name": t("wordmark"),
         "url": f"{SITE_URL}/",
-        "description": t("meta-description"),
+        "description": t(description),
         "applicationCategory": "BusinessApplication",
         "publisher": {"@type": "Organization", "name": t("ld-publisher"), "url": "https://banneker.net"},
     }
@@ -634,6 +593,7 @@ def render_stage_2(path: str) -> str:
 def render_us_page(path: str) -> str:
     spec = US_PAGES[path]
     t = page_copy.text
+    sub = f'      <p class="sub">{_markup(t(spec["sub"]))}</p>\n' if "sub" in spec else ""
     body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in spec["body"])
     return f"""{_head(t(spec["title"]), path, t(spec["description"]))}
   {_body(path)}
@@ -641,8 +601,7 @@ def render_us_page(path: str) -> str:
     <main>
       <h1>{_markup(t(spec["h1"]))}</h1>
       <div class="prose">
-      <p class="sub">{_markup(t(spec["sub"]))}</p>
-{body}
+{sub}{body}
       </div>
       <div class="prose">
       <p class="cta">{_mail_link("cta-demo-target", spec["cta"], _demo_attrs(path, "body"))}</p>
@@ -654,17 +613,26 @@ def render_us_page(path: str) -> str:
 """
 
 
+# Between the two landings only (ask 202). A crawler reaches the EU funnel through this and the sitemap, never through
+# the root's redirect: Googlebot crawls from the US.
+HREFLANG = f"""
+    <link rel="alternate" hreflang="en-US" href="{SITE_URL}{US_TRACK}">
+    <link rel="alternate" hreflang="en" href="{SITE_URL}{EU_TRACK}">
+    <link rel="alternate" hreflang="x-default" href="{SITE_URL}/">"""
+
+
 def render_us_track() -> str:
-    """The US track: its lead is the US door's line, then its pages."""
+    """The US landing: the lead that stood at the root until 2026-10-30, the surplus example, and its pages."""
     t = page_copy.text
-    lead = t("door-us").split("** ", 1)[1]
-    return f"""{_head(t("us-meta-title"), US_TRACK, lead)}
+    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("home-body-1", "home-body-2", "us-il-figure"))
+    extra = HREFLANG + render_structured_data("home-meta-description")
+    return f"""{_head(t("us-meta-title"), US_TRACK, t("home-meta-description"), extra=extra)}
   {_body(US_TRACK)}
 {_bar(US_TRACK)}
     <main>
-      <h1>{_markup(t("region-us"))}</h1>
-      <div class="prose">
-      <p class="sub">{_markup(lead)}</p>
+      <h1>{_markup(t("home-h1"))}</h1>
+{HERO_IMG}      <div class="prose">
+{body}
       <p class="cta">{_mail_link("cta-demo-target", "cta-demo", _demo_attrs(US_TRACK, "body"))}</p>
       </div>
 {TICKS}{_cards(US_NAV)}{_footer()}
@@ -674,50 +642,12 @@ def render_us_track() -> str:
 """
 
 
-def render_index() -> str:
-    """The universal home page (draft v2): the speed and value argument, then a door to each track."""
-    t = page_copy.text
-    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("home-body-1", "home-body-2", "home-body-3"))
-    doors = "\n".join(
-        f'        <li><a class="door" href="{href}"{asset_attrs(f"home-door-{region}", "door_click", destination_track=region, source_page="/")}>{_markup(t(f"door-{region}"))}</a></li>'
-        for region, href in (("us", US_TRACK), ("eu", EU_TRACK))
-    )
-    click = asset_attrs("root-banner-click", "region_banner", banner_action="click", destination_track="us", source_page="/")
-    dismiss = asset_attrs("root-banner-dismiss", "region_banner", banner_action="dismiss", source_page="/")
-    banner = f"""      <div class="banner" id="region-banner" data-asset="root-banner" hidden>
-        <p>{_markup(t("region-banner"))} <a href="{US_TRACK}" data-region="us"{click}>{_markup(t("region-us"))}</a></p>
-        <button type="button"{dismiss}>{_markup(t("region-dismiss"))}</button>
-      </div>
-"""
-    return f"""{_head(t("home-meta-title"), "/", t("home-meta-description"), extra=ROOT_SCRIPT + render_structured_data())}
-  {_body("/")}
-{_bar("/", link=False)}
-    <main>
-{banner}      <h1>{_markup(t("home-h1"))}</h1>
-{HERO_IMG}      <div class="prose">
-{body}
-      </div>
-      <h2>{_markup(t("doors-h2"))}</h2>
-      <ul class="doors">
-{doors}
-      </ul>
-      <div class="prose">
-      <p class="cta">{_mail_link("cta-demo-target", "cta-demo", _demo_attrs("/", "body"))}</p>
-      </div>
-{_footer()}
-    </main>
-{REGION_SCRIPT}  </body>
-</html>
-"""
-
-
 def render_eu_track() -> str:
-    """The EU track: the home page as it stood until 2026-10-30, moved here unchanged."""
+    """The EU landing: the home page as it stood until 2026-10-30, minus what its feature pages say."""
     t = page_copy.text
-    # `il-body-1` is the intraday page's approved line, shown here as it stands (Cowork's ask 175.4).
-    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2", "il-body-1"))
+    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2"))
     body += "\n" + _roles() + f"      <p>{_markup(t('body-3'))}</p>"
-    return f"""{_head(t("meta-title"), EU_TRACK, t("meta-description"))}
+    return f"""{_head(t("meta-title"), EU_TRACK, t("meta-description"), extra=HREFLANG + render_structured_data())}
   {_body(EU_TRACK)}
 {_bar(EU_TRACK)}
     <main>
@@ -726,7 +656,7 @@ def render_eu_track() -> str:
 {body}
       <p class="cta">{_mail_link("cta-demo-target", "cta-demo", _demo_attrs(EU_TRACK, "body"))}</p>
       </div>
-{TICKS}{_cards()}{_brief_link(EU_TRACK)}{_footer()}
+{TICKS}{_cards(EU_NAV)}{_brief_link(EU_TRACK)}{_footer()}
     </main>
 {REGION_SCRIPT}  </body>
 </html>
@@ -794,7 +724,7 @@ ASSETS = ROOT / "assets"
 BRIEF_PDF = ASSETS / "galinstan-brief.pdf"
 BRIEF_LOCK = ASSETS / "galinstan-brief.lock.json"
 BRIEF_PATH = "/galinstan-brief.pdf"
-BRIEF_LINKED_FROM = (EU_TRACK, "/audit-evidence", "/deployment")
+BRIEF_LINKED_FROM = (EU_TRACK, "/eu-banks/audit-evidence", "/eu-banks/deployment")
 
 BRIEF_CSS = """\
 @page {
@@ -934,6 +864,12 @@ def render_robots() -> str:
     )
 
 
+def render_redirects() -> str:
+    """Cloudflare Pages' `_redirects`: each address that moved, and its `.html` form, permanently to its new one."""
+    lines = [f"{old}{suffix} {new} 301" for old, new in MOVED.items() for suffix in ("", ".html")]
+    return "\n".join(lines) + "\n"
+
+
 def _content_date(render) -> str | None:
     """The newest approval date among the strings a page actually renders.
 
@@ -971,7 +907,6 @@ def _content_date(render) -> str | None:
 # page that was indexed had never been declared. Canonicals and internal links are checked
 # against this map by `tools/guards.py`, so the three cannot drift apart again.
 SITEMAP = {
-    "/": lambda: render_index(),
     US_TRACK: lambda: render_us_track(),
     **{path: (lambda p=path: render_us_page(p)) for path in US_PAGES},
     EU_TRACK: lambda: render_eu_track(),
@@ -1002,7 +937,7 @@ def render_sitemap() -> str:
 
 # The allowlist. A file reaches galinstan.ai if and only if it is named here.
 ALLOWLIST = {
-    "index.html": render_index,
+    "_redirects": render_redirects,
     f"{US_TRACK[1:]}.html": render_us_track,
     **{f"{path[1:]}.html": (lambda p=path: render_us_page(p)) for path in US_PAGES},
     f"{EU_TRACK[1:]}.html": render_eu_track,

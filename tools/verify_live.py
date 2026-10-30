@@ -105,14 +105,14 @@ def fetch(url: str, accept: str = "text/html,application/xhtml+xml") -> str:
 # the front page's headline on every URL — so /privacy.html failed a check it could never
 # have passed. It was caught on a preview deploy, which is the argument for running one.
 EXPECTED = {
-    "/": ("home-h1", "stays above the requirement, all day"),
     "/eu-banks": ("headline", "runs inside your perimeter, not ours"),
-    "/us-banks": ("door-us", "Liquidity coverage under Regulation WW"),
+    "/us-banks": ("home-h1", "stays above the requirement, all day"),
     "/us-banks/intraday-liquidity": ("us-il-body-5", "behind FR 2052a and Call Report"),
     "/us-banks/audit-evidence": ("us-ae-body-4", "a model validator can re-perform it"),
-    "/intraday-liquidity": ("il-h1", "are two different problems"),
-    "/audit-evidence": ("ae-h1", "never leaves the institution that produced it"),
-    "/deployment": ("dep-body-1", "for licensing, not for telemetry"),
+    "/us-banks/deployment": ("us-dep-where", "in your own cloud account"),
+    "/eu-banks/intraday-liquidity": ("il-h1", "are two different problems"),
+    "/eu-banks/audit-evidence": ("ae-h1", "never leaves the institution that produced it"),
+    "/eu-banks/deployment": ("dep-body-1", "for licensing, not for telemetry"),
     "/privacy": ("privacy-controller", "The data controller for this site is"),
 }
 
@@ -249,6 +249,43 @@ def verify_crawler_policy(origin: str) -> list[str]:
     return failures
 
 
+def _redirect_of(url: str, cookie: str | None = None) -> tuple[int, str, str]:
+    """The status, Location and Cache-Control an address answers with, or a failure if it serves a page."""
+    headers = {"User-Agent": BROWSER_UA, "Accept": "text/html"}
+    if cookie:
+        headers["Cookie"] = cookie
+    try:
+        with _OPENER.open(urllib.request.Request(url, headers=headers), timeout=TIMEOUT) as response:  # noqa: S310
+            return response.status, "", ""
+    except urllib.error.HTTPError as exc:
+        return exc.code, exc.headers.get("Location", ""), exc.headers.get("Cache-Control", "")
+
+
+def verify_routing(origin: str) -> list[str]:
+    """Cowork's ask 202, over the live response: no build can see the edge's decision. The root sends a stored choice to
+    its funnel and anyone else by country, never cacheably; each moved address answers a permanent redirect. Which funnel
+    the country picks depends on where this runs, so the check holds it to one of the two."""
+    from urllib.parse import parse_qs, urlparse
+
+    failures = []
+    for cookie, tracks, source in ((None, (build.US_TRACK, build.EU_TRACK), "edge-country"),
+                                   ("region=us", (build.US_TRACK,), "stored-choice"),
+                                   ("region=eu", (build.EU_TRACK,), "stored-choice")):
+        status, location, cache = _redirect_of(f"{origin}/", cookie)
+        target = urlparse(location)
+        if status != 302 or target.path not in tracks:
+            failures.append(f"{origin}/ with cookie {cookie}: answered {status} to {location!r}, wanted 302 to {tracks}")
+        elif parse_qs(target.query).get("region_source") != [source]:
+            failures.append(f"{origin}/ with cookie {cookie}: {location!r} does not say {source}")
+        if "no-store" not in cache:
+            failures.append(f"{origin}/ with cookie {cookie}: Cache-Control is {cache!r}, so the decision could be cached")
+    for old, new in build.MOVED.items():
+        status, location, _ = _redirect_of(f"{origin}{old}")
+        if status != 301 or urlparse(location).path != new:
+            failures.append(f"{origin}{old}: answered {status} to {location!r}, wanted 301 to {new}")
+    return failures
+
+
 def main() -> int:
     # An origin alone verifies every declared address; the deploy passes the origin, so a
     # page added to the sitemap is verified without anyone editing the workflow.
@@ -294,6 +331,17 @@ def main() -> int:
                     print(f"        {f}")
             else:
                 print(f"ok    {origin}/robots.txt — crawler policy present, byte-identical to the commit")
+        try:
+            routing = verify_routing(origin)
+        except Exception as exc:  # a fetch that does not complete is a failed release
+            routing = [f"{type(exc).__name__}: {exc}"]
+        if routing:
+            failed += 1
+            print(f"FAIL  {origin}/ routing")
+            for f in routing:
+                print(f"        {f}")
+        else:
+            print(f"ok    {origin}/ — routes by stored choice, then country; moved addresses answer 301")
     return 1 if failed else 0
 
 
