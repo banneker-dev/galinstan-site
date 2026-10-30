@@ -472,7 +472,8 @@ def _cards(pages: dict[str, str]) -> str:
     return f'      <div class="cards">\n{cards}\n      </div>\n'
 
 
-def _roles() -> str:
+def _roles(lines: tuple[str, ...] = ("roles-treasury", "roles-dora", "roles-security", "roles-audit"),
+           pages: dict[str, str] | None = None) -> str:
     """The role block on the home page: one line for each seat on the buying committee.
 
     Each approved line ends with the name of the page that carries its argument, and that
@@ -480,9 +481,9 @@ def _roles() -> str:
     that does not end with a nav label fails the build rather than shipping without its link.
     """
     t = page_copy.text
-    by_label = {t(nav_id): path for path, (_, nav_id) in PAGES.items()}
+    by_label = {t(nav_id): path for path, nav_id in (pages or EU_NAV).items()}
     items = []
-    for line_id in ("roles-treasury", "roles-dora", "roles-security", "roles-audit"):
+    for line_id in lines:
         raw = t(line_id)
         label = next((lab for lab in by_label if raw.endswith(" " + lab)), None)
         if label is None:
@@ -621,10 +622,16 @@ HREFLANG = f"""
     <link rel="alternate" hreflang="x-default" href="{SITE_URL}/">"""
 
 
+US_ROLES = ("us-roles-treasury", "us-roles-liquidity", "us-roles-model", "us-roles-third-party", "us-roles-security",
+            "us-roles-audit")
+
+
 def render_us_track() -> str:
     """The US landing: the lead that stood at the root until 2026-10-30, the surplus example, and its pages."""
     t = page_copy.text
-    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("home-body-1", "home-body-2", "us-il-figure"))
+    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("us-lead-1", "us-lead-2", "home-body-1", "home-body-2",
+                                                                  "us-il-figure"))
+    body += "\n" + _roles(US_ROLES, US_NAV) + f"      <p>{_markup(t('us-roles-close'))}</p>"
     extra = HREFLANG + render_structured_data("home-meta-description")
     return f"""{_head(t("us-meta-title"), US_TRACK, t("home-meta-description"), extra=extra)}
   {_body(US_TRACK)}

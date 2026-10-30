@@ -240,9 +240,21 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
         <img src="/hero-2000.webp" srcset="/hero-800.jpg 800w, /hero-2000.webp 2000w" sizes="(max-width: 44rem) 175vw, (max-width: 67rem) 100vw, 64rem" width="2000" height="857" alt="" fetchpriority="high">
       </figure>
       <div class="prose">
+      <p>Galinstan is built for treasury and resilience teams at US banks subject to a liquidity coverage requirement, including institutions in scope of the Federal Reserve's LCR rule, Regulation WW. It is built to do two things inside your own hardware boundary: find the most efficient way to hold a regulatory liquidity position, and produce audit evidence that can be relied on.</p>
+      <p>By design, no data leaves the institution, there is no cloud service to depend on, and the software works completely offline.</p>
       <p>Intraday tools show the position. Galinstan is built to choose it, beside the systems a bank already runs: which assets to hold, which to release, and what the surplus is costing. That is a combinatorial problem rather than a report (assets held in lots, haircuts and caps interacting, encumbrance removing collateral from the buffer), and Galinstan is built to solve it as one.</p>
       <p>The surplus is worth measuring before it is defended. Headroom above the requirement is not all deliberate: part of it is high-quality liquid assets the requirement did not call for.</p>
       <p>Take a bank holding $4.2 billion of high-quality liquid assets against $3.0 billion of net cash outflows: a ratio of 140% against a 100% minimum. Some of that $1.2 billion of headroom is deliberate. If a third of it is not, $400 million sits in assets the requirement did not call for, and at a 1.5% yield gap that costs $6 million a year.</p>
+      <h2>Built for the committee that buys it.</h2>
+      <ul class="roles">
+        <li><strong>Treasury and ALM.</strong> Which assets to hold against the requirement, which to release, and what the surplus is costing. <a href="/us-banks/intraday-liquidity">Intraday liquidity</a></li>
+        <li><strong>Liquidity risk management.</strong> How the position holds up intraday and under stress, and how it reconciles to what the bank reports. <a href="/us-banks/intraday-liquidity">Intraday liquidity</a></li>
+        <li><strong>Model risk management.</strong> A deterministic calculation a validator can re-perform, with the method, parameters, and source rule text recorded beside the result rather than described afterwards. <a href="/us-banks/audit-evidence">Audit evidence</a></li>
+        <li><strong>Third-party risk management.</strong> What the software connects to, what leaves the perimeter, and what happens at exit, in the terms of the interagency guidance on third-party relationships. <a href="/us-banks/deployment">Deployment</a></li>
+        <li><strong>CISO and infrastructure.</strong> Every version installs from a signed offline bundle with a software bill of materials, and never connects to the internet. <a href="/us-banks/deployment">Deployment</a></li>
+        <li><strong>Internal and external audit.</strong> Control testing and gap analysis evidence, built to be produced inside the institution, with each finding citing where it came from. <a href="/us-banks/audit-evidence">Audit evidence</a></li>
+      </ul>
+      <p>We want to hear from treasurers, heads of ALM, and liquidity risk and model risk officers about how this work gets done today, and what it costs. If that is your remit, write to us.</p>
       <p class="cta"><a href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request" data-asset="demo-request-body" data-event="demo_request_click" data-landing-page="/us-banks">Request a demo</a></p>
       </div>
       <div class="ticks" aria-hidden="true"></div>
