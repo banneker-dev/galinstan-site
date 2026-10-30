@@ -2,6 +2,26 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.10.7] — a universal home page, with a US track and an EU track
+
+Draft v2 as Antwain approved it on 2026-10-30, with "most efficient" for "cheapest" in the headline, and the US
+intraday figures he asked for until the real figures replace them.
+
+### Added
+- **A universal home page at `/`** from Spot's US copy draft v2 (2026-10-30): the speed and value argument, then a
+  door to each track. The draft's em dashes are parentheses and colons (RULES.md D2); otherwise its words.
+- **The US track:** `/us-banks`, `/us-banks/intraday-liquidity` and `/us-banks/audit-evidence`. Sentences the EU pages
+  already carry in the same words keep their approved lines.
+- **A "US banks | EU banks" switcher in every page's header**, linking to the same page in the other track where one
+  exists. A click stores the choice in this browser only (`galinstan-region`), and only the root consults it.
+- **A banner on the root only**, when nothing is stored or dismissed and the browser's own time zone is in the
+  Americas: "Looking for the US bank version?", a link and a dismiss. No address, location or third party is read.
+
+### Changed
+- **The home page as it stood moves to `/eu-banks`, unchanged**, with the product brief's link. The EU feature pages
+  keep their addresses; Deployment stays shared. The structured data stays on `/`.
+- A placeholder's marker uses a colon, not a dash, and the prose guard accepts a placeholder's own marker.
+
 ## [site-2026.10.6] — the demo's masthead, the evidence voice, and the brief in audit paper
 
 ### Changed

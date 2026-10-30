@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Galinstan For US Banks</title>
+    <meta name="description" content="Liquidity coverage under Regulation WW, model validation, and reconciliation to what the bank reports.">
+    <link rel="canonical" href="https://galinstan.ai/us-banks">
+    <meta name="robots" content="index, follow">
+    <style>
+@font-face {
+  font-family: "Source Serif 4"; font-weight: 600; font-style: normal; font-display: swap;
+  src: url("/source-serif-4-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono"; font-weight: 400; font-style: normal; font-display: swap;
+  src: url("/ibm-plex-mono-400.woff2") format("woff2");
+}
+:root {
+  color-scheme: light;
+  --paper: #f6f4ee;
+  --card: #fffdf8;
+  --hair: #e2dbc9;
+  --hair2: #ece7d8;
+  --ink: #1e1a13;
+  --muted: #7c7361;
+  --teal: #0e7c6b;
+  --teal2: #0a5a4e;
+  --risk: #b3402e;
+  --measure: 34rem;
+  --wide: 64rem;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; background: var(--paper); }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1rem/1.65 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: var(--wide); margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+.prose, footer { max-width: var(--measure); }
+.bar {
+  border-top: 4px solid var(--ink);
+  border-bottom: 1px solid var(--hair);
+  view-transition-name: bar;
+}
+.bar-in {
+  max-width: var(--wide); margin: 0 auto; padding: 1rem 1.5rem 0;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0 2rem;
+}
+.wordmark {
+  display: flex; align-items: center; gap: 0.75rem;
+  font-family: var(--serif);
+  font-size: 1.3125rem;
+  font-weight: 600;
+  margin: 0;
+  padding-bottom: 1rem;
+}
+.wordmark::before {
+  content: "G" / "";
+  flex: none; display: flex; align-items: center; justify-content: center;
+  width: 2.125rem; height: 2.125rem; border: 1.5px solid var(--ink); border-radius: 50%;
+  font-size: 1.125rem; color: var(--teal2);
+}
+.wordmark .wm { white-space: nowrap; }
+.wordmark .wm span { color: var(--teal2); }
+main > .wordmark { margin: 0 0 2.5rem; }
+.wordmark a { text-decoration: none; }
+nav {
+  font-size: 0.84375rem; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 0 1.75rem;
+  align-self: stretch; align-items: flex-end;
+}
+nav a {
+  color: var(--muted); text-decoration: none;
+  padding: 0.8125rem 0.125rem; margin-bottom: -1px; border-bottom: 2px solid transparent;
+}
+nav a:hover { color: var(--ink); }
+nav a[aria-current="page"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--teal2); }
+.pill {
+  font-size: 0.875rem; font-weight: 600;
+  display: inline-block; margin-bottom: 1rem;
+  padding: 0.5rem 1.125rem; border-radius: 8px;
+  border: 1.5px solid var(--teal2); color: var(--teal2); text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+.pill:hover { background: var(--card); }
+.mid { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 1.75rem; align-self: stretch; }
+.region { gap: 0; }
+.region a { padding-left: 0.625rem; padding-right: 0.625rem; }
+.region a + a { border-left: 1px solid var(--hair); }
+.region a[aria-current="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--teal2); }
+.banner:not([hidden]) {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem;
+  margin: 0 0 2rem; padding: 0.75rem 1rem; border: 1px solid var(--hair); border-radius: 8px; background: var(--card);
+}
+.banner p { margin: 0; }
+.banner a { font-weight: 600; color: var(--teal2); }
+.banner button {
+  font: inherit; font-size: 0.875rem; color: var(--muted); background: none;
+  border: 1px solid var(--hair); border-radius: 6px; padding: 0.25rem 0.75rem; cursor: pointer;
+}
+.doors { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
+.door {
+  display: block; height: 100%; padding: 1.25rem; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none;
+  transition: border-color 0.2s ease;
+}
+.door:hover { border-color: var(--teal2); }
+.door strong { display: block; font-family: var(--serif); font-size: 1.25rem; margin-bottom: 0.375rem; }
+@media (max-width: 44rem) {
+  .bar-in { grid-template-columns: 1fr auto; column-gap: 0.75rem; }
+  .bar .mid { grid-column: 1 / -1; grid-row: 2; gap: 0 1.125rem; }
+  .bar nav { gap: 0 1.125rem; font-size: 0.8125rem; }
+  .bar .wordmark { font-size: 1rem; gap: 0.5rem; }
+  .bar .wordmark::before { width: 1.75rem; height: 1.75rem; font-size: 0.9375rem; }
+  .pill { padding: 0.4375rem 0.75rem; font-size: 0.8125rem; }
+}
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(1.875rem, 1.1rem + 3.2vw, 3.25rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+  max-width: 22ch;
+  margin: 1rem 0 2.5rem;
+  text-wrap: balance;
+}
+p { margin: 0 0 1.25rem; color: var(--ink); }
+h2 {
+  font-family: var(--serif); font-size: 1.375rem; font-weight: 600;
+  color: var(--ink); margin: 2.5rem 0 1rem;
+}
+.roles { list-style: none; margin: 0 0 2.5rem; padding: 0; }
+.roles li { margin: 0; padding: 0.875rem 0; border-top: 1px solid var(--hair); color: var(--ink); }
+.roles li:last-child { border-bottom: 1px solid var(--hair); }
+.roles a { font-family: var(--mono); font-size: 0.78125rem; color: var(--teal2); white-space: nowrap; }
+footer {
+  margin-top: 3.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--hair);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+footer p { margin: 0 0 0.375rem; color: inherit; }
+.sub { color: var(--ink); font-size: 1.125rem; }
+.cta { margin-top: 2rem; }
+.cta a { font-weight: 600; color: var(--teal2); text-decoration: none; border-bottom: 1px solid var(--teal2); }
+strong { color: var(--ink); font-weight: 600; }
+a { color: inherit; text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
+.ticks {
+  height: 11px; margin: 3rem 0;
+  --x: linear-gradient(var(--muted), var(--muted));
+  background:
+    var(--x) 5px 0 / 1px 11px no-repeat, var(--x) 0 5px / 11px 1px no-repeat,
+    var(--x) 50% 0 / 1px 11px no-repeat, var(--x) 50% 5px / 11px 1px no-repeat,
+    var(--x) calc(100% - 5px) 0 / 1px 11px no-repeat, var(--x) 100% 5px / 11px 1px no-repeat,
+    linear-gradient(var(--hair), var(--hair)) 0 5px / 100% 1px no-repeat;
+}
+.art {
+  margin: 0 0 3rem; border-radius: 8px; overflow: hidden;
+  background: var(--card); border: 1px solid var(--hair);
+  aspect-ratio: 16 / 7;
+}
+.art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 100% 50%; }
+@media (max-width: 44rem) { .art { aspect-ratio: 4 / 3; } .card { min-height: 5.5rem; } }
+.cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem;
+  margin: 0 0 1rem;
+}
+.card {
+  position: relative; display: flex; align-items: flex-end;
+  min-height: 9rem; padding: 1.25rem; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none;
+  font-family: var(--serif); font-size: 1.25rem; font-weight: 600;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.card::after {
+  content: ""; position: absolute; top: 1.25rem; right: 1.25rem;
+  width: 0.625rem; height: 0.625rem; color: var(--teal2);
+  border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor;
+  background: linear-gradient(to bottom right, transparent calc(50% - 0.75px), currentColor 0 calc(50% + 0.75px), transparent 0);
+  transition: transform 0.2s ease;
+}
+.card:hover { border-color: var(--teal2); }
+.card:hover::after { transform: translate(2px, -2px); }
+.brief {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  margin: 1rem 0 0; padding: 1.75rem 1.5rem; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none;
+  font-family: var(--serif); font-size: clamp(1.125rem, 0.9rem + 1vw, 1.5rem); font-weight: 600;
+  transition: border-color 0.2s ease;
+}
+.brief:hover { border-color: var(--teal2); }
+.brief::after {
+  content: ""; flex: none; width: 3rem; height: 3rem; border-radius: 50%;
+  background:
+    linear-gradient(var(--card), var(--card)) 50% 55% / 1.5px 1rem no-repeat,
+    linear-gradient(45deg, transparent 45%, var(--card) 45% 55%, transparent 55%) 38% 62% / 0.6rem 0.6rem no-repeat,
+    linear-gradient(-45deg, transparent 45%, var(--card) 45% 55%, transparent 55%) 62% 62% / 0.6rem 0.6rem no-repeat,
+    var(--teal2);
+  transition: transform 0.2s ease;
+}
+.brief:hover::after { transform: translateY(2px); }
+.todo {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  color: var(--risk);
+  background: var(--card);
+  border: 1px dashed var(--risk);
+  border-radius: 2px;
+  padding: 0.0625rem 0.375rem;
+}
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(1.25rem); } }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  @view-transition { navigation: none; }
+}
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <div class="bar-in">
+        <p class="wordmark"><a href="/"><span class="wm">Galinstan <span>Liquidity</span></span></a></p>
+        <div class="mid">
+        <nav>
+          <a href="/us-banks/intraday-liquidity">Intraday liquidity</a>
+          <a href="/us-banks/audit-evidence">Audit evidence</a>
+          <a href="/deployment">Deployment</a>
+        </nav>
+          <nav class="region" aria-label="Region"><a href="/us-banks" data-region="us" aria-current="true">US banks</a><a href="/eu-banks" data-region="eu">EU banks</a></nav>
+        </div>
+        <a class="pill" href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request">Request a demo</a>
+      </div>
+    </header>
+    <main>
+      <h1>US banks</h1>
+      <div class="prose">
+      <p class="sub">Liquidity coverage under Regulation WW, model validation, and reconciliation to what the bank reports.</p>
+      <p class="cta"><a href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request">Request a demo</a></p>
+      </div>
+      <div class="ticks" aria-hidden="true"></div>
+      <div class="cards">
+        <a class="card reveal" href="/us-banks/intraday-liquidity">Intraday liquidity</a>
+        <a class="card reveal" href="/us-banks/audit-evidence">Audit evidence</a>
+        <a class="card reveal" href="/deployment">Deployment</a>
+      </div>
+      <footer>
+        <p>Galinstan is built to run inside your perimeter and produce evidence.</p>
+        <p>Galinstan is a product of Banneker.</p>
+        <p><a href="mailto:partners@banneker.net?subject=Galinstan%20enquiry%20via%20galinstan.ai">partners@banneker.net</a></p>
+        <p><a href="/privacy">Privacy</a></p>
+        <p>© 2026 Banneker · banneker.net</p>
+      </footer>
+    </main>
+    <script>
+(function () {
+  var key = "galinstan-region", dismissed = "galinstan-region-banner", store;
+  try { store = window.localStorage; store.getItem(key); } catch (e) { return; }
+  document.querySelectorAll("a[data-region]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      try { store.setItem(key, a.getAttribute("data-region")); } catch (e) {}
+    });
+  });
+  var banner = document.getElementById("region-banner");
+  if (!banner) return;
+  var zone = "";
+  try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  if (store.getItem(key) || store.getItem(dismissed) || zone.indexOf("America/") !== 0) return;
+  banner.hidden = false;
+  banner.querySelector("button").addEventListener("click", function () {
+    banner.hidden = true;
+    try { store.setItem(dismissed, "1"); } catch (e) {}
+  });
+})();
+    </script>
+  </body>
+</html>

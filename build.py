@@ -134,9 +134,33 @@ nav a[aria-current="page"] { color: var(--ink); font-weight: 600; border-bottom-
   transition: background-color 0.2s ease;
 }
 .pill:hover { background: var(--card); }
+.mid { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 1.75rem; align-self: stretch; }
+.region { gap: 0; }
+.region a { padding-left: 0.625rem; padding-right: 0.625rem; }
+.region a + a { border-left: 1px solid var(--hair); }
+.region a[aria-current="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--teal2); }
+.banner:not([hidden]) {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem;
+  margin: 0 0 2rem; padding: 0.75rem 1rem; border: 1px solid var(--hair); border-radius: 8px; background: var(--card);
+}
+.banner p { margin: 0; }
+.banner a { font-weight: 600; color: var(--teal2); }
+.banner button {
+  font: inherit; font-size: 0.875rem; color: var(--muted); background: none;
+  border: 1px solid var(--hair); border-radius: 6px; padding: 0.25rem 0.75rem; cursor: pointer;
+}
+.doors { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
+.door {
+  display: block; height: 100%; padding: 1.25rem; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none;
+  transition: border-color 0.2s ease;
+}
+.door:hover { border-color: var(--teal2); }
+.door strong { display: block; font-family: var(--serif); font-size: 1.25rem; margin-bottom: 0.375rem; }
 @media (max-width: 44rem) {
   .bar-in { grid-template-columns: 1fr auto; column-gap: 0.75rem; }
-  .bar nav { grid-column: 1 / -1; grid-row: 2; gap: 0 1.125rem; font-size: 0.8125rem; }
+  .bar .mid { grid-column: 1 / -1; grid-row: 2; gap: 0 1.125rem; }
+  .bar nav { gap: 0 1.125rem; font-size: 0.8125rem; }
   .bar .wordmark { font-size: 1rem; gap: 0.5rem; }
   .bar .wordmark::before { width: 1.75rem; height: 1.75rem; font-size: 0.9375rem; }
   .pill { padding: 0.4375rem 0.75rem; font-size: 0.8125rem; }
@@ -305,12 +329,109 @@ PAGES = {
 }
 
 
-def _nav(current: str | None) -> str:
+# The US track (Spot's ask, 2026-10-30): the US pages under /us-banks, and Deployment shared.
+# Each US page names the lines it renders, in order; a line the EU page carries in the same
+# words is the EU page's approved line, not a copy of it.
+US_TRACK = "/us-banks"
+EU_TRACK = "/eu-banks"
+US_PAGES = {
+    "/us-banks/intraday-liquidity": {
+        "nav": "nav-1", "title": "il-meta-title", "description": "il-meta-description", "h1": "il-h1",
+        "sub": "il-sub", "cta": "il-cta",
+        "body": ("il-body-1", "il-body-2", "home-body-2", "us-il-figure", "il-body-4", "us-il-body-5"),
+    },
+    "/us-banks/audit-evidence": {
+        "nav": "nav-2", "title": "ae-meta-title", "description": "ae-meta-description", "h1": "ae-h1",
+        "sub": "ae-sub", "cta": "ae-cta", "body": ("ae-body-2", "us-ae-body-3", "us-ae-body-4"),
+    },
+}
+US_NAV = {**{path: spec["nav"] for path, spec in US_PAGES.items()}, "/deployment": "nav-3"}
+EU_NAV = {path: nav_id for path, (_, nav_id) in PAGES.items()}
+
+# Region, in Spot's order: the address decides, always. A page in a track has a counterpart in
+# the other one where the same page exists; anywhere else the switcher goes to the tracks.
+COUNTERPART = {
+    "/intraday-liquidity": "/us-banks/intraday-liquidity",
+    "/audit-evidence": "/us-banks/audit-evidence",
+    EU_TRACK: US_TRACK,
+}
+COUNTERPART |= {us: eu for eu, us in COUNTERPART.items()}
+EU_PATHS = {EU_TRACK, "/intraday-liquidity", "/audit-evidence"}
+
+
+def region_of(path: str | None) -> str | None:
+    if path and (path == US_TRACK or path.startswith(US_TRACK + "/")):
+        return "us"
+    return "eu" if path in EU_PATHS else None
+
+
+def switch_targets(path: str | None) -> dict[str, str]:
+    """Where the switcher's two links go from `path`: the same page in the other track where it
+    exists, this page for its own track, and the track pages otherwise."""
+    here = region_of(path)
+    other = COUNTERPART.get(path or "")
+    if here == "us":
+        return {"us": path, "eu": other or EU_TRACK}
+    if here == "eu":
+        return {"us": other or US_TRACK, "eu": path}
+    return {"us": US_TRACK, "eu": EU_TRACK}
+
+
+def _switcher(current: str | None) -> str:
+    """The "US banks | EU banks" switcher, in the header of every page. Plain links, so it works
+    with scripts off; with them on, a click also stores the choice for the root (`REGION_SCRIPT`)."""
+    t = page_copy.text
+    here = region_of(current)
     links = []
-    for path, (_, nav_id) in PAGES.items():
+    for region, href in switch_targets(current).items():
+        mark = ' aria-current="true"' if region == here else ""
+        links.append(f'<a href="{href}" data-region="{region}"{mark}>{_markup(t(f"region-{region}"))}</a>')
+    label = html.escape(t("region-label"), quote=True)
+    return f'          <nav class="region" aria-label="{label}">' + "".join(links) + "</nav>"
+
+
+# The visitor's own choice, and nothing else: no address, no location, no third party. A click
+# on the switcher (or on the banner's link) stores `us` or `eu` in this browser only. The banner
+# appears on the root alone, only when nothing is stored, nothing was dismissed and the browser's
+# own time zone is in the Americas; it suggests and never moves the visitor.
+REGION_SCRIPT = """    <script>
+(function () {
+  var key = "galinstan-region", dismissed = "galinstan-region-banner", store;
+  try { store = window.localStorage; store.getItem(key); } catch (e) { return; }
+  document.querySelectorAll("a[data-region]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      try { store.setItem(key, a.getAttribute("data-region")); } catch (e) {}
+    });
+  });
+  var banner = document.getElementById("region-banner");
+  if (!banner) return;
+  var zone = "";
+  try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  if (store.getItem(key) || store.getItem(dismissed) || zone.indexOf("America/") !== 0) return;
+  banner.hidden = false;
+  banner.querySelector("button").addEventListener("click", function () {
+    banner.hidden = true;
+    try { store.setItem(dismissed, "1"); } catch (e) {}
+  });
+})();
+    </script>
+"""
+
+# The root only, before anything is drawn: a choice the visitor stored takes them to that
+# track. An explicit address never consults it, and without a stored choice the root stays.
+ROOT_SCRIPT = """
+    <script>try { var r = localStorage.getItem("galinstan-region"); if (r === "us") location.replace("/us-banks"); else if (r === "eu") location.replace("/eu-banks"); } catch (e) {}</script>"""
+
+
+def _nav(current: str | None, pages: dict[str, str] | None = None) -> str:
+    pages = EU_NAV if pages is None else pages
+    if not pages:
+        return ""  # the root belongs to neither track, so its header carries the switcher alone
+    links = []
+    for path, nav_id in pages.items():
         mark = ' aria-current="page"' if path == current else ""
         links.append(f'<a href="{path}"{mark}>{_markup(page_copy.text(nav_id))}</a>')
-    return "        <nav>\n          " + "\n          ".join(links) + "\n        </nav>"
+    return "        <nav>\n          " + "\n          ".join(links) + "\n        </nav>\n"
 
 
 def _wordmark() -> str:
@@ -330,7 +451,9 @@ def _bar(current: str | None, link: bool = True) -> str:
     return f"""    <header class="bar">
       <div class="bar-in">
         <p class="wordmark">{mark}</p>
-{_nav(current)}
+        <div class="mid">
+{_nav(current, US_NAV if region_of(current) == "us" else ({} if current == "/" else EU_NAV))}{_switcher(current)}
+        </div>
         <a class="pill" href="{demo}">{_markup(page_copy.text("cta-demo"))}</a>
       </div>
     </header>"""
@@ -341,13 +464,13 @@ def _bar(current: str | None, link: bool = True) -> str:
 TICKS = '      <div class="ticks" aria-hidden="true"></div>\n'
 
 
-def _cards() -> str:
-    """The three stage 2 pages as cards on the home page. Titles only: they are the nav
+def _cards(pages: dict[str, str] | None = None) -> str:
+    """A track's pages as cards on its track page. Titles only: they are the nav
     labels, and a line of description under each would be new copy."""
     t = page_copy.text
     cards = "\n".join(
         f'        <a class="card reveal" href="{path}">{_markup(t(nav_id))}</a>'
-        for path, (_, nav_id) in PAGES.items()
+        for path, nav_id in (EU_NAV if pages is None else pages).items()
     )
     return f'      <div class="cards">\n{cards}\n      </div>\n'
 
@@ -465,28 +588,107 @@ def render_stage_2(path: str) -> str:
       </div>
 {_brief_link(path)}{_footer()}
     </main>
-  </body>
+{REGION_SCRIPT}  </body>
+</html>
+"""
+
+
+def render_us_page(path: str) -> str:
+    spec = US_PAGES[path]
+    t = page_copy.text
+    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in spec["body"])
+    return f"""{_head(t(spec["title"]), path, t(spec["description"]))}
+  <body>
+{_bar(path)}
+    <main>
+      <h1>{_markup(t(spec["h1"]))}</h1>
+      <div class="prose">
+      <p class="sub">{_markup(t(spec["sub"]))}</p>
+{body}
+      </div>
+      <div class="prose">
+      <p class="cta">{_mail_link("cta-demo-target", spec["cta"])}</p>
+      </div>
+{_footer()}
+    </main>
+{REGION_SCRIPT}  </body>
+</html>
+"""
+
+
+def render_us_track() -> str:
+    """The US track: its lead is the US door's line, then its pages."""
+    t = page_copy.text
+    lead = t("door-us").split("** ", 1)[1]
+    return f"""{_head(t("us-meta-title"), US_TRACK, lead)}
+  <body>
+{_bar(US_TRACK)}
+    <main>
+      <h1>{_markup(t("region-us"))}</h1>
+      <div class="prose">
+      <p class="sub">{_markup(lead)}</p>
+      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
+      </div>
+{TICKS}{_cards(US_NAV)}{_footer()}
+    </main>
+{REGION_SCRIPT}  </body>
 </html>
 """
 
 
 def render_index() -> str:
+    """The universal home page (draft v2): the speed and value argument, then a door to each track."""
+    t = page_copy.text
+    body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("home-body-1", "home-body-2", "home-body-3"))
+    doors = "\n".join(
+        f'        <li><a class="door" href="{href}">{_markup(t(f"door-{region}"))}</a></li>'
+        for region, href in (("us", US_TRACK), ("eu", EU_TRACK))
+    )
+    banner = f"""      <div class="banner" id="region-banner" hidden>
+        <p>{_markup(t("region-banner"))} <a href="{US_TRACK}" data-region="us">{_markup(t("region-us"))}</a></p>
+        <button type="button">{_markup(t("region-dismiss"))}</button>
+      </div>
+"""
+    return f"""{_head(t("home-meta-title"), "/", t("home-meta-description"), extra=ROOT_SCRIPT + render_structured_data())}
+  <body>
+{_bar("/", link=False)}
+    <main>
+{banner}      <h1>{_markup(t("home-h1"))}</h1>
+{HERO_IMG}      <div class="prose">
+{body}
+      </div>
+      <h2>{_markup(t("doors-h2"))}</h2>
+      <ul class="doors">
+{doors}
+      </ul>
+      <div class="prose">
+      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
+      </div>
+{_footer()}
+    </main>
+{REGION_SCRIPT}  </body>
+</html>
+"""
+
+
+def render_eu_track() -> str:
+    """The EU track: the home page as it stood until 2026-10-30, moved here unchanged."""
     t = page_copy.text
     # `il-body-1` is the intraday page's approved line, shown here as it stands (Cowork's ask 175.4).
     body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2", "il-body-1"))
     body += "\n" + _roles() + f"      <p>{_markup(t('body-3'))}</p>"
-    return f"""{_head(t("meta-title"), "/", t("meta-description"), extra=render_structured_data())}
+    return f"""{_head(t("meta-title"), EU_TRACK, t("meta-description"))}
   <body>
-{_bar(None, link=False)}
+{_bar(EU_TRACK)}
     <main>
       <h1>{_markup(t("headline"))}</h1>
 {HERO_IMG}      <div class="prose">
 {body}
       <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
       </div>
-{TICKS}{_cards()}{_brief_link("/")}{_footer()}
+{TICKS}{_cards()}{_brief_link(EU_TRACK)}{_footer()}
     </main>
-  </body>
+{REGION_SCRIPT}  </body>
 </html>
 """
 
@@ -508,7 +710,7 @@ def render_privacy() -> str:
         <p>{_markup(t("legal-footer"))}</p>
       </footer>
     </main>
-  </body>
+{REGION_SCRIPT}  </body>
 </html>
 """
 
@@ -552,7 +754,7 @@ ASSETS = ROOT / "assets"
 BRIEF_PDF = ASSETS / "galinstan-brief.pdf"
 BRIEF_LOCK = ASSETS / "galinstan-brief.lock.json"
 BRIEF_PATH = "/galinstan-brief.pdf"
-BRIEF_LINKED_FROM = ("/", "/audit-evidence", "/deployment")
+BRIEF_LINKED_FROM = (EU_TRACK, "/audit-evidence", "/deployment")
 
 BRIEF_CSS = """\
 @page {
@@ -730,6 +932,9 @@ def _content_date(render) -> str | None:
 # against this map by `tools/guards.py`, so the three cannot drift apart again.
 SITEMAP = {
     "/": lambda: render_index(),
+    US_TRACK: lambda: render_us_track(),
+    **{path: (lambda p=path: render_us_page(p)) for path in US_PAGES},
+    EU_TRACK: lambda: render_eu_track(),
     **{path: (lambda p=path: render_stage_2(p)) for path in PAGES},
     "/privacy": lambda: render_privacy(),
     BRIEF_PATH: lambda: render_brief_source(),
@@ -758,6 +963,9 @@ def render_sitemap() -> str:
 # The allowlist. A file reaches galinstan.ai if and only if it is named here.
 ALLOWLIST = {
     "index.html": render_index,
+    f"{US_TRACK[1:]}.html": render_us_track,
+    **{f"{path[1:]}.html": (lambda p=path: render_us_page(p)) for path in US_PAGES},
+    f"{EU_TRACK[1:]}.html": render_eu_track,
     **{f"{path[1:]}.html": (lambda p=path: render_stage_2(p)) for path in PAGES},
     "privacy.html": render_privacy,
     "404.html": render_404,
@@ -774,6 +982,7 @@ def build(target: pathlib.Path) -> None:
         shutil.rmtree(target)
     target.mkdir(parents=True)
     for name, render in ALLOWLIST.items():
+        (target / name).parent.mkdir(parents=True, exist_ok=True)
         content = render()
         if isinstance(content, bytes):
             (target / name).write_bytes(content)
@@ -796,7 +1005,7 @@ def main() -> int:
         match, mismatch, errors = filecmp.cmpfiles(
             scratch, PUBLIC, list(ALLOWLIST), shallow=False
         )
-        stray = sorted(p.name for p in PUBLIC.iterdir()) if PUBLIC.exists() else []
+        stray = sorted(p.relative_to(PUBLIC).as_posix() for p in PUBLIC.rglob("*") if p.is_file()) if PUBLIC.exists() else []
         unexpected = [n for n in stray if n not in ALLOWLIST]
         shutil.rmtree(scratch)
         problems = sorted(mismatch + errors)

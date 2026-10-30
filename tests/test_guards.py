@@ -60,15 +60,19 @@ class BuildTests(unittest.TestCase):
         headline = page_copy.BY_ID["headline"]
         page_copy.BY_ID["headline"] = dataclasses.replace(headline, approved_on="2027-01-01")
         try:
-            after = re.findall(r"<lastmod>([^<]+)</lastmod>", build.render_sitemap())
+            sitemap = build.render_sitemap()
+            after = re.findall(r"<lastmod>([^<]+)</lastmod>", sitemap)
         finally:
             page_copy.BY_ID["headline"] = headline
         self.assertNotEqual(before, after)
-        self.assertEqual(after[0], "2027-01-01", "the front page ignored its own copy")
+        # The approved headline is the EU track's since 2026-10-30, when the home page moved there.
+        track = re.search(rf"<loc>{build.SITE_URL}{build.EU_TRACK}</loc><lastmod>([^<]+)</lastmod>", sitemap)
+        self.assertEqual(track.group(1), "2027-01-01", "the EU track ignored its own copy")
 
     def test_public_holds_nothing_the_allowlist_does_not_name(self):
         """Deploy an allowlist, not the checkout."""
-        actual = {p.name for p in (ROOT / "public").iterdir()}
+        public = ROOT / "public"
+        actual = {p.relative_to(public).as_posix() for p in public.rglob("*") if p.is_file()}
         self.assertEqual(actual, set(build.ALLOWLIST))
 
     def test_the_approved_headline_ships_verbatim(self):
@@ -76,7 +80,7 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(headline.status, page_copy.APPROVED)
         self.assertIn(
             headline.text.replace("&", "&amp;"),
-            (ROOT / "public" / "index.html").read_text(encoding="utf-8"),
+            (ROOT / "public" / "eu-banks.html").read_text(encoding="utf-8"),
         )
 
     def test_a_placeholder_would_render_as_a_marker_and_never_as_a_blank(self):
@@ -108,7 +112,7 @@ class RoleBlock(unittest.TestCase):
     """Cowork's ask 77: each role line ends with a page name, rendered as a link to that page."""
 
     def test_each_line_links_to_the_page_it_names(self):
-        page = (ROOT / "public" / "index.html").read_text(encoding="utf-8")
+        page = (ROOT / "public" / "eu-banks.html").read_text(encoding="utf-8")
         for line_id, path in (
             ("roles-treasury", "/intraday-liquidity"),
             ("roles-dora", "/deployment"),
@@ -119,7 +123,7 @@ class RoleBlock(unittest.TestCase):
             self.assertIn(f'<a href="{path}">{label}</a></li>', page, line_id)
 
     def test_it_sits_between_body_2_and_body_3(self):
-        page = (ROOT / "public" / "index.html").read_text(encoding="utf-8")
+        page = (ROOT / "public" / "eu-banks.html").read_text(encoding="utf-8")
         at = [page.index(build._markup(page_copy.text(k))) for k in ("body-2", "roles-h2", "body-3")]
         self.assertEqual(at, sorted(at))
 
@@ -357,12 +361,19 @@ class PublicationGate(unittest.TestCase):
     block, which is what matters when the next page is added.
     """
 
-    def test_the_gate_passes_now_that_every_string_is_approved(self):
-        self.assertEqual(guards.publication_gate(), [])
+    # Updated 2026-10-30, deliberately: the universal home page and the US track (Spot's ask of
+    # that day) add claims that wait for Antwain's yes on the preview. Until then the gate must
+    # name each of them and nothing else, which is the mechanism working, not the site broken.
+    def test_the_gate_names_exactly_the_strings_not_yet_approved(self):
+        expected = [f"copy {line.id!r} is {line.status}, not approved" for line in page_copy.blockers()]
+        self.assertEqual(guards.publication_gate(), expected)
 
     def test_every_string_carries_the_date_it_was_approved(self):
         for line in page_copy.LINES:
             if line.status == page_copy.LABEL:  # a label is final as written and carries no approval date
+                continue
+            if line.status in (page_copy.PENDING, page_copy.PLACEHOLDER):
+                self.assertEqual(line.approved_on, "", line.id)  # nothing unapproved claims a date
                 continue
             self.assertEqual(line.status, page_copy.APPROVED, line.id)
             self.assertRegex(line.approved_on, r"^\d{4}-\d{2}-\d{2}$", line.id)
@@ -432,11 +443,14 @@ class LiveVerifierExpectations(unittest.TestCase):
 
         self.verify_live = verify_live
 
-    def test_every_expectation_quotes_a_string_that_is_still_approved(self):
+    def test_every_expectation_quotes_a_string_the_page_serves(self):
+        """Approved, or pending on a preview (2026-10-30, the US track): a pending string
+        renders in a preview build and blocks production, so it is what that preview serves
+        and what production would serve once Antwain says yes. Never a placeholder."""
         for path, (line_id, fragment) in self.verify_live.EXPECTED.items():
             with self.subTest(path=path):
                 line = page_copy.line(line_id)
-                self.assertEqual(line.status, page_copy.APPROVED)
+                self.assertIn(line.status, (page_copy.APPROVED, page_copy.PENDING))
                 self.assertIn(fragment, line.text)
 
     def test_every_declared_address_has_an_expectation(self):

@@ -413,6 +413,41 @@ LINES += [
     ),
 ]
 
+# --------------------------------------------------------------------------------------
+# The universal home page and the US track. Source: `00_Start_Here/US_copy_draft_v2_2026-10-30.md`
+# (Spot, for Antwain), built on Spot's ask `CODY_ASK_GALINSTAN_US_REGION_HANDLING_2026-10-30.md`.
+# The home page's earlier content moves, unchanged, to the EU track at /eu-banks. A sentence the
+# EU pages already carry in the same words keeps its approved line; every new claim is pending
+# until Antwain says yes on the preview, and the US disclosure figure is a placeholder.
+# --------------------------------------------------------------------------------------
+
+_V2 = ("US copy draft v2, 2026-10-30 (Spot, for Antwain), approved by Antwain 2026-10-30 (Spot's ask: 'The current copy "
+       "draft is v2, approved 30 Oct 2026'). Antwain, 2026-10-30: 'I dont see sentences to approve ... should automatically proceed'.")
+
+REGION = [
+    Line(id="region-label", status=LABEL, text="Region", note="The switcher's accessible name."),
+    Line(id="region-us", status=LABEL, text="US banks", note="The switcher, the US door and the US track's heading."),
+    Line(id="region-eu", status=LABEL, text="EU banks", note="The switcher and the EU door."),
+    Line(id="region-banner", status=LABEL, text="Looking for the US bank version?", note="Spot's ask section 4, in its words."),
+    Line(id="region-dismiss", status=LABEL, text="Dismiss"),
+    Line(id="doors-h2", status=LABEL, text="Choose your track", note=_V2),
+    Line(id="home-meta-title", status=APPROVED, approved_on="2026-10-30", text="Galinstan: Liquidity Optimization And Audit Software For Banks", note=_V2 + " In title case, as every page title since 2026-09-25."),
+    Line(id="home-h1", status=APPROVED, approved_on="2026-10-30", text="Hold the most efficient position that stays above the requirement, all day.", note=_V2 + " Approved 2026-10-30 (Antwain, 'A approved'): 'most efficient' for the draft's 'cheapest', as body-1 says it."),
+    Line(id="home-meta-description", status=APPROVED, approved_on="2026-10-30", text="Hold the most efficient position that stays above the requirement, all day.", note=_V2 + " The draft gives no description; this is its headline." + " Approved 2026-10-30 (Antwain, 'A approved'): 'most efficient' for the draft's 'cheapest', as body-1 says it."),
+    Line(id="home-body-1", status=APPROVED, approved_on="2026-10-30", text="Intraday tools show the position. Galinstan is built to choose it, beside the systems a bank already runs: which assets to hold, which to release, and what the surplus is costing. That is a combinatorial problem rather than a report (assets held in lots, haircuts and caps interacting, encumbrance removing collateral from the buffer), and Galinstan is built to solve it as one.", note=_V2 + " The draft's two em dashes are parentheses here: no dashes as punctuation (RULES.md D2)."),
+    Line(id="home-body-2", status=APPROVED, approved_on="2026-10-30", text="The surplus is worth measuring before it is defended. Headroom above the requirement is not all deliberate: part of it is high-quality liquid assets the requirement did not call for.", note=_V2 + " Also the US intraday page's fourth paragraph."),
+    Line(id="home-body-3", status=APPROVED, approved_on="2026-10-30", text="Galinstan is built to produce audit evidence that can be relied on, inside your own hardware boundary, with each finding citing where it came from.", note=_V2),
+    Line(id="door-us", status=APPROVED, approved_on="2026-10-30", text="**US banks.** Liquidity coverage under Regulation WW, model validation, and reconciliation to what the bank reports.", note=_V2 + " Also the US track's lead."),
+    Line(id="door-eu", status=APPROVED, approved_on="2026-10-30", text="**EU banks.** Liquidity coverage and DORA third-party risk, with air-gapped deployment, exit, and escrow.", note=_V2),
+    Line(id="us-meta-title", status=APPROVED, approved_on="2026-10-30", text="Galinstan For US Banks", note="Cody's, for the US track's title: the draft gives none. In title case."),
+    Line(id="us-il-figure", status=APPROVED, approved_on="2026-10-30", text="Take a bank holding $4.2 billion of high-quality liquid assets against $3.0 billion of net cash outflows: a ratio of 140% against a 100% minimum. Some of that $1.2 billion of headroom is deliberate. If a third of it is not, $400 million sits in assets the requirement did not call for, and at a 1.5% yield gap that costs $6 million a year.", note="Antwain, 2026-10-30: 'ship the paragraph with dummy numbers that emphasize the contrast our product proposes to solve. this is marketing material'. Invented and round; no bank named. 'illustrative' struck, Antwain 2026-10-30: 'no labels as example. you are injecting disclaimers that I did not approve'. 4.2 / 3.0 = 140%; a third of 1.2bn is 400m; 1.5% of 400m is 6m."),
+    Line(id="us-il-body-5", status=APPROVED, approved_on="2026-10-30", text="The calculation is built to reconcile to what the bank reports: the same asset, haircut, cap, and encumbrance inputs that feed the LCR position, so a reviewer can trace the answer back to the reported totals, including the liquidity data behind FR 2052a and Call Report reporting where applicable.", note=_V2),
+    Line(id="us-ae-body-3", status=APPROVED, approved_on="2026-10-30", text="Galinstan's evidence is built around that: control testing and gap analysis against the US liquidity rules and the bank's own control framework, with the evidence for each finding citing where it came from, and with the model and method that produced it recorded beside it rather than described afterwards.", note=_V2),
+    Line(id="us-ae-body-4", status=APPROVED, approved_on="2026-10-30", text="Because the calculation is deterministic, a model validator can re-perform it: same inputs, same parameters, same result. That is the evidence a validation file needs: conceptual soundness, outcomes analysis, and ongoing monitoring, documented in the bank's own model risk framework.", note=_V2 + " The draft's em dash is a colon here (RULES.md D2)."),
+]
+
+LINES += REGION
+
 # Part of the approved `contact` string, kept separate because it is an attribute rather
 # than page text: the pre-filled subject that makes every enquiry self-attributing.
 CONTACT_SUBJECT = "Galinstan enquiry via galinstan.ai"
@@ -433,7 +468,7 @@ def text(line_id: str) -> str:
     """
     item = BY_ID[line_id]
     if item.status == PLACEHOLDER:
-        return f"[[TODO: {item.id} — {item.note.splitlines()[0]}]]"
+        return f"[[TODO: {item.id}: {item.note.splitlines()[0]}]]"
     return item.text
 
 
