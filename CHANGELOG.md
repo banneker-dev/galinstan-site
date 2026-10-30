@@ -2,9 +2,10 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
-## [Unreleased] — a universal home page, with a US track and an EU track
+## [site-2026.10.7] — a universal home page, with a US track and an EU track
 
-Preview only: the new claims are pending until Antwain says yes on the preview, and production is blocked until then.
+Draft v2 as Antwain approved it on 2026-10-30, with "most efficient" for "cheapest" in the headline, and the US
+intraday figures he asked for until the real figures replace them.
 
 ### Added
 - **A universal home page at `/`** from Spot's US copy draft v2 (2026-10-30): the speed and value argument, then a
