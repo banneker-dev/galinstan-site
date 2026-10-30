@@ -105,7 +105,11 @@ def fetch(url: str, accept: str = "text/html,application/xhtml+xml") -> str:
 # the front page's headline on every URL — so /privacy.html failed a check it could never
 # have passed. It was caught on a preview deploy, which is the argument for running one.
 EXPECTED = {
-    "/": ("headline", "runs inside your perimeter, not ours"),
+    "/": ("home-h1", "stays above the requirement, all day"),
+    "/eu-banks": ("headline", "runs inside your perimeter, not ours"),
+    "/us-banks": ("door-us", "Liquidity coverage under Regulation WW"),
+    "/us-banks/intraday-liquidity": ("us-il-body-5", "behind FR 2052a and Call Report"),
+    "/us-banks/audit-evidence": ("us-ae-body-4", "a model validator can re-perform it"),
     "/intraday-liquidity": ("il-h1", "are two different problems"),
     "/audit-evidence": ("ae-h1", "never leaves the institution that produced it"),
     "/deployment": ("dep-body-1", "for licensing, not for telemetry"),
