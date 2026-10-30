@@ -2,6 +2,13 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.10.10] — the privacy page's analytics and cookies paragraph
+
+### Changed
+- **`/privacy`:** the "Analytics." paragraph replaced by "Analytics and cookies.", in the wording Antwain approved
+  (Cowork's ask 202, addendum, 10:50 ET). It should have shipped with `site-2026.10.9`; the addendum landed after that
+  build began. Nothing else on the page changes.
+
 ## [site-2026.10.9] — two funnels, the region served first
 
 ### Changed
