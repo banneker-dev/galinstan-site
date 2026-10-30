@@ -315,9 +315,9 @@ def mail_href(line_id: str) -> str:
     return f"mailto:{item.text}?subject={subject}"
 
 
-def _mail_link(target_id: str, label_id: str | None = None) -> str:
+def _mail_link(target_id: str, label_id: str | None = None, attrs: str = "") -> str:
     label = page_copy.text(label_id or target_id)
-    return f'<a href="{html.escape(mail_href(target_id))}">{_markup(label)}</a>'
+    return f'<a href="{html.escape(mail_href(target_id))}"{attrs}>{_markup(label)}</a>'
 
 
 # The stage 2 pages, in nav order. The address is the file's name without `.html`, which
@@ -377,6 +377,41 @@ def switch_targets(path: str | None) -> dict[str, str]:
     return {"us": US_TRACK, "eu": EU_TRACK}
 
 
+# Asset labels for measurement (Spot's ask of 2026-10-30, `CODY_ASK_GOOGLE_ANALYTICS_LABELS`): Cody names each
+# measurable thing, Cowork's tag reads the names. They are inert attributes: nothing here sends, stores or fetches
+# anything, and a page without the tag behaves exactly as before. Each label belongs to a canonical address, never to
+# a visitor. `docs/ANALYTICS_LABELS.md` is the table Cowork maps its tags to.
+PAGE_LABELS = {
+    "/": ("home", "all"),
+    "/us-banks": ("us-track", "us"),
+    "/us-banks/intraday-liquidity": ("us-intraday-liquidity", "us"),
+    "/us-banks/audit-evidence": ("us-audit-evidence", "us"),
+    "/eu-banks": ("eu-track", "eu"),
+    "/intraday-liquidity": ("eu-intraday-liquidity", "eu"),
+    "/audit-evidence": ("eu-audit-evidence", "eu"),
+    "/deployment": ("deployment", "shared"),
+    "/privacy": ("privacy", "shared"),
+}
+
+
+def _body(path: str) -> str:
+    asset, region = PAGE_LABELS[path]
+    return f'<body data-asset="{asset}" data-asset-region="{region}" data-page="{path}">'
+
+
+def asset_attrs(asset: str, event: str, **params: str) -> str:
+    """The attributes one measurable element carries: its label, the event the tag sends for it, and the event's
+    parameters, each a fixed value from the page's address. `destination_track` becomes `data-destination-track`."""
+    out = f' data-asset="{asset}" data-event="{event}"'
+    for name, value in params.items():
+        out += f' data-{name.replace("_", "-")}="{html.escape(value, quote=True)}"'
+    return out
+
+
+def _demo_attrs(path: str, where: str) -> str:
+    return asset_attrs(f"demo-request-{where}", "demo_request_click", landing_page=path)
+
+
 def _switcher(current: str | None) -> str:
     """The "US banks | EU banks" switcher, in the header of every page. Plain links, so it works
     with scripts off; with them on, a click also stores the choice for the root (`REGION_SCRIPT`)."""
@@ -385,7 +420,8 @@ def _switcher(current: str | None) -> str:
     links = []
     for region, href in switch_targets(current).items():
         mark = ' aria-current="true"' if region == here else ""
-        links.append(f'<a href="{href}" data-region="{region}"{mark}>{_markup(t(f"region-{region}"))}</a>')
+        labels = asset_attrs(f"switcher-to-{region}", "region_switch", destination_track=region, source_page=current or "/")
+        links.append(f'<a href="{href}" data-region="{region}"{labels}{mark}>{_markup(t(f"region-{region}"))}</a>')
     label = html.escape(t("region-label"), quote=True)
     return f'          <nav class="region" aria-label="{label}">' + "".join(links) + "</nav>"
 
@@ -409,6 +445,8 @@ REGION_SCRIPT = """    <script>
   try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
   if (store.getItem(key) || store.getItem(dismissed) || zone.indexOf("America/") !== 0) return;
   banner.hidden = false;
+  // For measurement only: says the banner was shown, to whatever listens; changes nothing on the page.
+  document.dispatchEvent(new CustomEvent("galinstan:asset", { detail: { event: "region_banner", asset: "root-banner-view", banner_action: "view", source_page: "/" } }));
   banner.querySelector("button").addEventListener("click", function () {
     banner.hidden = true;
     try { store.setItem(dismissed, "1"); } catch (e) {}
@@ -454,7 +492,7 @@ def _bar(current: str | None, link: bool = True) -> str:
         <div class="mid">
 {_nav(current, US_NAV if region_of(current) == "us" else ({} if current == "/" else EU_NAV))}{_switcher(current)}
         </div>
-        <a class="pill" href="{demo}">{_markup(page_copy.text("cta-demo"))}</a>
+        <a class="pill" href="{demo}"{_demo_attrs(current or "/", "header")}>{_markup(page_copy.text("cta-demo"))}</a>
       </div>
     </header>"""
 
@@ -575,7 +613,7 @@ def render_stage_2(path: str) -> str:
     bodies = [i.id for i in page_copy.LINES if re.fullmatch(rf"{prefix}-body-\d+", i.id)]
     body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in bodies)
     return f"""{_head(t(f"{prefix}-meta-title"), path, t(f"{prefix}-meta-description"))}
-  <body>
+  {_body(path)}
 {_bar(path)}
     <main>
       <h1>{_markup(t(f"{prefix}-h1"))}</h1>
@@ -584,7 +622,7 @@ def render_stage_2(path: str) -> str:
 {body}
       </div>
       <div class="prose">
-      <p class="cta">{_mail_link("cta-demo-target", f"{prefix}-cta")}</p>
+      <p class="cta">{_mail_link("cta-demo-target", f"{prefix}-cta", _demo_attrs(path, "body"))}</p>
       </div>
 {_brief_link(path)}{_footer()}
     </main>
@@ -598,7 +636,7 @@ def render_us_page(path: str) -> str:
     t = page_copy.text
     body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in spec["body"])
     return f"""{_head(t(spec["title"]), path, t(spec["description"]))}
-  <body>
+  {_body(path)}
 {_bar(path)}
     <main>
       <h1>{_markup(t(spec["h1"]))}</h1>
@@ -607,7 +645,7 @@ def render_us_page(path: str) -> str:
 {body}
       </div>
       <div class="prose">
-      <p class="cta">{_mail_link("cta-demo-target", spec["cta"])}</p>
+      <p class="cta">{_mail_link("cta-demo-target", spec["cta"], _demo_attrs(path, "body"))}</p>
       </div>
 {_footer()}
     </main>
@@ -621,13 +659,13 @@ def render_us_track() -> str:
     t = page_copy.text
     lead = t("door-us").split("** ", 1)[1]
     return f"""{_head(t("us-meta-title"), US_TRACK, lead)}
-  <body>
+  {_body(US_TRACK)}
 {_bar(US_TRACK)}
     <main>
       <h1>{_markup(t("region-us"))}</h1>
       <div class="prose">
       <p class="sub">{_markup(lead)}</p>
-      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
+      <p class="cta">{_mail_link("cta-demo-target", "cta-demo", _demo_attrs(US_TRACK, "body"))}</p>
       </div>
 {TICKS}{_cards(US_NAV)}{_footer()}
     </main>
@@ -641,16 +679,18 @@ def render_index() -> str:
     t = page_copy.text
     body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("home-body-1", "home-body-2", "home-body-3"))
     doors = "\n".join(
-        f'        <li><a class="door" href="{href}">{_markup(t(f"door-{region}"))}</a></li>'
+        f'        <li><a class="door" href="{href}"{asset_attrs(f"home-door-{region}", "door_click", destination_track=region, source_page="/")}>{_markup(t(f"door-{region}"))}</a></li>'
         for region, href in (("us", US_TRACK), ("eu", EU_TRACK))
     )
-    banner = f"""      <div class="banner" id="region-banner" hidden>
-        <p>{_markup(t("region-banner"))} <a href="{US_TRACK}" data-region="us">{_markup(t("region-us"))}</a></p>
-        <button type="button">{_markup(t("region-dismiss"))}</button>
+    click = asset_attrs("root-banner-click", "region_banner", banner_action="click", destination_track="us", source_page="/")
+    dismiss = asset_attrs("root-banner-dismiss", "region_banner", banner_action="dismiss", source_page="/")
+    banner = f"""      <div class="banner" id="region-banner" data-asset="root-banner" hidden>
+        <p>{_markup(t("region-banner"))} <a href="{US_TRACK}" data-region="us"{click}>{_markup(t("region-us"))}</a></p>
+        <button type="button"{dismiss}>{_markup(t("region-dismiss"))}</button>
       </div>
 """
     return f"""{_head(t("home-meta-title"), "/", t("home-meta-description"), extra=ROOT_SCRIPT + render_structured_data())}
-  <body>
+  {_body("/")}
 {_bar("/", link=False)}
     <main>
 {banner}      <h1>{_markup(t("home-h1"))}</h1>
@@ -662,7 +702,7 @@ def render_index() -> str:
 {doors}
       </ul>
       <div class="prose">
-      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
+      <p class="cta">{_mail_link("cta-demo-target", "cta-demo", _demo_attrs("/", "body"))}</p>
       </div>
 {_footer()}
     </main>
@@ -678,13 +718,13 @@ def render_eu_track() -> str:
     body = "\n".join(f"      <p>{_markup(t(k))}</p>" for k in ("body-1", "body-2", "il-body-1"))
     body += "\n" + _roles() + f"      <p>{_markup(t('body-3'))}</p>"
     return f"""{_head(t("meta-title"), EU_TRACK, t("meta-description"))}
-  <body>
+  {_body(EU_TRACK)}
 {_bar(EU_TRACK)}
     <main>
       <h1>{_markup(t("headline"))}</h1>
 {HERO_IMG}      <div class="prose">
 {body}
-      <p class="cta">{_mail_link("cta-demo-target", "cta-demo")}</p>
+      <p class="cta">{_mail_link("cta-demo-target", "cta-demo", _demo_attrs(EU_TRACK, "body"))}</p>
       </div>
 {TICKS}{_cards()}{_brief_link(EU_TRACK)}{_footer()}
     </main>
@@ -696,8 +736,8 @@ def render_eu_track() -> str:
 def render_privacy() -> str:
     t = page_copy.text
     return f"""{_head(t("privacy-meta-title"), "/privacy")}
-  <body>
-{_bar(None)}
+  {_body("/privacy")}
+{_bar("/privacy")}
     <main>
       <h1>{_markup(t("privacy-meta-title"))}</h1>
       <div class="prose">

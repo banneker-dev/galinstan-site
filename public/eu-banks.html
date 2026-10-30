@@ -235,7 +235,7 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
 }
     </style>
   </head>
-  <body>
+  <body data-asset="eu-track" data-asset-region="eu" data-page="/eu-banks">
     <header class="bar">
       <div class="bar-in">
         <p class="wordmark"><a href="/"><span class="wm">Galinstan <span>Liquidity</span></span></a></p>
@@ -245,9 +245,9 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
           <a href="/audit-evidence">Audit evidence</a>
           <a href="/deployment">Deployment</a>
         </nav>
-          <nav class="region" aria-label="Region"><a href="/us-banks" data-region="us">US banks</a><a href="/eu-banks" data-region="eu" aria-current="true">EU banks</a></nav>
+          <nav class="region" aria-label="Region"><a href="/us-banks" data-region="us" data-asset="switcher-to-us" data-event="region_switch" data-destination-track="us" data-source-page="/eu-banks">US banks</a><a href="/eu-banks" data-region="eu" data-asset="switcher-to-eu" data-event="region_switch" data-destination-track="eu" data-source-page="/eu-banks" aria-current="true">EU banks</a></nav>
         </div>
-        <a class="pill" href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request">Request a demo</a>
+        <a class="pill" href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request" data-asset="demo-request-header" data-event="demo_request_click" data-landing-page="/eu-banks">Request a demo</a>
       </div>
     </header>
     <main>
@@ -267,7 +267,7 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
         <li><strong>Internal and external audit.</strong> Control testing and gap analysis evidence, built to be produced inside the institution, with each finding citing where it came from. <a href="/audit-evidence">Audit evidence</a></li>
       </ul>
       <p>We want to hear from group treasurers, heads of ALM and DORA programme leads about how this work gets done today, and what it costs. If that is your remit, write to us.</p>
-      <p class="cta"><a href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request">Request a demo</a></p>
+      <p class="cta"><a href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request" data-asset="demo-request-body" data-event="demo_request_click" data-landing-page="/eu-banks">Request a demo</a></p>
       </div>
       <div class="ticks" aria-hidden="true"></div>
       <div class="cards">
@@ -299,6 +299,8 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
   try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
   if (store.getItem(key) || store.getItem(dismissed) || zone.indexOf("America/") !== 0) return;
   banner.hidden = false;
+  // For measurement only: says the banner was shown, to whatever listens; changes nothing on the page.
+  document.dispatchEvent(new CustomEvent("galinstan:asset", { detail: { event: "region_banner", asset: "root-banner-view", banner_action: "view", source_page: "/" } }));
   banner.querySelector("button").addEventListener("click", function () {
     banner.hidden = true;
     try { store.setItem(dismissed, "1"); } catch (e) {}

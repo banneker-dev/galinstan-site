@@ -2,6 +2,15 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.10.8] — asset labels for measurement
+
+### Added
+- **A label on every measurable asset** (Spot's ask of 2026-10-30, Cody defines the labels, Cowork applies the tags):
+  each page's `<body>`, the home page's doors, the switcher, the banner's click and dismiss, and both demo-request
+  links, each with its event name and parameters. The banner's view is a `galinstan:asset` event on `document`. The
+  labels send, store and fetch nothing; no tag, measurement ID or cookie is added. `docs/ANALYTICS_LABELS.md` is the
+  table.
+
 ## [site-2026.10.7] — a universal home page, with a US track and an EU track
 
 Draft v2 as Antwain approved it on 2026-10-30, with "most efficient" for "cheapest" in the headline, and the US

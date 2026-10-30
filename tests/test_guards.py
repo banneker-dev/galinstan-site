@@ -578,3 +578,36 @@ class StructuredData(unittest.TestCase):
         self.assertEqual(data["description"], page_copy.text("meta-description"))
         self.assertEqual(data["publisher"]["name"], page_copy.text("ld-publisher"))
         self.assertEqual(data["url"], f"{build.SITE_URL}/")
+
+
+class AssetLabels(unittest.TestCase):
+    """Spot's ask of 2026-10-30: one stable label per measurable asset, tied to a canonical address, read by a tag
+    Cowork applies. Labels observe; they send, store and fetch nothing."""
+
+    def _page(self, path):
+        name = "index.html" if path == "/" else f"{path[1:]}.html"
+        return (ROOT / "public" / name).read_text(encoding="utf-8")
+
+    def test_every_declared_page_carries_its_own_label(self):
+        pages = [p for p in build.SITEMAP if p != build.BRIEF_PATH]
+        self.assertEqual(set(pages), set(build.PAGE_LABELS))
+        labels = [asset for asset, _ in build.PAGE_LABELS.values()]
+        self.assertEqual(len(labels), len(set(labels)))
+        for path in pages:
+            asset, region = build.PAGE_LABELS[path]
+            self.assertIn(f'<body data-asset="{asset}" data-asset-region="{region}" data-page="{path}">', self._page(path))
+
+    def test_the_home_page_labels_its_doors_switcher_banner_and_demo_links(self):
+        page = self._page("/")
+        for asset in ("home-door-us", "home-door-eu", "switcher-to-us", "switcher-to-eu", "root-banner",
+                      "root-banner-click", "root-banner-dismiss", "demo-request-header", "demo-request-body"):
+            self.assertEqual(page.count(f'data-asset="{asset}"'), 1, asset)
+        self.assertIn('"root-banner-view"', page)
+
+    def test_parameters_name_addresses_and_tracks_only(self):
+        values = set()
+        for path in build.PAGE_LABELS:
+            values |= set(re.findall(r'data-(?:destination-track|source-page|landing-page|banner-action)="([^"]*)"', self._page(path)))
+        allowed = set(build.PAGE_LABELS) | {"us", "eu", "click", "dismiss"}
+        self.assertTrue(values)
+        self.assertLessEqual(values, allowed)
