@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Galinstan: Intraday Liquidity Optimization That Runs On Your Own Hardware</title>
+    <title>Galinstan: Intraday Liquidity Optimization That Runs In Your Environment</title>
     <meta name="description" content="Software built to decide what a bank should hold against its intraday and LCR requirements, and to run the decision inside the institution&#x27;s own hardware boundary.">
     <link rel="canonical" href="https://galinstan.ai/us-banks/intraday-liquidity">
     <meta name="robots" content="index, follow">
@@ -91,28 +91,8 @@ nav a[aria-current="page"] { color: var(--ink); font-weight: 600; border-bottom-
 }
 .pill:hover { background: var(--card); }
 .mid { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 1.75rem; align-self: stretch; }
-.region { gap: 0; }
-.region a { padding-left: 0.625rem; padding-right: 0.625rem; }
-.region a + a { border-left: 1px solid var(--hair); }
-.region a[aria-current="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--teal2); }
-.banner:not([hidden]) {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem;
-  margin: 0 0 2rem; padding: 0.75rem 1rem; border: 1px solid var(--hair); border-radius: 8px; background: var(--card);
-}
-.banner p { margin: 0; }
-.banner a { font-weight: 600; color: var(--teal2); }
-.banner button {
-  font: inherit; font-size: 0.875rem; color: var(--muted); background: none;
-  border: 1px solid var(--hair); border-radius: 6px; padding: 0.25rem 0.75rem; cursor: pointer;
-}
-.doors { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
-.door {
-  display: block; height: 100%; padding: 1.25rem; border-radius: 8px;
-  background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none;
-  transition: border-color 0.2s ease;
-}
-.door:hover { border-color: var(--teal2); }
-.door strong { display: block; font-family: var(--serif); font-size: 1.25rem; margin-bottom: 0.375rem; }
+.change { align-self: center; padding-bottom: 1rem; font-size: 0.8125rem; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.change:hover { color: var(--ink); }
 @media (max-width: 44rem) {
   .bar-in { grid-template-columns: 1fr auto; column-gap: 0.75rem; }
   .bar .mid { grid-column: 1 / -1; grid-row: 2; gap: 0 1.125rem; }
@@ -235,17 +215,17 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
 }
     </style>
   </head>
-  <body data-asset="us-intraday-liquidity" data-asset-region="us" data-page="/us-banks/intraday-liquidity">
+  <body data-asset="us-intraday-liquidity" data-asset-region="us" data-page="/us-banks/intraday-liquidity" data-region-served="us">
     <header class="bar">
       <div class="bar-in">
-        <p class="wordmark"><a href="/"><span class="wm">Galinstan <span>Liquidity</span></span></a></p>
+        <p class="wordmark"><a href="/us-banks"><span class="wm">Galinstan <span>Liquidity</span></span></a></p>
         <div class="mid">
         <nav>
           <a href="/us-banks/intraday-liquidity" aria-current="page">Intraday liquidity</a>
           <a href="/us-banks/audit-evidence">Audit evidence</a>
-          <a href="/deployment">Deployment</a>
+          <a href="/us-banks/deployment">Deployment</a>
         </nav>
-          <nav class="region" aria-label="Region"><a href="/us-banks/intraday-liquidity" data-region="us" data-asset="switcher-to-us" data-event="region_switch" data-destination-track="us" data-source-page="/us-banks/intraday-liquidity" aria-current="true">US banks</a><a href="/intraday-liquidity" data-region="eu" data-asset="switcher-to-eu" data-event="region_switch" data-destination-track="eu" data-source-page="/us-banks/intraday-liquidity">EU banks</a></nav>
+          <a class="change" href="/eu-banks" data-asset="region-change-to-eu" data-event="region_switch" data-destination-track="eu" data-source-page="/us-banks/intraday-liquidity">EU banks →</a>
         </div>
         <a class="pill" href="mailto:partners@banneker.net?subject=Galinstan%20demo%20request" data-asset="demo-request-header" data-event="demo_request_click" data-landing-page="/us-banks/intraday-liquidity">Request a demo</a>
       </div>
@@ -254,11 +234,7 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
       <h1>Knowing where the money is, and knowing what to hold, are two different problems.</h1>
       <div class="prose">
       <p class="sub">Intraday monitoring tells a treasurer what happened. Galinstan is built to answer what to do about it: which assets to hold, which to release, and what the surplus is costing.</p>
-      <p>Intraday tools show the position. Galinstan is built to choose it, beside the systems a bank already runs.</p>
       <p>The choice is hard on purpose. Assets are held in lots, haircuts and caps interact, and encumbrance removes collateral from the buffer. The objective is to give up as little yield as possible while staying above the requirement all day. That is a combinatorial problem rather than a report, and Galinstan is built to solve it as one.</p>
-      <p>The surplus is worth measuring before it is defended. Headroom above the requirement is not all deliberate: part of it is high-quality liquid assets the requirement did not call for.</p>
-      <p>Take a bank holding $4.2 billion of high-quality liquid assets against $3.0 billion of net cash outflows: a ratio of 140% against a 100% minimum. Some of that $1.2 billion of headroom is deliberate. If a third of it is not, $400 million sits in assets the requirement did not call for, and at a 1.5% yield gap that costs $6 million a year.</p>
-      <p>Galinstan is built to connect to nothing. It reads the position you give it, computes inside your hardware boundary, and writes its answer back to you. There is no service on our end of a line, because there is no line.</p>
       <p>The calculation is built to reconcile to what the bank reports: the same asset, haircut, cap, and encumbrance inputs that feed the LCR position, so a reviewer can trace the answer back to the reported totals, including the liquidity data behind FR 2052a and Call Report reporting where applicable.</p>
       </div>
       <div class="prose">
@@ -274,25 +250,23 @@ a:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
     </main>
     <script>
 (function () {
-  var key = "galinstan-region", dismissed = "galinstan-region-banner", store;
-  try { store = window.localStorage; store.getItem(key); } catch (e) { return; }
-  document.querySelectorAll("a[data-region]").forEach(function (a) {
+  document.querySelectorAll('a[data-event="region_switch"]').forEach(function (a) {
     a.addEventListener("click", function () {
-      try { store.setItem(key, a.getAttribute("data-region")); } catch (e) {}
+      document.cookie = "region=" + a.getAttribute("data-destination-track") + "; Path=/; Max-Age=31536000; SameSite=Lax; Secure";
     });
   });
-  var banner = document.getElementById("region-banner");
-  if (!banner) return;
-  var zone = "";
-  try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
-  if (store.getItem(key) || store.getItem(dismissed) || zone.indexOf("America/") !== 0) return;
-  banner.hidden = false;
-  // For measurement only: says the banner was shown, to whatever listens; changes nothing on the page.
-  document.dispatchEvent(new CustomEvent("galinstan:asset", { detail: { event: "region_banner", asset: "root-banner-view", banner_action: "view", source_page: "/" } }));
-  banner.querySelector("button").addEventListener("click", function () {
-    banner.hidden = true;
-    try { store.setItem(dismissed, "1"); } catch (e) {}
-  });
+  try {
+    var query = new URLSearchParams(location.search), asked = query.get("region_source");
+    if (asked) {
+      query.delete("region_source");
+      var rest = query.toString();
+      history.replaceState(null, "", location.pathname + (rest ? "?" + rest : "") + location.hash);
+    }
+    if (!sessionStorage.getItem("galinstan-visit")) {
+      sessionStorage.setItem("galinstan-visit", "1");
+      document.body.setAttribute("data-region-source", asked === "stored-choice" || asked === "edge-country" ? asked : "explicit-url");
+    }
+  } catch (e) {}
 })();
     </script>
   </body>

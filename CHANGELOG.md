@@ -2,6 +2,28 @@
 
 Keep a Changelog format. Site releases are date tagged: `site-YYYY.MM.N`.
 
+## [site-2026.10.9] — two funnels, the region served first
+
+### Changed
+- **Two self-contained funnels** (Cowork's ask 202; Antwain, 2026-10-30). `/us-banks` is now the US landing page, and each
+  funnel has its own landing, feature pages and deployment page, linking only to itself.
+- **The root serves no page.** `functions/index.js` answers 302 to a funnel: the visitor's stored choice, then the country
+  at the edge (EEA, UK and Switzerland to the EU funnel, every other country to the US funnel). An explicit address is
+  never redirected away.
+- **EU addresses moved under `/eu-banks`**, with a 301 from each old address and its `.html` form.
+- **Repeated paragraphs reduced to one page per funnel;** the US intraday page's "connect to nothing" paragraph deleted.
+- **Labels revised:** `docs/ANALYTICS_LABELS.md`.
+
+### Added
+- **`/us-banks/deployment`**, the US deployment page, in Antwain's authorised wording.
+- **One link at the right of the header to the other funnel.** A click sets `region`, a first-party cookie holding `us` or
+  `eu` for one year; nothing else sets it.
+- **`hreflang` between the two landings**, and the live check now tests the root's routing and the 301s.
+
+### Removed
+- The universal home page, both doors, the root banner and its time zone logic, the two-tab switcher, and the
+  `localStorage` choice.
+
 ## [site-2026.10.8] — asset labels for measurement
 
 ### Added

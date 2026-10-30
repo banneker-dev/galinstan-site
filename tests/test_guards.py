@@ -93,17 +93,17 @@ class BuildTests(unittest.TestCase):
             del page_copy.BY_ID["probe"]
 
     def test_the_page_carries_no_placeholder_markers(self):
-        self.assertNotIn("[[TODO:", (ROOT / "public" / "index.html").read_text("utf-8"))
+        self.assertNotIn("[[TODO:", (ROOT / "public" / "us-banks.html").read_text("utf-8"))
 
     def test_the_contact_address_is_a_mail_link_with_the_approved_subject(self):
         """The pre-filled subject is the whole of the site's source attribution."""
-        body = (ROOT / "public" / "index.html").read_text("utf-8")
+        body = (ROOT / "public" / "us-banks.html").read_text("utf-8")
         self.assertIn("mailto:partners@banneker.net?subject=", body)
         self.assertIn("via%20galinstan.ai", body)
         self.assertNotIn("antwain@banneker.net", body, "the retired address is still served")
 
     def test_the_footer_domain_is_not_invented_into_a_link(self):
-        body = (ROOT / "public" / "index.html").read_text("utf-8")
+        body = (ROOT / "public" / "us-banks.html").read_text("utf-8")
         self.assertIn("banneker.net", body)
         self.assertNotIn('href="https://banneker.net', body)
 
@@ -114,10 +114,10 @@ class RoleBlock(unittest.TestCase):
     def test_each_line_links_to_the_page_it_names(self):
         page = (ROOT / "public" / "eu-banks.html").read_text(encoding="utf-8")
         for line_id, path in (
-            ("roles-treasury", "/intraday-liquidity"),
-            ("roles-dora", "/deployment"),
-            ("roles-security", "/deployment"),
-            ("roles-audit", "/audit-evidence"),
+            ("roles-treasury", "/eu-banks/intraday-liquidity"),
+            ("roles-dora", "/eu-banks/deployment"),
+            ("roles-security", "/eu-banks/deployment"),
+            ("roles-audit", "/eu-banks/audit-evidence"),
         ):
             label = page_copy.text(line_id).rsplit(". ", 1)[1]
             self.assertIn(f'<a href="{path}">{label}</a></li>', page, line_id)
@@ -299,7 +299,7 @@ class DeclaredAddresses(unittest.TestCase):
         self.assertTrue(any("canonical" in f for f in failures), failures)
 
     def test_a_link_to_the_redirecting_form_is_caught(self):
-        page = build.render_index().replace('href="/privacy"', 'href="/privacy.html"')
+        page = build.render_us_track().replace('href="/privacy"', 'href="/privacy.html"')
         failures = guards.declared_addresses_agree(pages=[("index.html", page)])
         self.assertTrue(any("redirects" in f for f in failures), failures)
 
@@ -425,6 +425,77 @@ class LiveResponseVerification(unittest.TestCase):
         self.assertEqual(guards.live_response_has_only_permitted_fetches(self.URL, body), [])
 
 
+
+class RegionFunnels(unittest.TestCase):
+    """Cowork's ask 202: two funnels, the region served first. `tools/verify_live.py` checks the edge's decision."""
+
+    def _page(self, path):
+        return (ROOT / "public" / f"{path[1:]}.html").read_text(encoding="utf-8")
+
+    def _links(self, path):
+        return set(re.findall(r'href="(/[^"]*)"', self._page(path)))
+
+    def test_there_is_no_page_at_the_root(self):
+        self.assertFalse((ROOT / "public" / "index.html").exists())
+        self.assertNotIn("/", build.SITEMAP)
+
+    def test_a_funnel_links_to_itself_and_once_to_the_other_landing(self):
+        for path in build.PAGE_LABELS:
+            region = build.region_of(path)
+            if region is None:
+                continue
+            other = "eu" if region == "us" else "us"
+            across = {link for link in self._links(path) if build.region_of(link) == other}
+            self.assertEqual(across, {f"/{other}-banks"}, path)
+            self.assertEqual(self._page(path).count(f'href="/{other}-banks"'), 1, path)
+
+    def test_the_root_sends_a_stored_choice_first_and_otherwise_by_country(self):
+        source = (ROOT / "functions" / "index.js").read_text(encoding="utf-8")
+        self.assertLess(source.index("stored-choice"), source.index("edge-country"))
+        self.assertIn("status: 302", source)
+        self.assertIn("no-store", source)
+        countries = set(re.findall(r'"([A-Z]{2})"', source))
+        eu = {"AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU",
+              "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"}
+        self.assertEqual(countries, eu | {"IS", "LI", "NO", "GB", "CH"})
+
+    def test_the_moved_addresses_redirect_permanently(self):
+        served = (ROOT / "public" / "_redirects").read_text(encoding="utf-8").splitlines()
+        for old, new in build.MOVED.items():
+            self.assertIn(f"{old} {new} 301", served)
+            self.assertIn(f"{old}.html {new} 301", served)
+            self.assertNotIn(old, build.SITEMAP)
+
+    def test_hreflang_is_between_the_two_landings(self):
+        for path in (build.US_TRACK, build.EU_TRACK):
+            page = self._page(path)
+            self.assertIn(f'hreflang="en-US" href="{build.SITE_URL}/us-banks"', page)
+            self.assertIn(f'hreflang="en" href="{build.SITE_URL}/eu-banks"', page)
+            self.assertIn(f'hreflang="x-default" href="{build.SITE_URL}/"', page)
+
+    def test_the_us_funnel_says_nothing_air_gapped_only(self):
+        for path in (*build.US_PAGES, build.US_TRACK):
+            page = self._page(path)
+            for line_id in ("il-body-4", "dep-body-1", "dep-body-4"):
+                self.assertNotIn(build._markup(page_copy.text(line_id)), page, path)
+        self.assertNotIn(page_copy.text("il-meta-title"), self._page("/us-banks/intraday-liquidity"))
+
+    def test_an_idea_appears_once_in_each_funnel(self):
+        once = {"us": ("home-body-1", "home-body-2", "us-il-figure", "il-body-1"), "eu": ("il-body-1", "il-body-3")}
+        for region, lines in once.items():
+            pages = [self._page(p) for p in build.PAGE_LABELS if build.region_of(p) == region]
+            for line_id in lines:
+                held = sum(build._markup(page_copy.text(line_id)) in page for page in pages)
+                self.assertLessEqual(held, 1, line_id)
+
+    def test_the_cookie_is_set_only_by_the_click(self):
+        script = build.REGION_SCRIPT
+        self.assertEqual(script.count("document.cookie"), 1)
+        self.assertLess(script.index('addEventListener("click"'), script.index("document.cookie"))
+        self.assertIn("region=", script)
+        self.assertNotIn("localStorage", script)
+
+
 if __name__ == "__main__":
     unittest.main()
 
@@ -490,12 +561,12 @@ class MailTargets(unittest.TestCase):
 
     def test_the_live_verifier_names_a_missing_demo_link(self):
         """Over a served body: the contact link present and the demo link rewritten away."""
-        body = (ROOT / "public" / "deployment.html").read_text("utf-8")
+        body = (ROOT / "public" / "eu-banks" / "deployment.html").read_text("utf-8")
         rewritten = body.replace(build.mail_href("cta-demo-target"), "/cdn-cgi/l/email-protection")
         original = verify_live.fetch
         verify_live.fetch = lambda url, accept=None: rewritten
         try:
-            failures = verify_live.verify("https://galinstan.ai/deployment")
+            failures = verify_live.verify("https://galinstan.ai/eu-banks/deployment")
         finally:
             verify_live.fetch = original
         self.assertTrue(any("cta-demo-target mail link is not served" in f for f in failures))
@@ -548,7 +619,7 @@ class ProductBrief(unittest.TestCase):
             name = "index.html" if path == "/" else f"{path[1:]}.html"
             with self.subTest(page=name):
                 self.assertIn(f'href="{build.BRIEF_PATH}"', (build.PUBLIC / name).read_text(encoding="utf-8"))
-        self.assertNotIn(build.BRIEF_PATH, (build.PUBLIC / "intraday-liquidity.html").read_text(encoding="utf-8"))
+        self.assertNotIn(build.BRIEF_PATH, (build.PUBLIC / "eu-banks" / "intraday-liquidity.html").read_text(encoding="utf-8"))
 
 
 class StructuredData(unittest.TestCase):
@@ -571,7 +642,7 @@ class StructuredData(unittest.TestCase):
     def test_the_home_page_carries_it_from_register_strings(self):
         import json
 
-        page = (ROOT / "public" / "index.html").read_text(encoding="utf-8")
+        page = (ROOT / "public" / "eu-banks.html").read_text(encoding="utf-8")
         block = re.search(r'<script type="application/ld\+json">(.*?)</script>', page, re.S).group(1)
         data = json.loads(block)
         self.assertEqual(data["name"], page_copy.text("wordmark"))
@@ -585,8 +656,7 @@ class AssetLabels(unittest.TestCase):
     Cowork applies. Labels observe; they send, store and fetch nothing."""
 
     def _page(self, path):
-        name = "index.html" if path == "/" else f"{path[1:]}.html"
-        return (ROOT / "public" / name).read_text(encoding="utf-8")
+        return (ROOT / "public" / f"{path[1:]}.html").read_text(encoding="utf-8")
 
     def test_every_declared_page_carries_its_own_label(self):
         pages = [p for p in build.SITEMAP if p != build.BRIEF_PATH]
@@ -595,19 +665,29 @@ class AssetLabels(unittest.TestCase):
         self.assertEqual(len(labels), len(set(labels)))
         for path in pages:
             asset, region = build.PAGE_LABELS[path]
-            self.assertIn(f'<body data-asset="{asset}" data-asset-region="{region}" data-page="{path}">', self._page(path))
+            served = f' data-region-served="{region}"' if region != "shared" else ""
+            self.assertIn(f'<body data-asset="{asset}" data-asset-region="{region}" data-page="{path}"{served}>', self._page(path))
 
-    def test_the_home_page_labels_its_doors_switcher_banner_and_demo_links(self):
-        page = self._page("/")
-        for asset in ("home-door-us", "home-door-eu", "switcher-to-us", "switcher-to-eu", "root-banner",
-                      "root-banner-click", "root-banner-dismiss", "demo-request-header", "demo-request-body"):
-            self.assertEqual(page.count(f'data-asset="{asset}"'), 1, asset)
-        self.assertIn('"root-banner-view"', page)
+    def test_each_landing_labels_its_change_link_and_demo_links(self):
+        for path, there in (("/us-banks", "eu"), ("/eu-banks", "us")):
+            page = self._page(path)
+            for asset in (f"region-change-to-{there}", "demo-request-header", "demo-request-body"):
+                self.assertEqual(page.count(f'data-asset="{asset}"'), 1, asset)
+
+    def test_the_retired_labels_are_gone(self):
+        for path in build.PAGE_LABELS:
+            page = self._page(path)
+            for asset in ("home-door", "root-banner", "switcher-to", "galinstan:asset", 'data-asset="home"'):
+                self.assertNotIn(asset, page, path)
+
+    def test_each_page_of_a_visit_can_say_how_it_was_reached(self):
+        for path in build.PAGE_LABELS:
+            self.assertIn("data-region-source", self._page(path))
 
     def test_parameters_name_addresses_and_tracks_only(self):
         values = set()
         for path in build.PAGE_LABELS:
-            values |= set(re.findall(r'data-(?:destination-track|source-page|landing-page|banner-action)="([^"]*)"', self._page(path)))
-        allowed = set(build.PAGE_LABELS) | {"us", "eu", "click", "dismiss"}
+            values |= set(re.findall(r'data-(?:destination-track|source-page|landing-page)="([^"]*)"', self._page(path)))
+        allowed = set(build.PAGE_LABELS) | {"us", "eu"}
         self.assertTrue(values)
         self.assertLessEqual(values, allowed)

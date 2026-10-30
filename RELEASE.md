@@ -14,7 +14,8 @@ Tags are date based: `site-2026.09.1`, then `.2`, `.3` within the month.
 5. `tools/verify_live.py` fetches the live pages with a cache-buster and checks two things:
    the approved headline is in the body, and no third-party host is fetched except the one
    permitted analytics beacon. A status code cannot tell a stale hit from a live one, and
-   a build-time guard cannot see what the edge injects afterwards.
+   a build-time guard cannot see what the edge injects afterwards. It also checks the root's
+   redirect (`functions/index.js`, which `pages deploy` publishes beside `public/`) and the 301s.
 
 ## Before the first release can happen
 
