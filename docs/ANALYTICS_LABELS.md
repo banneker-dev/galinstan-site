@@ -52,5 +52,10 @@ every other `data-*` parameter on the element, `-` read as `_`.
 
 `demo_request_click` is the one to mark as the key event.
 
+**What the tags send (Cowork's Round 264).** The Zaraz action form takes no event parameters, so the live tags differ from
+the table above: the region change is two event names, `region_switch_to_eu` and `region_switch_to_us`, and
+`demo_request_click` carries no `asset` or `landing_page`. The landing page and `region_source` arrive in GA's
+`page_location`. The attributes stay on the page as the table says.
+
 **The demo-request link opens the visitor's own mail client.** It carries no form and no address, so the parameter is
 the landing page only.
