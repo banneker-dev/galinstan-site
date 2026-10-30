@@ -198,13 +198,19 @@ LINES = [
     Line(
         id="privacy-analytics",
         status=APPROVED,
-        approved_on="2026-09-21",
+        approved_on="2026-10-30",
         text=(
-            "**Analytics.** This site uses Cloudflare Web Analytics to count visits. It sets no cookies and does not track you across other sites. Cloudflare, which hosts the site, processes your IP address to deliver the page and protect it from abuse. Our lawful basis is our legitimate interest in knowing how the site is used."
+            "**Analytics and cookies.** This site uses Cloudflare Web Analytics, which sets no cookies, and Google Analytics, "
+            "which counts visits and clicks on its pages. For visitors in the European Economic Area, the United Kingdom and "
+            "Switzerland, Google Analytics sets no cookies. For visitors elsewhere, it sets first-party cookies that last up to "
+            "13 months, so that a return visit is counted once. Google Analytics receives these counts through Cloudflare, "
+            "without your IP address. We do not use it for advertising, and it receives no names or email addresses from this "
+            "site. If you choose a region with the link in the header, the site keeps that choice in a cookie for one year, and "
+            "the cookie holds nothing else. Cloudflare, which hosts the site, uses your country to show the right region and "
+            "processes your IP address to deliver the page and protect it from abuse. Our lawful basis for analytics is our "
+            "legitimate interest in knowing how the site is used."
         ),
-        note=(
-            "Cloudflare Web Analytics is free, cookieless and needs no consent banner. Its limits are six months of history and no custom events. Label folded into the string on 2026-09-25 so no page prose sits outside the register. The served bytes are unchanged: the renderer used to emit the same <strong> itself."
-        ),
+        note="Cowork's ask 202, addendum. Antwain, 2026-10-30 10:50 ET: 'ok, update privacy page accordingly'.",
     ),
     Line(
         id="meta-title",
