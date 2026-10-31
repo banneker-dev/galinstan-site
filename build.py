@@ -820,6 +820,9 @@ def render_brief_source(prefix: str = "brief") -> str:
     if open_list:
         out.append(f"      </{open_list}>")
     body = "\n".join(out)
+    # The US close is the approved rewrite's two sentences and no more; the EU close stays as printed.
+    close_stop = "." if prefix == "usbrief" else ""
+    close_footer = "" if prefix == "usbrief" else f'        <p>{_markup(t("legal-footer"))}</p>\n'
     return f"""<!doctype html>
 <html lang="en">
   <head>
@@ -836,10 +839,9 @@ def render_brief_source(prefix: str = "brief") -> str:
       <p class="edition">{_markup(t(f"{prefix}-edition"))}</p>
 {body}
       <div class="close">
-        <p>{_markup(t("brief-contact-label"))} {_mail_link("brief-contact")}</p>
+        <p>{_markup(t("brief-contact-label"))} {_mail_link("brief-contact")}{close_stop}</p>
         <p>{_markup(t("entity"))}</p>
-        <p>{_markup(t("legal-footer"))}</p>
-      </div>
+{close_footer}      </div>
     </section>
   </body>
 </html>
