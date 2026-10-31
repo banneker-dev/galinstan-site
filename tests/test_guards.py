@@ -487,9 +487,20 @@ class RegionFunnels(unittest.TestCase):
                               ("us-roles-security", "/us-banks/deployment")):
             label = page_copy.text(line_id).rsplit(". ", 1)[1]
             self.assertIn(f'<a href="{path}">{label}</a></li>', page)
-        self.assertNotIn("galinstan-brief.pdf", page)
+        self.assertNotIn(build.BRIEF_PATH, page)  # the EU brief is DORA-framed
+        self.assertIn(f'href="{build.US_BRIEF_PATH}"', page)
         self.assertEqual(page.count(build._markup(page_copy.text("home-body-2"))), 1)
         self.assertEqual(page.count(build._markup(page_copy.text("us-il-figure"))), 1)
+
+    def test_the_us_brief_is_its_own_paper_with_no_dora_in_it(self):
+        self.assertEqual(guards.us_brief_matches_its_source(), [])
+        source = build.render_brief_source("usbrief")
+        self.assertIn(page_copy.text("usbrief-title"), source)
+        self.assertNotIn("DORA", source)
+        self.assertNotIn("EBA", source)
+        for path in build.PAGE_LABELS:
+            if build.region_of(path) == "eu":
+                self.assertNotIn(build.US_BRIEF_PATH, self._page(path))
 
     def test_an_idea_appears_once_in_each_funnel(self):
         once = {"us": ("home-body-1", "home-body-2", "us-il-figure", "il-body-1"), "eu": ("il-body-1", "il-body-3")}
@@ -670,7 +681,7 @@ class AssetLabels(unittest.TestCase):
         return (ROOT / "public" / f"{path[1:]}.html").read_text(encoding="utf-8")
 
     def test_every_declared_page_carries_its_own_label(self):
-        pages = [p for p in build.SITEMAP if p != build.BRIEF_PATH]
+        pages = [p for p in build.SITEMAP if p not in build.BRIEF_PATHS]
         self.assertEqual(set(pages), set(build.PAGE_LABELS))
         labels = [asset for asset, _ in build.PAGE_LABELS.values()]
         self.assertEqual(len(labels), len(set(labels)))

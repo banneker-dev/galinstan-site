@@ -329,6 +329,29 @@ def _brief(line_id: str, text: str, **kw) -> Line:
     return Line(id=line_id, status=APPROVED, text=text, **kw)
 
 
+US_BRIEF_NOTE = "The rewrite Antwain approved through Spot, 2026-10-30 (CODY_ASK_US_BRIEF_REWRITE_2026-10-30.md), published on CODY_ASK_US_BRIEF_PUBLISH_2026-10-30.md. His words, except that D2 turns its dashes into commas, colons and full stops."
+
+US_BRIEF = [
+    Line(id="usbrief-meta-title", status=APPROVED, approved_on="2026-10-30", text="How Galinstan Works For US Banks", note=US_BRIEF_NOTE),
+    Line(id="usbrief-title", status=APPROVED, approved_on="2026-10-30", text="How Galinstan Works For US Banks", note=US_BRIEF_NOTE),
+    Line(id="usbrief-sub", status=APPROVED, approved_on="2026-10-30", text="Hold the most efficient position that stays above the requirement, all day.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-edition", status=APPROVED, approved_on="2026-10-30", text="Galinstan Liquidity \u00b7 Product brief \u00b7 October 2026", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h-position", status=APPROVED, approved_on="2026-10-30", text="The position, chosen. Not reported after the fact.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-position", status=APPROVED, approved_on="2026-10-30", text="Most tools show you a ratio. Galinstan chooses the position.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-position-1", status=APPROVED, approved_on="2026-10-30", text="**The most efficient compliant LCR and NSFR position.** One calculation, from the text of 12 CFR part 249, that finds the most efficient change to reach the level the bank sets, with lots, haircuts, caps, and encumbrance solved together, not approximated one asset at a time.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-position-2", status=APPROVED, approved_on="2026-10-30", text='**The intraday low, with its driver.** A day\'s payments and statements, read to the low point, what drove it, and the limit and cushion to set against the day\'s peaks. Not a balance view. The answer to "what do we hold, and why."', note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-position-3", status=APPROVED, approved_on="2026-10-30", text="**The change, explained in the bank's own labels.** Month to month, what moved and why. Tokenized deposit flows classified by the bank's own mapping. Two books brought together before a close, with every difference in treatment listed.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-li-position-4", status=APPROVED, approved_on="2026-10-30", text="**Reconciliation to what the bank reports.** The same book that produces the position reconciles to the bank's reported totals: FR 2052a for a bank that files it, the bank's own exports mapped to one book for a bank that does not.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h-evidence", status=APPROVED, approved_on="2026-10-30", text="Evidence a validator can re-perform", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-evidence-1", status=APPROVED, approved_on="2026-10-30", text="A second calculator, built apart from the optimizer, recomputes every proposal. Same inputs, same parameters, same result, or it does not pass.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-evidence-2", status=APPROVED, approved_on="2026-10-30", text="Every run writes its inputs and its result together. One command re-performs it on the validator's own machine. Each release is a signed tag with a changelog. No AI in the liquidity calculation. Every treatment comes from a published rule, or from the bank's own mapping where no rule sets it, versioned and dated. A flow the mapping does not cover is listed, and no ratio is given on an incomplete book.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h-below", status=APPROVED, approved_on="2026-10-30", text="For banks below the LCR rule's scope", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-below", status=APPROVED, approved_on="2026-10-30", text="Most US banks, by count, fall below the full LCR rule's scope for large and internationally active firms. The same arithmetic, labelled as an internal measure, not a regulatory figure, gives those banks a starting position, a limit, and a cushion, where today they have no regulatory figure to start from.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-h-deployment", status=APPROVED, approved_on="2026-10-30", text="Deployment, in one line", note=US_BRIEF_NOTE),
+    Line(id="usbrief-p-deployment", status=APPROVED, approved_on="2026-10-30", text="In the bank's own environment: the bank's cloud account or its own servers, air-gapped if its policy requires it. A pilot starts from the files its teams already produce. No new feed, no live integration, nothing leaves the bank.", note=US_BRIEF_NOTE),
+    Line(id="usbrief-link", status=APPROVED, approved_on="2026-10-30", text="How Galinstan works: US product brief (PDF)", note=US_BRIEF_NOTE),
+]
+
 BRIEF = [
     _brief("brief-meta-title", "How Galinstan Works", note=_BRIEF_NOTE + " Title case approved 2026-09-25 (Antwain, 'and brief title')."),
     _brief("brief-title", "How Galinstan Works", note=_BRIEF_NOTE + " Title case approved 2026-09-25 (Antwain, 'and brief title')."),
@@ -405,6 +428,7 @@ BRIEF = [
 ]
 
 LINES += BRIEF
+LINES += US_BRIEF
 
 # Structured data on the home page (build.render_structured_data). The product's name is
 # `wordmark` and its description `meta-description`, both already approved; this is the one

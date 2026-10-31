@@ -40,7 +40,11 @@ def main() -> int:
     if not CHROME.exists():
         print(f"Google Chrome is not at {CHROME}", file=sys.stderr)
         return 1
-    source = build.render_brief_source()
+    return make(build.render_brief_source(), build.BRIEF_PDF, build.BRIEF_LOCK) or make(
+        build.render_brief_source("usbrief"), build.US_BRIEF_PDF, build.US_BRIEF_LOCK)
+
+
+def make(source: str, target: pathlib.Path, lock_file: pathlib.Path) -> int:
     build.ASSETS.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
         page = pathlib.Path(tmp) / "brief.html"
@@ -82,7 +86,7 @@ def main() -> int:
                 chrome.terminate()
                 chrome.wait(timeout=10)
         pdf = out.read_bytes()
-    build.BRIEF_PDF.write_bytes(pdf)
+    target.write_bytes(pdf)
     lock = {
         "source_sha256": sha256(source.encode("utf-8")),
         "pdf_sha256": sha256(pdf),
@@ -90,9 +94,9 @@ def main() -> int:
             [str(CHROME), "--version"], check=True, capture_output=True, text=True
         ).stdout.strip(),
     }
-    build.BRIEF_LOCK.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
-    print(f"Wrote {build.BRIEF_PDF.relative_to(ROOT)} ({len(pdf):,} bytes)")
-    print(f"Wrote {build.BRIEF_LOCK.relative_to(ROOT)}")
+    lock_file.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote {target.relative_to(ROOT)} ({len(pdf):,} bytes)")
+    print(f"Wrote {lock_file.relative_to(ROOT)}")
     return 0
 
 

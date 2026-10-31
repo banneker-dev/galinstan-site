@@ -607,7 +607,7 @@ def render_us_page(path: str) -> str:
       <div class="prose">
       <p class="cta">{_mail_link("cta-demo-target", spec["cta"], _demo_attrs(path, "body"))}</p>
       </div>
-{_footer()}
+{_brief_link(path)}{_footer()}
     </main>
 {REGION_SCRIPT}  </body>
 </html>
@@ -642,7 +642,7 @@ def render_us_track() -> str:
 {body}
       <p class="cta">{_mail_link("cta-demo-target", "cta-demo", _demo_attrs(US_TRACK, "body"))}</p>
       </div>
-{TICKS}{_cards(US_NAV)}{_footer()}
+{TICKS}{_cards(US_NAV)}{_brief_link(US_TRACK)}{_footer()}
     </main>
 {REGION_SCRIPT}  </body>
 </html>
@@ -732,6 +732,13 @@ BRIEF_PDF = ASSETS / "galinstan-brief.pdf"
 BRIEF_LOCK = ASSETS / "galinstan-brief.lock.json"
 BRIEF_PATH = "/galinstan-brief.pdf"
 BRIEF_LINKED_FROM = (EU_TRACK, "/eu-banks/audit-evidence", "/eu-banks/deployment")
+# The US funnel's own paper, the same way: strings under `usbrief-`, its own PDF and lock. The EU brief is DORA-framed and is
+# never linked from a US page.
+US_BRIEF_PDF = ASSETS / "galinstan-us-brief.pdf"
+US_BRIEF_LOCK = ASSETS / "galinstan-us-brief.lock.json"
+US_BRIEF_PATH = "/galinstan-us-brief.pdf"
+US_BRIEF_LINKED_FROM = (US_TRACK, "/us-banks/audit-evidence", "/us-banks/deployment")
+BRIEF_PATHS = (BRIEF_PATH, US_BRIEF_PATH)
 
 BRIEF_CSS = """\
 @page {
@@ -766,7 +773,7 @@ a { color: #0a5a4e; }
 .cover { break-after: page; }
 """
 
-_BRIEF_BODY = re.compile(r"brief-(h|h3|p|li|ref)-.+")
+_BRIEF_BODY = r"-(h|h3|p|li|ref)-.+"
 
 
 def _brief_faces() -> str:
@@ -781,14 +788,14 @@ def _brief_faces() -> str:
     return faces
 
 
-def render_brief_source() -> str:
+def render_brief_source(prefix: str = "brief") -> str:
     """The paper as HTML, every visible word from the register, in the register's order.
 
     The cover carries the summary, so it reads as a one-page brief on its own; the rest
     follows on the pages after it.
     """
     t = page_copy.text
-    items = [(m.group(1), i.id) for i in page_copy.LINES if (m := _BRIEF_BODY.fullmatch(i.id))]
+    items = [(m.group(1), i.id) for i in page_copy.LINES if (m := re.fullmatch(prefix + _BRIEF_BODY, i.id))]
     out: list[str] = []
     open_list = ""
     for kind, line_id in items:
@@ -797,7 +804,7 @@ def render_brief_source() -> str:
             out.append(f"      </{open_list}>")
             open_list = ""
         if kind == "h":
-            if line_id == "brief-h-problem":  # the cover ends with the summary
+            if line_id == f"{prefix}-h-problem":  # the cover ends with the summary
                 out.append("    </section>\n    <section>")
             out.append(f"      <h2>{_markup(t(line_id))}</h2>")
         elif kind == "h3":
@@ -813,26 +820,28 @@ def render_brief_source() -> str:
     if open_list:
         out.append(f"      </{open_list}>")
     body = "\n".join(out)
+    # The US close is the approved rewrite's two sentences and no more; the EU close stays as printed.
+    close_stop = "." if prefix == "usbrief" else ""
+    close_footer = "" if prefix == "usbrief" else f'        <p>{_markup(t("legal-footer"))}</p>\n'
     return f"""<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{html.escape(t("brief-meta-title"))}</title>
+    <title>{html.escape(t(f"{prefix}-meta-title"))}</title>
     <style>
 {_brief_faces()}{BRIEF_CSS}    </style>
   </head>
   <body>
     <section class="cover">
       <p class="wordmark">{_wordmark()}</p>
-      <h1>{_markup(t("brief-title"))}</h1>
-      <p class="sub">{_markup(t("brief-sub"))}</p>
-      <p class="edition">{_markup(t("brief-edition"))}</p>
+      <h1>{_markup(t(f"{prefix}-title"))}</h1>
+      <p class="sub">{_markup(t(f"{prefix}-sub"))}</p>
+      <p class="edition">{_markup(t(f"{prefix}-edition"))}</p>
 {body}
       <div class="close">
-        <p>{_markup(t("brief-contact-label"))} {_mail_link("brief-contact")}</p>
+        <p>{_markup(t("brief-contact-label"))} {_mail_link("brief-contact")}{close_stop}</p>
         <p>{_markup(t("entity"))}</p>
-        <p>{_markup(t("legal-footer"))}</p>
-      </div>
+{close_footer}      </div>
     </section>
   </body>
 </html>
@@ -840,6 +849,8 @@ def render_brief_source() -> str:
 
 
 def _brief_link(path: str) -> str:
+    if path in US_BRIEF_LINKED_FROM:
+        return f'      <a class="brief reveal" href="{US_BRIEF_PATH}">{_markup(page_copy.text("usbrief-link"))}</a>\n'
     if path not in BRIEF_LINKED_FROM:
         return ""
     return f'      <a class="brief reveal" href="{BRIEF_PATH}">{_markup(page_copy.text("brief-link"))}</a>\n'
@@ -847,6 +858,10 @@ def _brief_link(path: str) -> str:
 
 def render_brief_pdf() -> bytes:
     return BRIEF_PDF.read_bytes()
+
+
+def render_us_brief_pdf() -> bytes:
+    return US_BRIEF_PDF.read_bytes()
 
 
 # The crawler policy, RULES.md r11, revised by Antwain on 2026-09-25: "AI crawlers: search,
@@ -920,6 +935,7 @@ SITEMAP = {
     **{path: (lambda p=path: render_stage_2(p)) for path in PAGES},
     "/privacy": lambda: render_privacy(),
     BRIEF_PATH: lambda: render_brief_source(),
+    US_BRIEF_PATH: lambda: render_brief_source("usbrief"),
 }
 
 
@@ -954,6 +970,7 @@ ALLOWLIST = {
     "robots.txt": render_robots,
     "sitemap.xml": render_sitemap,
     "galinstan-brief.pdf": render_brief_pdf,
+    "galinstan-us-brief.pdf": render_us_brief_pdf,
     **{name: (lambda n=name: (ASSETS / n).read_bytes()) for name in HERO},
     **{name: (lambda n=name: (FONTS_DIR / n).read_bytes()) for name in FONTS},
 }
